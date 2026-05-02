@@ -1,0 +1,102 @@
+import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { useRoomStore } from '@/stores/room'
+
+import HomeView from '../views/HomeView.vue'
+import Login from '../components/Login.vue'
+import Register from '../components/Register.vue'
+import ForgotPassword from '../components/ForgotPassword.vue'
+import LandLordDashboard from '../components/auth/LandLordDashboard.vue'
+import TenantDashboard from '../components/auth/TenantDashboard.vue'
+import RoomEdit from '@/components/auth/edits/RoomEdit.vue'
+
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes: [
+    {
+      path: '/',
+      name: 'home',
+      component: HomeView,
+      meta: { requiresGuest: true },
+    },
+    {
+      path: '/about',
+      name: 'about',
+      component: () => import('../views/AboutView.vue'),
+    },
+    {
+      path: '/login',
+      component: Login,
+      meta: { requiresGuest: true },
+    },
+    {
+      path: '/register',
+      component: Register,
+      meta: { requiresGuest: true },
+    },
+    {
+      path: '/forgot-password',
+      component: ForgotPassword,
+      meta: { requiresGuest: true },
+    },
+
+    //  role-based routes
+    {
+      path: '/landlord',
+      component: LandLordDashboard,
+      meta: { requiresAuth: true, role: 'landlord' },
+    },
+    {
+      path: '/tenant',
+      component: TenantDashboard,
+      meta: { requiresAuth: true, role: 'tenant' },
+    },
+
+    {
+      path: '/room/show/:id',
+      component: RoomEdit,
+      meta: { requiresAuth: true },
+    },
+  ],
+})
+
+router.beforeEach(async (to) => {
+  const auth = useAuthStore()
+  const roomStore = useRoomStore()
+
+  if (!auth.user) {
+    await auth.fetchUser()
+  }
+
+  //  define normalized role ONCE
+  const role = auth.user?.is_landlord == 1 ? 'landlord' : 'tenant'
+
+  //  not logged in
+  if (to.meta.requiresAuth && !auth.user) {
+    return '/login'
+  }
+
+  // guest-only pages (login/register/home)
+  if (to.meta.requiresGuest && auth.user) {
+    return role === 'landlord' ? '/landlord' : '/tenant'
+  }
+
+  //  role protection (IMPORTANT PART)
+  if (to.meta.role && to.meta.role !== role) {
+    return role === 'landlord' ? '/landlord' : '/tenant'
+  }
+
+  // Prefetch landlord dashboard stats
+  if (to.path === '/landlord' && role === 'landlord') {
+    await roomStore.fetchRooms()
+    await auth.fetchUsers()
+  }
+
+  // Prefetch tenant dashboard stats
+  if (to.path === '/tenant' && role === 'tenant') {
+    await roomStore.fetchRooms()
+    await auth.fetchUser()
+  }
+})
+
+export default router
