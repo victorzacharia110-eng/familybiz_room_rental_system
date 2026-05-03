@@ -99,6 +99,10 @@ const setLanguage = (lang) => {
 </template>
 
 <style scoped>
+* {
+  box-sizing: border-box;
+}
+
 .auth-page {
   min-height: 100vh;
   display: flex;
@@ -180,6 +184,7 @@ h2 {
   border-radius: 6px;
   font-size: 16px;
   transition: border-color 0.3s;
+  box-sizing: border-box; /* ADD THIS */
 }
 
 .form-group input:focus {
