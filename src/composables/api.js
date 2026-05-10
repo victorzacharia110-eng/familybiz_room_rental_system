@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'https://homerentsystemapi-main-qjnwql.laravel.cloud',
+  baseURL: 'https://api.familybiz.online',
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',
