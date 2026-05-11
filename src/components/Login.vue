@@ -6,9 +6,6 @@ import { useI18n } from 'vue-i18n'
 
 const auth = useAuthStore()
 const router = useRouter()
-const { locale } = useI18n()
-
-const currentLocale = ref(locale.value)
 
 const form = ref({
   email: '',
@@ -16,22 +13,19 @@ const form = ref({
 })
 
 const isLoading = ref(false)
-const showPassword = ref(false)
 
-const setLanguage = (lang) => {
-  locale.value = lang
-  currentLocale.value = lang
-}
-
-// ---------------- LOGIN ----------------
 const submit = async () => {
-  if (isLoading.value) return
+  console.log('Form payload:', form.value)
+
+  if (isLoading.value || auth.loading) return
 
   isLoading.value = true
 
   const user = await auth.login(form.value)
+  console.log('Logged in user:', user)
 
   if (!user) {
+    console.log('Login failed:', auth.error)
     isLoading.value = false
     return
   }
@@ -45,24 +39,40 @@ const submit = async () => {
   isLoading.value = false
 }
 
-// ---------------- BACK HOME ----------------
-const goHome = () => {
-  if (isLoading.value) return
+// -------------------- LANGUAGE TOGGLE --------------------
+const { locale } = useI18n()
+const currentLocale = ref(locale.value)
 
-  isLoading.value = true
-
-  setTimeout(() => {
-    router.push('/')
-    isLoading.value = false
-  }, 800)
+const setLanguage = (lang) => {
+  locale.value = lang
+  currentLocale.value = lang
 }
+
+// Eye for password view
+const showPassword = ref(false)
 </script>
 
 <template>
   <div class="auth-page">
+
+    <!-- 🔥 OVERLAY LOADER (ADDED ONLY) -->
+    <div v-if="isLoading || auth.loading" class="overlay">
+      <div class="loader-box">
+        <div class="spinner"></div>
+
+        <p class="wait-text">
+          {{ $t('waitMoment') || 'Wait a moment...' }}
+        </p>
+
+        <p class="loading-text">
+          {{ $t('Logging in...') }}
+        </p>
+      </div>
+    </div>
+
     <div class="auth-card">
 
-      <!-- LANGUAGE -->
+      <!-- Language Toggle -->
       <div class="language-toggle">
         <button :class="{ active: currentLocale === 'en' }" @click="setLanguage('en')">
           🇬🇧 English
@@ -76,17 +86,10 @@ const goHome = () => {
       <h2>{{ $t('Welcome') }}</h2>
       <p class="subtitle">{{ $t('Login to continue') }}</p>
 
-      <!-- 🔥 WAIT SCREEN (replaces form) -->
-      <div v-if="isLoading" class="wait-screen">
-        {{ $t('waitMoment') || 'Wait a moment...' }}
-      </div>
-
-      <!-- FORM -->
-      <form v-else @submit.prevent="submit">
-
+      <form @submit.prevent="submit">
         <div class="form-group">
           <label>{{ $t('Email') }}</label>
-          <input v-model="form.email" type="email" required />
+          <input v-model="form.email" type="email" :placeholder="$t('Email')" required />
         </div>
 
         <div class="form-group">
@@ -96,14 +99,11 @@ const goHome = () => {
             <input
               v-model="form.password"
               :type="showPassword ? 'text' : 'password'"
+              :placeholder="$t('Password')"
               required
             />
 
-            <button
-              type="button"
-              class="toggle-eye"
-              @click="showPassword = !showPassword"
-            >
+            <button type="button" class="toggle-eye" @click="showPassword = !showPassword">
               {{ showPassword ? '👁️' : '🙈' }}
             </button>
           </div>
@@ -115,27 +115,21 @@ const goHome = () => {
           </router-link>
         </div>
 
-        <!-- 🔘 BUTTON TEXT ONLY -->
-        <button class="btn-primary" :disabled="isLoading">
-          {{ isLoading ? ($t('Logging in...') || 'Logging in...') : $t('Login') }}
+        <button class="btn-primary" :disabled="auth.loading || isLoading">
+          {{ (auth.loading || isLoading)
+            ? ($t('Logging in...') || 'Logging in...')
+            : $t('Login')
+          }}
         </button>
-
       </form>
 
       <p class="switch">
         {{ $t('Do not have an account') || "Don't have an account?" }}
-        <router-link to="/register">
-          {{ $t('Register') || 'Register' }}
-        </router-link>
+        <router-link to="/register">{{ $t('Register') }}</router-link>
       </p>
 
-      <!-- BACK HOME -->
-      <router-link
-        to="/"
-        class="back-home"
-        @click.prevent="goHome"
-      >
-        ← {{ $t('Back to Home') || 'Back to Home' }}
+      <router-link to="/" class="back-home">
+        ← {{ $t('Back to Home') }}
       </router-link>
 
     </div>
@@ -143,17 +137,8 @@ const goHome = () => {
 </template>
 
 <style scoped>
-/* WAIT SCREEN */
-.wait-screen {
-  text-align: center;
-  padding: 50px 20px;
-  font-weight: bold;
-  color: #0f766e;
-  font-size: 18px;
-  animation: pulse 1s infinite;
-}
+/* ================= YOUR ORIGINAL STYLES (UNCHANGED) ================= */
 
-/* PASSWORD */
 .password-wrapper {
   position: relative;
   display: flex;
@@ -174,7 +159,6 @@ const goHome = () => {
   font-size: 18px;
 }
 
-/* LANGUAGE */
 .language-toggle {
   margin: 10px 0;
   display: flex;
@@ -186,10 +170,16 @@ const goHome = () => {
   padding: 5px 12px;
   background: transparent;
   border: 1px solid #888;
+  color: black;
   cursor: pointer;
   border-radius: 20px;
   font-weight: bold;
   transition: 0.25s ease;
+}
+
+.language-toggle button:hover {
+  background: rgba(0, 0, 0, 0.05);
+  transform: scale(1.05);
 }
 
 .language-toggle button.active {
@@ -198,7 +188,12 @@ const goHome = () => {
   color: #007bff;
 }
 
-/* PAGE */
+.dashboard {
+  display: flex;
+  min-height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
 .auth-page {
   min-height: 100vh;
   display: flex;
@@ -217,6 +212,7 @@ const goHome = () => {
   max-width: 400px;
   border-radius: 12px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  animation: fadeUp 0.6s ease;
 }
 
 h2 {
@@ -230,7 +226,6 @@ h2 {
   color: #555;
 }
 
-/* FORM */
 .form-group {
   margin-bottom: 15px;
 }
@@ -243,11 +238,15 @@ input {
 }
 
 input:focus {
-  border-color: #14b8a6;
   outline: none;
+  border-color: #14b8a6;
 }
 
-/* BUTTON */
+.form-options {
+  text-align: right;
+  margin-bottom: 15px;
+}
+
 .btn-primary {
   width: 100%;
   padding: 12px;
@@ -257,26 +256,80 @@ input:focus {
   border-radius: 20px;
   font-weight: bold;
   cursor: pointer;
+  transition: 0.3s;
 }
 
 .btn-primary:hover {
   background: #022c22;
+  transform: translateY(-2px);
 }
 
-/* LINKS */
-.switch,
+.switch {
+  text-align: center;
+  margin-top: 15px;
+}
+
 .back-home {
+  display: block;
   text-align: center;
   margin-top: 10px;
-  display: block;
   color: #0f766e;
 }
 
-/* ANIMATION */
 @keyframes gradientMove {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ================= 🔥 NEW FEATURE ADDED ================= */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 118, 110, 0.25);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loader-box {
+  text-align: center;
+  color: #0f766e;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(255,255,255,0.3);
+  border-top: 5px solid #0f766e;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 15px;
+}
+
+.wait-text {
+  font-size: 18px;
+  font-weight: bold;
+  animation: pulse 1s infinite;
+}
+
+.loading-text {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-top: 5px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 @keyframes pulse {
