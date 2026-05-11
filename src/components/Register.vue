@@ -49,6 +49,7 @@ const showConfirmPassword = ref(false)
 
 <template>
   <div class="auth-page">
+
     <div class="auth-card">
 
       <!-- Language Toggle -->
@@ -65,9 +66,12 @@ const showConfirmPassword = ref(false)
       <h2>{{ $t('Create Account') }}</h2>
       <p class="subtitle">{{ $t('Register to Get a Room') }}</p>
 
-      <!-- 🔥 NEW: LOGIN-STYLE BLUR OVERLAY -->
+      <!-- 🔥 LOGIN STYLE OVERLAY (ADDED ONLY FEATURE) -->
       <div v-if="isLoading || loading" class="loading-overlay">
         <div class="spinner"></div>
+        <p class="loading-text">
+          {{ $t('Registering...') || 'Registering...' }}
+        </p>
       </div>
 
       <!-- FORM (UNCHANGED LAYOUT) -->
@@ -146,7 +150,7 @@ const showConfirmPassword = ref(false)
         </div>
 
         <button type="submit" class="btn-primary" :disabled="loading || isLoading">
-          {{ loading || isLoading ? $t('Registering...') : $t('Register') }}
+          {{ loading || isLoading ? ($t('Registering...') || 'Registering...') : ($t('Register') || 'Register') }}
         </button>
       </form>
 
@@ -168,28 +172,35 @@ const showConfirmPassword = ref(false)
 
 <style scoped>
 
-/* ================== NEW LOGIN STYLE OVERLAY ================== */
+/* ================= LOGIN-STYLE OVERLAY ================= */
 
 .loading-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(6px);
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(8px);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   z-index: 999;
   border-radius: 12px;
 }
 
-/* Spinner */
 .spinner {
-  width: 45px;
-  height: 45px;
-  border: 4px solid #ccc;
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(0,0,0,0.1);
   border-top: 4px solid #0f766e;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin 0.9s linear infinite;
+}
+
+.loading-text {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #0f766e;
+  animation: pulse 1s infinite;
 }
 
 @keyframes spin {
@@ -197,7 +208,18 @@ const showConfirmPassword = ref(false)
   100% { transform: rotate(360deg); }
 }
 
-/* ================== YOUR ORIGINAL CSS (UNCHANGED) ================== */
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* IMPORTANT */
+.auth-card {
+  position: relative;
+}
+
+/* ================= YOUR ORIGINAL CSS (UNCHANGED) ================= */
 
 .form-group {
   margin-bottom: 16px;
@@ -268,7 +290,6 @@ const showConfirmPassword = ref(false)
   border-radius: 12px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   animation: fadeUp 0.6s ease;
-  position: relative; /* IMPORTANT for overlay */
 }
 
 h2 {
