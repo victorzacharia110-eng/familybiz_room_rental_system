@@ -1,12 +1,22 @@
 <script setup>
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
-const { locale } = useI18n()
+const isLoading = ref(false)
 
 const changeLanguage = (lang) => {
   locale.value = lang
+}
+
+// Simulate loading (replace with real auth logic later)
+const handleAuthClick = () => {
+  isLoading.value = true
+
+  setTimeout(() => {
+    isLoading.value = false
+  }, 2000)
 }
 </script>
 
@@ -25,6 +35,7 @@ const changeLanguage = (lang) => {
           {{ $t('homeHeroDescription') }}
         </p>
 
+        <!-- LANGUAGE SWITCH -->
         <div class="language-switch zoom-in">
           <button @click="changeLanguage('en')" :class="{ active: locale === 'en' }">
             🇬🇧 ENGLISH
@@ -35,14 +46,33 @@ const changeLanguage = (lang) => {
           </button>
         </div>
 
+        <!-- ACTION BUTTONS -->
         <div class="actions zoom-in">
-          <router-link to="/login" class="btn login-btn">
+          <router-link
+            to="/login"
+            class="btn login-btn"
+            :class="{ disabled: isLoading }"
+            :aria-disabled="isLoading"
+            @click.prevent="isLoading ? null : handleAuthClick()"
+          >
             {{ $t('login') }}
           </router-link>
-          <router-link to="/register" class="btn register-btn">
+
+          <router-link
+            to="/register"
+            class="btn register-btn"
+            :class="{ disabled: isLoading }"
+            :aria-disabled="isLoading"
+            @click.prevent="isLoading ? null : handleAuthClick()"
+          >
             {{ $t('Register') }}
           </router-link>
         </div>
+
+        <!-- WAIT MESSAGE -->
+        <p v-if="isLoading" class="wait-message">
+          {{ $t('waitMoment') }}
+        </p>
       </div>
     </section>
 
@@ -77,7 +107,6 @@ const changeLanguage = (lang) => {
     <section class="location-section">
       <div class="location-content">
         <h2>{{ $t('homeLocationTitle') }}</h2>
-
         <p>{{ $t('homeLocationDesc') }}</p>
 
         <p class="highlight">
@@ -109,7 +138,9 @@ const changeLanguage = (lang) => {
         </div>
       </div>
 
-      <div class="footer-bottom">© {{ new Date().getFullYear() }} Majohe Bwera Rooms</div>
+      <div class="footer-bottom">
+        © {{ new Date().getFullYear() }} Majohe Bwera Rooms
+      </div>
     </footer>
   </div>
 </template>
@@ -138,34 +169,16 @@ const changeLanguage = (lang) => {
   font-weight: bold;
 }
 
-/* ACTIVE STATE */
 .language-switch button.active {
   background: white;
   color: #0f766e;
   transform: scale(1.1);
+  animation: pulse 1.5s infinite;
 }
 
-/* HOVER EFFECT */
 .language-switch button:hover {
   transform: scale(1.15);
   background: rgba(255, 255, 255, 0.2);
-}
-
-/* ANIMATION */
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.6);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
-  }
-}
-
-.language-switch button.active {
-  animation: pulse 1.5s infinite;
 }
 
 /* HERO */
@@ -200,6 +213,14 @@ const changeLanguage = (lang) => {
   font-weight: bold;
   margin: 10px;
   transition: 0.3s ease;
+  display: inline-block;
+}
+
+/* DISABLED STATE */
+.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .login-btn {
@@ -214,6 +235,14 @@ const changeLanguage = (lang) => {
 
 .btn:hover {
   transform: translateY(-4px);
+}
+
+/* WAIT MESSAGE */
+.wait-message {
+  margin-top: 15px;
+  color: white;
+  font-weight: bold;
+  animation: pulse 1s infinite;
 }
 
 /* FEATURES */
@@ -276,64 +305,37 @@ const changeLanguage = (lang) => {
 }
 
 /* ANIMATIONS */
-.fade-in {
-  animation: fadeIn 1s ease-in-out;
-}
-
-.slide-up {
-  animation: slideUp 1.2s ease;
-}
-
-.slide-up-delay {
-  animation: slideUp 1.6s ease;
-}
-
-.zoom-in {
-  animation: zoomIn 1.8s ease;
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.6); }
+  70% { box-shadow: 0 0 0 10px rgba(255,255,255,0); }
+  100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slideUp {
-  from {
-    transform: translateY(40px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 @keyframes zoomIn {
-  from {
-    transform: scale(0.9);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
 @keyframes gradientMove {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
+
+.fade-in { animation: fadeIn 1s ease-in-out; }
+.slide-up { animation: slideUp 1.2s ease; }
+.slide-up-delay { animation: slideUp 1.6s ease; }
+.zoom-in { animation: zoomIn 1.8s ease; }
 
 /* RESPONSIVE */
 @media (max-width: 600px) {
