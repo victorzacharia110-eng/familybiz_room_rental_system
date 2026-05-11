@@ -6,9 +6,10 @@ import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
 
-// SINGLE SOURCE OF TRUTH
+// COMPOSABLE
 const { register, data, error, loading } = useRegister()
 
+// FORM
 const form = ref({
   last_name: '',
   phone_number: '',
@@ -17,27 +18,61 @@ const form = ref({
   password_confirmation: '',
 })
 
-// USE DIRECTLY
+// VALIDATION ERROR
+const validationError = ref('')
+
+// SINGLE SOURCE OF TRUTH
 const isBusy = loading
 
+// SUBMIT
 const submit = async () => {
   if (loading.value) return
 
+  validationError.value = ''
+
+  // LAST NAME
+  if (!form.value.last_name.trim()) {
+    validationError.value = 'Last name is required'
+    return
+  }
+
+  // PHONE VALIDATION
+  const phoneRegex = /^(0|\+255)[67][0-9]{8}$/
+
+  if (!phoneRegex.test(form.value.phone_number)) {
+    validationError.value = 'Invalid Tanzanian phone number'
+    return
+  }
+
+  // PASSWORD LENGTH
+  if (form.value.password.length < 6) {
+    validationError.value = 'Password must be at least 6 characters'
+    return
+  }
+
+  // PASSWORD MATCH
+  if (form.value.password !== form.value.password_confirmation) {
+    validationError.value = 'Passwords do not match'
+    return
+  }
+
+  // REGISTER
   const res = await register(form.value)
 
   if (res?.status === 201 || res?.status === 200) {
-    alert('Account created successfully! Please login.')
+    alert('Account created successfully! Please login!')
     router.push('/login')
     return
   }
 
   if (res?.status === 409) {
-    alert('User already exists!')
+    validationError.value = 'User already exists!'
   }
 }
 
 // LANGUAGE
 const { locale } = useI18n()
+
 const currentLocale = ref(locale.value)
 
 const setLanguage = (lang) => {
@@ -57,31 +92,46 @@ const showConfirmPassword = ref(false)
 
       <!-- LANGUAGE -->
       <div class="language-toggle">
-        <button :class="{ active: currentLocale === 'en' }" @click="setLanguage('en')">
+
+        <button
+          :class="{ active: currentLocale === 'en' }"
+          @click="setLanguage('en')"
+        >
           🇬🇧 English
         </button>
 
-        <button :class="{ active: currentLocale === 'sw' }" @click="setLanguage('sw')">
+        <button
+          :class="{ active: currentLocale === 'sw' }"
+          @click="setLanguage('sw')"
+        >
           🇹🇿 Swahili
         </button>
+
       </div>
 
       <h2>{{ $t('Create Account') }}</h2>
-      <p class="subtitle">{{ $t('Register to Get a Room') }}</p>
 
-      <!-- 🔥 LOGIN STYLE BLUR OVERLAY -->
+      <p class="subtitle">
+        {{ $t('Register to Get a Room') }}
+      </p>
+
+      <!-- LOADING OVERLAY -->
       <div v-if="isBusy" class="loading-overlay">
         <div class="spinner"></div>
+
         <p class="loading-text">
           {{ $t('Registering...') || 'Registering...' }}
         </p>
       </div>
 
-      <!-- FORM (UNCHANGED LAYOUT) -->
+      <!-- FORM -->
       <form @submit.prevent="submit">
 
+        <!-- LAST NAME -->
         <div class="form-group">
+
           <label>{{ $t('Last Name') }}</label>
+
           <input
             v-model="form.last_name"
             type="text"
@@ -91,22 +141,29 @@ const showConfirmPassword = ref(false)
             required
             :disabled="isBusy"
           />
+
         </div>
 
+        <!-- PHONE -->
         <div class="form-group">
+
           <label>{{ $t('Phone Number') }}</label>
+
           <input
             v-model="form.phone_number"
             type="text"
             :placeholder="$t('Enter Phone Number')"
-            pattern="^(0|\+255)[67][0-9]{8}$"
             required
             :disabled="isBusy"
           />
+
         </div>
 
+        <!-- EMAIL -->
         <div class="form-group">
+
           <label>{{ $t('Email') }}</label>
+
           <input
             v-model="form.email"
             type="email"
@@ -114,13 +171,16 @@ const showConfirmPassword = ref(false)
             required
             :disabled="isBusy"
           />
+
         </div>
 
         <!-- PASSWORD -->
         <div class="form-group">
+
           <label>{{ $t('Password') }}</label>
 
           <div class="password-wrapper">
+
             <input
               v-model="form.password"
               :type="showPassword ? 'text' : 'password'"
@@ -129,17 +189,24 @@ const showConfirmPassword = ref(false)
               :disabled="isBusy"
             />
 
-            <button type="button" @click="showPassword = !showPassword">
+            <button
+              type="button"
+              @click="showPassword = !showPassword"
+            >
               {{ showPassword ? '👁️' : '🙈' }}
             </button>
+
           </div>
+
         </div>
 
         <!-- CONFIRM PASSWORD -->
         <div class="form-group">
+
           <label>{{ $t('Confirm Password') }}</label>
 
           <div class="password-wrapper">
+
             <input
               v-model="form.password_confirmation"
               :type="showConfirmPassword ? 'text' : 'password'"
@@ -148,37 +215,71 @@ const showConfirmPassword = ref(false)
               :disabled="isBusy"
             />
 
-            <button type="button" @click="showConfirmPassword = !showConfirmPassword">
+            <button
+              type="button"
+              @click="showConfirmPassword = !showConfirmPassword"
+            >
               {{ showConfirmPassword ? '👁️' : '🙈' }}
             </button>
+
           </div>
+
         </div>
 
-        <button type="submit" class="btn-primary" :disabled="isBusy">
-          {{ isBusy ? ($t('Registering...') || 'Registering...') : ($t('Register') || 'Register') }}
+        <!-- BUTTON -->
+        <button
+          type="submit"
+          class="btn-primary"
+          :disabled="isBusy"
+        >
+          {{
+            isBusy
+              ? ($t('Registering...') || 'Registering...')
+              : ($t('Register') || 'Register')
+          }}
         </button>
 
       </form>
 
-      <div v-if="error" class="feedback error">{{ error }}</div>
-      <div v-if="data" class="feedback success">{{ data.message }}</div>
+      <!-- VALIDATION ERROR -->
+      <div v-if="validationError" class="feedback error">
+        {{ validationError }}
+      </div>
 
+      <!-- API ERROR -->
+      <div v-if="error" class="feedback error">
+        {{ error }}
+      </div>
+
+      <!-- SUCCESS -->
+      <div v-if="data" class="feedback success">
+        {{ data.message }}
+      </div>
+
+      <!-- LOGIN -->
       <p class="switch">
+
         {{ $t('Already Have an Account') || 'Already have an account?' }}
-        <router-link to="/login">{{ $t('Login') }}</router-link>
+
+        <router-link to="/login">
+          {{ $t('Login') }}
+        </router-link>
+
       </p>
 
+      <!-- HOME -->
       <router-link to="/" class="back-home">
         ← {{ $t('Back to Home') }}
       </router-link>
 
     </div>
+
   </div>
 </template>
 
 <style scoped>
 
-/* ================= LOGIN STYLE OVERLAY ================= */
+/* OVERLAY */
 
 .loading-overlay {
   position: absolute;
@@ -195,6 +296,8 @@ const showConfirmPassword = ref(false)
   border-radius: 12px;
   pointer-events: all;
 }
+
+/* SPINNER */
 
 .spinner {
   width: 50px;
@@ -213,27 +316,69 @@ const showConfirmPassword = ref(false)
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 
-/* IMPORTANT FIX */
+/* CARD */
+
 .auth-card {
   position: relative;
   min-height: 420px;
+  background: white;
+  padding: 35px;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
-/* ================= YOUR ORIGINAL CSS (UNCHANGED) ================= */
+/* PAGE */
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(270deg, #0f766e, #14b8a6, #0f766e);
+  background-size: 400% 400%;
+  padding: 20px;
+}
+
+/* FORM */
 
 .form-group {
   margin-bottom: 16px;
 }
+
+input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+/* PASSWORD */
 
 .password-wrapper {
   position: relative;
@@ -242,9 +387,7 @@ const showConfirmPassword = ref(false)
 
 .password-wrapper input {
   width: 100%;
-  height: 38px;
-  padding: 0 40px 0 10px;
-  box-sizing: border-box;
+  padding-right: 40px;
 }
 
 .password-wrapper button {
@@ -257,6 +400,42 @@ const showConfirmPassword = ref(false)
   cursor: pointer;
   font-size: 14px;
 }
+
+/* BUTTON */
+
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  background: #0f766e;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background: #022c22;
+}
+
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* TEXT */
+
+h2 {
+  text-align: center;
+  color: #0f766e;
+}
+
+.subtitle {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* LANGUAGE */
 
 .language-toggle {
   margin: 10px 0;
@@ -281,53 +460,23 @@ const showConfirmPassword = ref(false)
   color: #007bff;
 }
 
-.auth-page {
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: linear-gradient(270deg, #0f766e, #14b8a6, #0f766e);
-  background-size: 400% 400%;
-  animation: gradientMove 12s ease infinite;
-  padding: 20px;
-}
+/* FEEDBACK */
 
-.auth-card {
-  background: white;
-  padding: 35px;
-  width: 100%;
-  max-width: 420px;
-  border-radius: 12px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  animation: fadeUp 0.6s ease;
-}
-
-h2 {
+.feedback {
+  margin-top: 12px;
   text-align: center;
-  color: #0f766e;
+  font-size: 14px;
 }
 
-input {
-  width: 100%;
-  padding: 12px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+.feedback.error {
+  color: red;
 }
 
-.btn-primary {
-  width: 100%;
-  padding: 12px;
-  background: #0f766e;
-  color: white;
-  border: none;
-  border-radius: 20px;
-  font-weight: bold;
-  cursor: pointer;
+.feedback.success {
+  color: green;
 }
 
-.btn-primary:hover {
-  background: #022c22;
-}
+/* LINKS */
 
 .switch {
   text-align: center;
@@ -340,4 +489,5 @@ input {
   margin-top: 10px;
   color: #0f766e;
 }
+
 </style>
