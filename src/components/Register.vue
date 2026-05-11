@@ -1,8 +1,12 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import useRegister from '@/composables/guest/register'
-const { register, data, error, loading } = useRegister()
 import { useI18n } from 'vue-i18n'
+
+const router = useRouter()
+
+const { register, data, error, loading } = useRegister()
 
 const form = ref({
   last_name: '',
@@ -12,11 +16,14 @@ const form = ref({
   password_confirmation: '',
 })
 
-// 🔥 ADDED: local loading control for full card
+// local loading
 const isLoading = ref(false)
 
+// 🔥 FIX: unified loading state (LIKE LOGIN)
+const isBusy = computed(() => isLoading.value || loading.value)
+
 const submit = async () => {
-  if (isLoading.value || loading.value) return
+  if (isBusy.value) return
 
   isLoading.value = true
 
@@ -24,6 +31,12 @@ const submit = async () => {
 
   if (res?.status === 201 || res?.status === 200) {
     alert('Account created successfully! Please login.')
+
+    isLoading.value = false
+
+    // optional redirect like login flow
+    router.push('/login')
+    return
   }
 
   if (res?.status === 409) {
@@ -52,7 +65,7 @@ const showConfirmPassword = ref(false)
 
     <div class="auth-card">
 
-      <!-- Language Toggle -->
+      <!-- LANGUAGE -->
       <div class="language-toggle">
         <button :class="{ active: currentLocale === 'en' }" @click="setLanguage('en')">
           🇬🇧 English
@@ -66,8 +79,8 @@ const showConfirmPassword = ref(false)
       <h2>{{ $t('Create Account') }}</h2>
       <p class="subtitle">{{ $t('Register to Get a Room') }}</p>
 
-      <!-- 🔥 LOGIN STYLE OVERLAY (ADDED ONLY FEATURE) -->
-      <div v-if="isLoading || loading" class="loading-overlay">
+      <!-- 🔥 LOGIN STYLE BLUR OVERLAY -->
+      <div v-if="isBusy" class="loading-overlay">
         <div class="spinner"></div>
         <p class="loading-text">
           {{ $t('Registering...') || 'Registering...' }}
@@ -86,7 +99,7 @@ const showConfirmPassword = ref(false)
             @keydown.space.prevent
             @input="form.last_name = form.last_name.replace(/[^A-Za-z]/g, '')"
             required
-            :disabled="isLoading || loading"
+            :disabled="isBusy"
           />
         </div>
 
@@ -98,7 +111,7 @@ const showConfirmPassword = ref(false)
             :placeholder="$t('Enter Phone Number')"
             pattern="^(0|\+255)[67][0-9]{8}$"
             required
-            :disabled="isLoading || loading"
+            :disabled="isBusy"
           />
         </div>
 
@@ -109,10 +122,11 @@ const showConfirmPassword = ref(false)
             type="email"
             :placeholder="$t('Email')"
             required
-            :disabled="isLoading || loading"
+            :disabled="isBusy"
           />
         </div>
 
+        <!-- PASSWORD -->
         <div class="form-group">
           <label>{{ $t('Password') }}</label>
 
@@ -122,7 +136,7 @@ const showConfirmPassword = ref(false)
               :type="showPassword ? 'text' : 'password'"
               :placeholder="$t('Password')"
               required
-              :disabled="isLoading || loading"
+              :disabled="isBusy"
             />
 
             <button type="button" @click="showPassword = !showPassword">
@@ -131,6 +145,7 @@ const showConfirmPassword = ref(false)
           </div>
         </div>
 
+        <!-- CONFIRM PASSWORD -->
         <div class="form-group">
           <label>{{ $t('Confirm Password') }}</label>
 
@@ -140,7 +155,7 @@ const showConfirmPassword = ref(false)
               :type="showConfirmPassword ? 'text' : 'password'"
               :placeholder="$t('Confirm Password')"
               required
-              :disabled="isLoading || loading"
+              :disabled="isBusy"
             />
 
             <button type="button" @click="showConfirmPassword = !showConfirmPassword">
@@ -149,9 +164,10 @@ const showConfirmPassword = ref(false)
           </div>
         </div>
 
-        <button type="submit" class="btn-primary" :disabled="loading || isLoading">
-          {{ loading || isLoading ? ($t('Registering...') || 'Registering...') : ($t('Register') || 'Register') }}
+        <button type="submit" class="btn-primary" :disabled="isBusy">
+          {{ isBusy ? ($t('Registering...') || 'Registering...') : ($t('Register') || 'Register') }}
         </button>
+
       </form>
 
       <div v-if="error" class="feedback error">{{ error }}</div>
@@ -172,7 +188,7 @@ const showConfirmPassword = ref(false)
 
 <style scoped>
 
-/* ================= LOGIN-STYLE OVERLAY ================= */
+/* ================= LOGIN STYLE OVERLAY ================= */
 
 .loading-overlay {
   position: absolute;
@@ -214,7 +230,7 @@ const showConfirmPassword = ref(false)
   100% { opacity: 1; }
 }
 
-/* IMPORTANT */
+/* IMPORTANT FIX */
 .auth-card {
   position: relative;
 }
