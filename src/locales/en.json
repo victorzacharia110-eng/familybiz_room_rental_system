@@ -161,6 +161,7 @@
   "year": "Year",
   "dueDate": "Due Date",
   "makePayment": "Make Payment",
-  "method1ApprovalWarning": "WARNING!!! You must communicate with your landlord after making payment for confirmation and approval."
+  "method1ApprovalWarning": "WARNING!!! You must communicate with your landlord after making payment for confirmation and approval.",
+    "waitMoment": "Please wait a moment..."
 }
 
