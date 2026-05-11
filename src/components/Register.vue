@@ -1,11 +1,12 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import useRegister from '@/composables/guest/register'
 import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
 
+// SINGLE SOURCE OF TRUTH
 const { register, data, error, loading } = useRegister()
 
 const form = ref({
@@ -16,26 +17,16 @@ const form = ref({
   password_confirmation: '',
 })
 
-// local loading
-const isLoading = ref(false)
-
-const isBusy = computed(() => {
-  return isLoading.value || Boolean(loading?.value)
-})
+// USE DIRECTLY
+const isBusy = loading
 
 const submit = async () => {
-  if (isBusy.value) return
-
-  isLoading.value = true
+  if (loading.value) return
 
   const res = await register(form.value)
 
   if (res?.status === 201 || res?.status === 200) {
     alert('Account created successfully! Please login.')
-
-    isLoading.value = false
-
-    // optional redirect like login flow
     router.push('/login')
     return
   }
@@ -43,8 +34,6 @@ const submit = async () => {
   if (res?.status === 409) {
     alert('User already exists!')
   }
-
-  isLoading.value = false
 }
 
 // LANGUAGE
@@ -56,7 +45,7 @@ const setLanguage = (lang) => {
   currentLocale.value = lang
 }
 
-// EYES
+// PASSWORD TOGGLES
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 </script>
@@ -192,8 +181,19 @@ const showConfirmPassword = ref(false)
 /* ================= LOGIN STYLE OVERLAY ================= */
 
 .loading-overlay {
-  pointer-events: all;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   z-index: 9999;
+  border-radius: 12px;
+  pointer-events: all;
 }
 
 .spinner {
@@ -226,6 +226,7 @@ const showConfirmPassword = ref(false)
 /* IMPORTANT FIX */
 .auth-card {
   position: relative;
+  min-height: 420px;
 }
 
 /* ================= YOUR ORIGINAL CSS (UNCHANGED) ================= */
