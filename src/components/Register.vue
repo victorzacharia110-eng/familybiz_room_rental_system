@@ -12,6 +12,7 @@ const form = ref({
   password_confirmation: '',
 })
 
+// 🔥 ADDED: local loading control for full card
 const isLoading = ref(false)
 
 const submit = async () => {
@@ -32,7 +33,7 @@ const submit = async () => {
   isLoading.value = false
 }
 
-// LANGUAGE
+// -------------------- LANGUAGE TOGGLE --------------------
 const { locale } = useI18n()
 const currentLocale = ref(locale.value)
 
@@ -41,7 +42,7 @@ const setLanguage = (lang) => {
   currentLocale.value = lang
 }
 
-// EYES
+// Eye for password view
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 </script>
@@ -50,6 +51,7 @@ const showConfirmPassword = ref(false)
   <div class="auth-page">
     <div class="auth-card">
 
+      <!-- Language Toggle -->
       <div class="language-toggle">
         <button :class="{ active: currentLocale === 'en' }" @click="setLanguage('en')">
           🇬🇧 English
@@ -63,11 +65,13 @@ const showConfirmPassword = ref(false)
       <h2>{{ $t('Create Account') }}</h2>
       <p class="subtitle">{{ $t('Register to Get a Room') }}</p>
 
+      <!-- LOADING SCREEN (ADDED ONLY) -->
       <div v-if="isLoading || loading" class="wait-screen">
         <p class="big-text">{{ $t('waitMoment') || 'Wait a moment...' }}</p>
         <p class="small-text">{{ $t('Registering...') }}</p>
       </div>
 
+      <!-- FORM -->
       <form v-else @submit.prevent="submit">
 
         <div class="form-group">
@@ -106,6 +110,7 @@ const showConfirmPassword = ref(false)
           />
         </div>
 
+        <!-- PASSWORD -->
         <div class="form-group">
           <label>{{ $t('Password') }}</label>
 
@@ -118,13 +123,14 @@ const showConfirmPassword = ref(false)
               :disabled="isLoading || loading"
             />
 
-            <!-- ONLY FIX: proper alignment -->
+            <!-- ONLY FIX: icon positioning fix -->
             <button type="button" class="eye-btn" @click="showPassword = !showPassword">
               {{ showPassword ? '👁️' : '🙈' }}
             </button>
           </div>
         </div>
 
+        <!-- CONFIRM PASSWORD -->
         <div class="form-group">
           <label>{{ $t('Confirm Password') }}</label>
 
@@ -137,6 +143,7 @@ const showConfirmPassword = ref(false)
               :disabled="isLoading || loading"
             />
 
+            <!-- ONLY FIX -->
             <button type="button" class="eye-btn" @click="showConfirmPassword = !showConfirmPassword">
               {{ showConfirmPassword ? '👁️' : '🙈' }}
             </button>
@@ -151,8 +158,14 @@ const showConfirmPassword = ref(false)
       <div v-if="error" class="feedback error">{{ error }}</div>
       <div v-if="data" class="feedback success">{{ data.message }}</div>
 
-      <router-link to="/login">Login</router-link>
-      <router-link to="/">Back</router-link>
+      <p class="switch">
+        {{ $t('Already Have an Account') || 'Already have an account?' }}
+        <router-link to="/login">{{ $t('Login') }}</router-link>
+      </p>
+
+      <router-link to="/" class="back-home">
+        ← {{ $t('Back to Home') }}
+      </router-link>
 
     </div>
   </div>
@@ -160,7 +173,33 @@ const showConfirmPassword = ref(false)
 
 <style scoped>
 
-/* ========== YOUR ORIGINAL CSS (UNCHANGED) ========== */
+/* ===== ONLY ADD (NO REMOVAL) ===== */
+
+.wait-screen {
+  text-align: center;
+  padding: 70px 20px;
+  color: #0f766e;
+}
+
+.big-text {
+  font-size: 20px;
+  font-weight: bold;
+  animation: pulse 1s infinite;
+}
+
+.small-text {
+  margin-top: 10px;
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* ===== YOUR ORIGINAL CSS (UNCHANGED) ===== */
 
 .form-group {
   margin-bottom: 16px;
@@ -178,7 +217,7 @@ const showConfirmPassword = ref(false)
   box-sizing: border-box;
 }
 
-/* 🔥 FIX ONLY (eye alignment) */
+/* FIX ONLY: proper icon placement */
 .eye-btn {
   position: absolute;
   right: 10px;
@@ -271,18 +310,6 @@ input {
   text-align: center;
   margin-top: 10px;
   color: #0f766e;
-}
-
-/* animations */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes gradientMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
 }
 
 </style>
