@@ -33,7 +33,7 @@ const submit = async () => {
   isLoading.value = false
 }
 
-// -------------------- LANGUAGE TOGGLE --------------------
+// LANGUAGE
 const { locale } = useI18n()
 const currentLocale = ref(locale.value)
 
@@ -42,7 +42,7 @@ const setLanguage = (lang) => {
   currentLocale.value = lang
 }
 
-// Eye for password view
+// EYES
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 </script>
@@ -65,14 +65,13 @@ const showConfirmPassword = ref(false)
       <h2>{{ $t('Create Account') }}</h2>
       <p class="subtitle">{{ $t('Register to Get a Room') }}</p>
 
-      <!-- LOADING SCREEN (ADDED ONLY) -->
-      <div v-if="isLoading || loading" class="wait-screen">
-        <p class="big-text">{{ $t('waitMoment') || 'Wait a moment...' }}</p>
-        <p class="small-text">{{ $t('Registering...') }}</p>
+      <!-- 🔥 NEW: LOGIN-STYLE BLUR OVERLAY -->
+      <div v-if="isLoading || loading" class="loading-overlay">
+        <div class="spinner"></div>
       </div>
 
-      <!-- FORM -->
-      <form v-else @submit.prevent="submit">
+      <!-- FORM (UNCHANGED LAYOUT) -->
+      <form @submit.prevent="submit">
 
         <div class="form-group">
           <label>{{ $t('Last Name') }}</label>
@@ -110,7 +109,6 @@ const showConfirmPassword = ref(false)
           />
         </div>
 
-        <!-- PASSWORD -->
         <div class="form-group">
           <label>{{ $t('Password') }}</label>
 
@@ -123,14 +121,12 @@ const showConfirmPassword = ref(false)
               :disabled="isLoading || loading"
             />
 
-            <!-- ONLY FIX: icon positioning fix -->
-            <button type="button" class="eye-btn" @click="showPassword = !showPassword">
+            <button type="button" @click="showPassword = !showPassword">
               {{ showPassword ? '👁️' : '🙈' }}
             </button>
           </div>
         </div>
 
-        <!-- CONFIRM PASSWORD -->
         <div class="form-group">
           <label>{{ $t('Confirm Password') }}</label>
 
@@ -143,8 +139,7 @@ const showConfirmPassword = ref(false)
               :disabled="isLoading || loading"
             />
 
-            <!-- ONLY FIX -->
-            <button type="button" class="eye-btn" @click="showConfirmPassword = !showConfirmPassword">
+            <button type="button" @click="showConfirmPassword = !showConfirmPassword">
               {{ showConfirmPassword ? '👁️' : '🙈' }}
             </button>
           </div>
@@ -173,33 +168,36 @@ const showConfirmPassword = ref(false)
 
 <style scoped>
 
-/* ===== ONLY ADD (NO REMOVAL) ===== */
+/* ================== NEW LOGIN STYLE OVERLAY ================== */
 
-.wait-screen {
-  text-align: center;
-  padding: 70px 20px;
-  color: #0f766e;
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  border-radius: 12px;
 }
 
-.big-text {
-  font-size: 20px;
-  font-weight: bold;
-  animation: pulse 1s infinite;
+/* Spinner */
+.spinner {
+  width: 45px;
+  height: 45px;
+  border: 4px solid #ccc;
+  border-top: 4px solid #0f766e;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
 
-.small-text {
-  margin-top: 10px;
-  font-size: 14px;
-  opacity: 0.7;
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-@keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
-}
-
-/* ===== YOUR ORIGINAL CSS (UNCHANGED) ===== */
+/* ================== YOUR ORIGINAL CSS (UNCHANGED) ================== */
 
 .form-group {
   margin-bottom: 16px;
@@ -217,10 +215,9 @@ const showConfirmPassword = ref(false)
   box-sizing: border-box;
 }
 
-/* FIX ONLY: proper icon placement */
-.eye-btn {
+.password-wrapper button {
   position: absolute;
-  right: 10px;
+  right: 8px;
   top: 50%;
   transform: translateY(-50%);
   background: transparent;
@@ -271,6 +268,7 @@ const showConfirmPassword = ref(false)
   border-radius: 12px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   animation: fadeUp 0.6s ease;
+  position: relative; /* IMPORTANT for overlay */
 }
 
 h2 {
@@ -311,5 +309,4 @@ input {
   margin-top: 10px;
   color: #0f766e;
 }
-
 </style>
