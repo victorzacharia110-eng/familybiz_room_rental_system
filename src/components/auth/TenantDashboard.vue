@@ -1542,6 +1542,20 @@ td {
     cursor: pointer;
     margin-left: 90%;
   }
+
+    .modal {
+    width: 95%;
+    padding: 15px;
+    max-height: 90vh;
+
+    /* THIS is the key fix */
+    overflow-y: auto;
+  }
+
+  .modal-overlay {
+    align-items: flex-start; /* prevents top/bottom cut on small screens */
+    padding: 10px;
+  }
 }
 
 @media (min-width: 769px) {
