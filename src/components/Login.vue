@@ -6,19 +6,33 @@ import { useI18n } from 'vue-i18n'
 
 const auth = useAuthStore()
 const router = useRouter()
+const { locale } = useI18n()
+
+const currentLocale = ref(locale.value)
 
 const form = ref({
   email: '',
   password: '',
 })
 
+const isLoading = ref(false)
+const showPassword = ref(false)
+
+const setLanguage = (lang) => {
+  locale.value = lang
+  currentLocale.value = lang
+}
+
+// ---------------- LOGIN ----------------
 const submit = async () => {
-  console.log('Form payload:', form.value)
+  if (isLoading.value) return
+
+  isLoading.value = true
+
   const user = await auth.login(form.value)
-  console.log('Logged in user:', user)
 
   if (!user) {
-    console.log('Login failed:', auth.error)
+    isLoading.value = false
     return
   }
 
@@ -27,26 +41,28 @@ const submit = async () => {
   } else {
     router.push('/tenant')
   }
+
+  isLoading.value = false
 }
 
-// -------------------- LANGUAGE TOGGLE --------------------
-const { locale } = useI18n()
-const currentLocale = ref(locale.value)
+// ---------------- BACK HOME ----------------
+const goHome = () => {
+  if (isLoading.value) return
 
-const setLanguage = (lang) => {
-  locale.value = lang
-  currentLocale.value = lang
+  isLoading.value = true
+
+  setTimeout(() => {
+    router.push('/')
+    isLoading.value = false
+  }, 800)
 }
-
-// Eye for password view
-const showPassword = ref(false)
-const password = ref('')
 </script>
 
 <template>
   <div class="auth-page">
     <div class="auth-card">
-      <!-- Language Toggle -->
+
+      <!-- LANGUAGE -->
       <div class="language-toggle">
         <button :class="{ active: currentLocale === 'en' }" @click="setLanguage('en')">
           🇬🇧 English
@@ -59,11 +75,18 @@ const password = ref('')
 
       <h2>{{ $t('Welcome') }}</h2>
       <p class="subtitle">{{ $t('Login to continue') }}</p>
-      
-      <form @submit.prevent="submit">
+
+      <!-- 🔥 WAIT SCREEN (replaces form) -->
+      <div v-if="isLoading" class="wait-screen">
+        {{ $t('waitMoment') || 'Wait a moment...' }}
+      </div>
+
+      <!-- FORM -->
+      <form v-else @submit.prevent="submit">
+
         <div class="form-group">
           <label>{{ $t('Email') }}</label>
-          <input v-model="form.email" type="email" :placeholder="$t('Email')" required />
+          <input v-model="form.email" type="email" required />
         </div>
 
         <div class="form-group">
@@ -73,11 +96,14 @@ const password = ref('')
             <input
               v-model="form.password"
               :type="showPassword ? 'text' : 'password'"
-              :placeholder="$t('Password')"
               required
             />
 
-            <button type="button" class="toggle-eye" @click="showPassword = !showPassword">
+            <button
+              type="button"
+              class="toggle-eye"
+              @click="showPassword = !showPassword"
+            >
               {{ showPassword ? '👁️' : '🙈' }}
             </button>
           </div>
@@ -89,32 +115,45 @@ const password = ref('')
           </router-link>
         </div>
 
-        <button class="btn-primary" :disabled="auth.loading">
-          <!-- Feedback -->
-          <div v-if="auth.loading" class="feedback info">
-            {{ $t('Logging in...') }}
-          </div>
-
-          <div v-else>
-            {{ $t('Login') }}
-          </div>
+        <!-- 🔘 BUTTON TEXT ONLY -->
+        <button class="btn-primary" :disabled="isLoading">
+          {{ isLoading ? ($t('Logging in...') || 'Logging in...') : $t('Login') }}
         </button>
+
       </form>
 
       <p class="switch">
         {{ $t('Do not have an account') || "Don't have an account?" }}
-        <router-link to="/register">{{ $t('Register') || 'Register' }}</router-link>
+        <router-link to="/register">
+          {{ $t('Register') || 'Register' }}
+        </router-link>
       </p>
 
-      <router-link to="/" class="back-home">
+      <!-- BACK HOME -->
+      <router-link
+        to="/"
+        class="back-home"
+        @click.prevent="goHome"
+      >
         ← {{ $t('Back to Home') || 'Back to Home' }}
       </router-link>
+
     </div>
   </div>
 </template>
 
 <style scoped>
-/* Eye styles for password view */
+/* WAIT SCREEN */
+.wait-screen {
+  text-align: center;
+  padding: 50px 20px;
+  font-weight: bold;
+  color: #0f766e;
+  font-size: 18px;
+  animation: pulse 1s infinite;
+}
+
+/* PASSWORD */
 .password-wrapper {
   position: relative;
   display: flex;
@@ -134,7 +173,8 @@ const password = ref('')
   cursor: pointer;
   font-size: 18px;
 }
-/* translation buttons */
+
+/* LANGUAGE */
 .language-toggle {
   margin: 10px 0;
   display: flex;
@@ -146,30 +186,19 @@ const password = ref('')
   padding: 5px 12px;
   background: transparent;
   border: 1px solid #888;
-  color: black; /* 👈 key change */
   cursor: pointer;
   border-radius: 20px;
   font-weight: bold;
   transition: 0.25s ease;
 }
 
-.language-toggle button:hover {
-  background: rgba(0, 0, 0, 0.05); /* light hover */
-  transform: scale(1.05);
-}
-
 .language-toggle button.active {
   background: rgba(0, 123, 255, 0.15);
   border-color: #007bff;
-  color: #007bff; /* active stays blue */
+  color: #007bff;
 }
 
-.dashboard {
-  display: flex;
-  min-height: 100vh;
-  font-family: Arial, Helvetica, sans-serif;
-}
-
+/* PAGE */
 .auth-page {
   min-height: 100vh;
   display: flex;
@@ -188,7 +217,6 @@ const password = ref('')
   max-width: 400px;
   border-radius: 12px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  animation: fadeUp 0.6s ease;
 }
 
 h2 {
@@ -202,6 +230,7 @@ h2 {
   color: #555;
 }
 
+/* FORM */
 .form-group {
   margin-bottom: 15px;
 }
@@ -214,15 +243,11 @@ input {
 }
 
 input:focus {
-  outline: none;
   border-color: #14b8a6;
+  outline: none;
 }
 
-.form-options {
-  text-align: right;
-  margin-bottom: 15px;
-}
-
+/* BUTTON */
 .btn-primary {
   width: 100%;
   padding: 12px;
@@ -232,46 +257,31 @@ input:focus {
   border-radius: 20px;
   font-weight: bold;
   cursor: pointer;
-  transition: 0.3s;
 }
 
 .btn-primary:hover {
   background: #022c22;
-  transform: translateY(-2px);
 }
 
-.switch {
-  text-align: center;
-  margin-top: 15px;
-}
-
+/* LINKS */
+.switch,
 .back-home {
-  display: block;
   text-align: center;
   margin-top: 10px;
+  display: block;
   color: #0f766e;
 }
 
+/* ANIMATION */
 @keyframes gradientMove {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
 }
 </style>

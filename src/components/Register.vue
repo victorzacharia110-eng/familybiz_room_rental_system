@@ -1,8 +1,14 @@
 <script setup>
 import { ref } from 'vue'
 import useRegister from '@/composables/guest/register'
-const { register, data, error, loading } = useRegister()
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+
+const { register, data, error } = useRegister()
+const router = useRouter()
+
+const { locale } = useI18n()
+const currentLocale = ref(locale.value)
 
 const form = ref({
   last_name: '',
@@ -12,29 +18,47 @@ const form = ref({
   password_confirmation: '',
 })
 
-const submit = async () => {
-  const res = await register(form.value)
+const isLoading = ref(false)
 
-  if (res?.status === 201 || res?.status === 200) {
-    alert('Account created successfully! Please login.')
-  }
-
-  if (res?.status === 409) {
-    alert('User already exists!')
-  }
-}
-
-// -------------------- LANGUAGE TOGGLE --------------------
-const { locale } = useI18n()
-const currentLocale = ref(locale.value)
-
+// ---------------- LANGUAGE ----------------
 const setLanguage = (lang) => {
   locale.value = lang
   currentLocale.value = lang
 }
 
-// Eye for password view
+// ---------------- SUBMIT REGISTER ----------------
+const submit = async () => {
+  if (isLoading.value) return
 
+  isLoading.value = true
+
+  const res = await register(form.value)
+
+  if (res?.status === 201 || res?.status === 200) {
+    alert('Account created successfully! Please login.')
+    router.push('/login')
+  }
+
+  if (res?.status === 409) {
+    alert('User already exists!')
+  }
+
+  isLoading.value = false
+}
+
+// ---------------- BACK HOME ----------------
+const goHome = () => {
+  if (isLoading.value) return
+
+  isLoading.value = true
+
+  setTimeout(() => {
+    router.push('/')
+    isLoading.value = false
+  }, 800)
+}
+
+// ---------------- PASSWORD ----------------
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 </script>
@@ -42,7 +66,8 @@ const showConfirmPassword = ref(false)
 <template>
   <div class="auth-page">
     <div class="auth-card">
-      <!-- Language Toggle -->
+
+      <!-- LANGUAGE SWITCH -->
       <div class="language-toggle">
         <button :class="{ active: currentLocale === 'en' }" @click="setLanguage('en')">
           🇬🇧 English
@@ -56,7 +81,14 @@ const showConfirmPassword = ref(false)
       <h2>{{ $t('Create Account') }}</h2>
       <p class="subtitle">{{ $t('Register to Get a Room') }}</p>
 
-      <form @submit.prevent="submit">
+      <!-- 🔥 WAIT SCREEN (replaces form) -->
+      <div v-if="isLoading" class="wait-screen">
+        {{ $t('waitMoment') || 'Wait a moment...' }}
+      </div>
+
+      <!-- FORM -->
+      <form v-else @submit.prevent="submit">
+
         <!-- LAST NAME -->
         <div class="form-group">
           <label>{{ $t('Last Name') }}</label>
@@ -70,7 +102,7 @@ const showConfirmPassword = ref(false)
           />
         </div>
 
-        <!-- PHONE NUMBER (TZ format) -->
+        <!-- PHONE -->
         <div class="form-group">
           <label>{{ $t('Phone Number') }}</label>
           <input
@@ -78,7 +110,6 @@ const showConfirmPassword = ref(false)
             type="text"
             :placeholder="$t('Enter Phone Number')"
             pattern="^(0|\+255)[67][0-9]{8}$"
-            title="Enter valid Tanzanian number (e.g. 07XXXXXXXX or +2557XXXXXXXX)"
             required
           />
         </div>
@@ -89,106 +120,104 @@ const showConfirmPassword = ref(false)
           <input
             v-model="form.email"
             type="email"
-            :placeholder="$t('Email')"
-            pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
-            title="Enter a valid email address"
             required
           />
         </div>
 
         <!-- PASSWORD -->
-        <div class="form-group">
+        <div class="form-group password-wrapper">
           <label>{{ $t('Password') }}</label>
 
-          <div class="password-wrapper">
-            <input
-              v-model="form.password"
-              :type="showPassword ? 'text' : 'password'"
-              :placeholder="$t('Password')"
-              pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&]).{8,}$"
-              title="Min 8 chars, uppercase, lowercase, number & special character required"
-              required
-            />
+          <input
+            v-model="form.password"
+            :type="showPassword ? 'text' : 'password'"
+            required
+          />
 
-            <button type="button" @click="showPassword = !showPassword">
-              {{ showPassword ? '👁️' : '🙈' }}
-            </button>
-          </div>
+          <button type="button" @click="showPassword = !showPassword">
+            {{ showPassword ? '👁️' : '🙈' }}
+          </button>
         </div>
 
         <!-- CONFIRM PASSWORD -->
-        <div class="form-group">
+        <div class="form-group password-wrapper">
           <label>{{ $t('Confirm Password') }}</label>
 
-          <div class="password-wrapper">
-            <input
-              v-model="form.password_confirmation"
-              :type="showConfirmPassword ? 'text' : 'password'"
-              :placeholder="$t('Confirm Password')"
-              required
-            />
+          <input
+            v-model="form.password_confirmation"
+            :type="showConfirmPassword ? 'text' : 'password'"
+            required
+          />
 
-            <button type="button" @click="showConfirmPassword = !showConfirmPassword">
-              {{ showConfirmPassword ? '👁️' : '🙈' }}
-            </button>
-          </div>
+          <button type="button" @click="showConfirmPassword = !showConfirmPassword">
+            {{ showConfirmPassword ? '👁️' : '🙈' }}
+          </button>
         </div>
 
-        <!-- SUBMIT -->
-        <button type="submit" class="btn-primary" :disabled="loading">
-          <div v-if="loading" class="feedback info">
-            {{ $t('Registering...') }}
-          </div>
-
-          <div v-else>
-            {{ $t('Register') }}
-          </div>
+        <!-- SUBMIT BUTTON -->
+        <button class="btn-primary" :disabled="isLoading">
+          {{ isLoading ? ($t('Registering...') || 'Registering...') : $t('Register') }}
         </button>
+
       </form>
 
+      <!-- API FEEDBACK -->
       <div v-if="error" class="feedback error">{{ error }}</div>
       <div v-if="data" class="feedback success">{{ data.message }}</div>
 
+      <!-- SWITCH -->
       <p class="switch">
         {{ $t('Already Have an Account') || 'Already have an account?' }}
         <router-link to="/login">{{ $t('Login') }}</router-link>
       </p>
 
-      <router-link to="/" class="back-home"> ← {{ $t('Back to Home') }} </router-link>
+      <!-- BACK HOME -->
+      <router-link
+        to="/"
+        class="back-home"
+        @click.prevent="goHome"
+        :class="{ disabled: isLoading }"
+      >
+        ← {{ $t('Back to Home') }}
+      </router-link>
+
     </div>
   </div>
 </template>
 
 <style scoped>
-/* Eye styles for password view */
-.form-group {
-  margin-bottom: 16px;
+/* WAIT SCREEN */
+.wait-screen {
+  text-align: center;
+  padding: 40px 20px;
+  font-weight: bold;
+  color: #0f766e;
+  font-size: 18px;
+  animation: pulse 1s infinite;
 }
 
+/* DISABLED */
+.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* PASSWORD */
 .password-wrapper {
   position: relative;
-  width: 100%;
-}
-
-.password-wrapper input {
-  width: 100%;
-  height: 38px;
-  padding: 0 40px 0 10px;
-  box-sizing: border-box;
 }
 
 .password-wrapper button {
   position: absolute;
-  right: 8px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  background: transparent;
+  background: none;
   border: none;
   cursor: pointer;
-  font-size: 14px;
 }
 
-/* translation buttons */
+/* LANGUAGE */
 .language-toggle {
   margin: 10px 0;
   display: flex;
@@ -198,33 +227,20 @@ const showConfirmPassword = ref(false)
 
 .language-toggle button {
   padding: 5px 12px;
-  background: transparent;
   border: 1px solid #888;
-  color: black; /* 👈 key change */
-  cursor: pointer;
+  background: transparent;
   border-radius: 20px;
+  cursor: pointer;
   font-weight: bold;
-  transition: 0.25s ease;
-}
-
-.language-toggle button:hover {
-  background: rgba(0, 0, 0, 0.05); /* light hover */
-  transform: scale(1.05);
 }
 
 .language-toggle button.active {
   background: rgba(0, 123, 255, 0.15);
   border-color: #007bff;
-  color: #007bff; /* active stays blue */
+  color: #007bff;
 }
 
-.dashboard {
-  display: flex;
-  min-height: 100vh;
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-/* Uses SAME styling as login for consistency */
+/* PAGE */
 .auth-page {
   min-height: 100vh;
   display: flex;
@@ -242,15 +258,10 @@ const showConfirmPassword = ref(false)
   width: 100%;
   max-width: 420px;
   border-radius: 12px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  animation: fadeUp 0.6s ease;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
 }
 
-h2 {
-  text-align: center;
-  color: #0f766e;
-}
-
+/* FORM */
 .form-group {
   margin-bottom: 15px;
 }
@@ -262,6 +273,7 @@ input {
   border: 1px solid #ccc;
 }
 
+/* BUTTON */
 .btn-primary {
   width: 100%;
   padding: 12px;
@@ -271,45 +283,31 @@ input {
   border-radius: 20px;
   font-weight: bold;
   cursor: pointer;
-  transition: 0.3s;
 }
 
 .btn-primary:hover {
   background: #022c22;
 }
 
-.switch {
-  text-align: center;
-  margin-top: 15px;
-}
-
+/* LINKS */
+.switch,
 .back-home {
-  display: block;
   text-align: center;
   margin-top: 10px;
+  display: block;
   color: #0f766e;
 }
 
+/* ANIMATION */
 @keyframes gradientMove {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
 }
 </style>
