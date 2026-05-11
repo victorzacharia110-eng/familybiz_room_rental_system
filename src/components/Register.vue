@@ -44,9 +44,14 @@ const submit = async () => {
     return
   }
 
-  // PASSWORD LENGTH
-  if (form.value.password.length < 6) {
-    validationError.value = 'Password must be at least 6 characters'
+  // PASSWORD VALIDATION
+  const passwordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/
+
+  if (!passwordRegex.test(form.value.password)) {
+    validationError.value =
+      'Password must be at least 6 characters and include uppercase, lowercase, and a number.'
+
     return
   }
 
@@ -197,6 +202,19 @@ const showConfirmPassword = ref(false)
             </button>
 
           </div>
+
+          <!-- PASSWORD REQUIREMENTS -->
+          <small class="password-hint">
+            Password must contain:
+            <br />
+            • At least 6 characters
+            <br />
+            • One uppercase letter
+            <br />
+            • One lowercase letter
+            <br />
+            • One number
+          </small>
 
         </div>
 
@@ -399,6 +417,14 @@ input {
   border: none;
   cursor: pointer;
   font-size: 14px;
+}
+
+.password-hint {
+  display: block;
+  margin-top: 6px;
+  color: #666;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 /* BUTTON */
