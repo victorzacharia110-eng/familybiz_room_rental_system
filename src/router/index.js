@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useRoomStore } from '@/stores/room'
 
@@ -11,7 +11,7 @@ import TenantDashboard from '../components/auth/TenantDashboard.vue'
 import RoomEdit from '@/components/auth/edits/RoomEdit.vue'
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHashHistory(),
   routes: [
     {
       path: '/',
@@ -40,7 +40,7 @@ const router = createRouter({
       meta: { requiresGuest: true },
     },
 
-    //  role-based routes
+    // role-based routes
     {
       path: '/landlord',
       component: LandLordDashboard,
@@ -68,10 +68,10 @@ router.beforeEach(async (to) => {
     await auth.fetchUser()
   }
 
-  //  define normalized role ONCE
+  // define normalized role ONCE
   const role = auth.user?.is_landlord == 1 ? 'landlord' : 'tenant'
 
-  //  not logged in
+  // not logged in
   if (to.meta.requiresAuth && !auth.user) {
     return '/login'
   }
@@ -81,7 +81,7 @@ router.beforeEach(async (to) => {
     return role === 'landlord' ? '/landlord' : '/tenant'
   }
 
-  //  role protection (IMPORTANT PART)
+  // role protection
   if (to.meta.role && to.meta.role !== role) {
     return role === 'landlord' ? '/landlord' : '/tenant'
   }
