@@ -19,8 +19,9 @@ const form = ref({
 // local loading
 const isLoading = ref(false)
 
-// 🔥 FIX: unified loading state (LIKE LOGIN)
-const isBusy = computed(() => isLoading.value || loading.value)
+const isBusy = computed(() => {
+  return isLoading.value || Boolean(loading?.value)
+})
 
 const submit = async () => {
   if (isBusy.value) return
@@ -191,16 +192,8 @@ const showConfirmPassword = ref(false)
 /* ================= LOGIN STYLE OVERLAY ================= */
 
 .loading-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(8px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-  border-radius: 12px;
+  pointer-events: all;
+  z-index: 9999;
 }
 
 .spinner {
