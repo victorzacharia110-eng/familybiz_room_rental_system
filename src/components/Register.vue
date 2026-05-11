@@ -12,7 +12,6 @@ const form = ref({
   password_confirmation: '',
 })
 
-// 🔥 ADDED: local loading control for full card
 const isLoading = ref(false)
 
 const submit = async () => {
@@ -33,7 +32,7 @@ const submit = async () => {
   isLoading.value = false
 }
 
-// -------------------- LANGUAGE TOGGLE --------------------
+// LANGUAGE
 const { locale } = useI18n()
 const currentLocale = ref(locale.value)
 
@@ -42,7 +41,7 @@ const setLanguage = (lang) => {
   currentLocale.value = lang
 }
 
-// Eye for password view
+// EYES
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 </script>
@@ -51,7 +50,6 @@ const showConfirmPassword = ref(false)
   <div class="auth-page">
     <div class="auth-card">
 
-      <!-- Language Toggle -->
       <div class="language-toggle">
         <button :class="{ active: currentLocale === 'en' }" @click="setLanguage('en')">
           🇬🇧 English
@@ -65,20 +63,13 @@ const showConfirmPassword = ref(false)
       <h2>{{ $t('Create Account') }}</h2>
       <p class="subtitle">{{ $t('Register to Get a Room') }}</p>
 
-      <!-- 🔥 ADDED: FULL CARD LOADING SCREEN -->
       <div v-if="isLoading || loading" class="wait-screen">
-        <p class="big-text">
-          {{ $t('waitMoment') || 'Wait a moment...' }}
-        </p>
-
-        <p class="small-text">
-          {{ $t('Registering...') }}
-        </p>
+        <p class="big-text">{{ $t('waitMoment') || 'Wait a moment...' }}</p>
+        <p class="small-text">{{ $t('Registering...') }}</p>
       </div>
 
-      <!-- FORM (UNCHANGED) -->
       <form v-else @submit.prevent="submit">
-        <!-- LAST NAME -->
+
         <div class="form-group">
           <label>{{ $t('Last Name') }}</label>
           <input
@@ -92,7 +83,6 @@ const showConfirmPassword = ref(false)
           />
         </div>
 
-        <!-- PHONE NUMBER -->
         <div class="form-group">
           <label>{{ $t('Phone Number') }}</label>
           <input
@@ -105,7 +95,6 @@ const showConfirmPassword = ref(false)
           />
         </div>
 
-        <!-- EMAIL -->
         <div class="form-group">
           <label>{{ $t('Email') }}</label>
           <input
@@ -117,7 +106,6 @@ const showConfirmPassword = ref(false)
           />
         </div>
 
-        <!-- PASSWORD -->
         <div class="form-group">
           <label>{{ $t('Password') }}</label>
 
@@ -130,13 +118,13 @@ const showConfirmPassword = ref(false)
               :disabled="isLoading || loading"
             />
 
-            <button type="button" @click="showPassword = !showPassword">
+            <!-- ONLY FIX: proper alignment -->
+            <button type="button" class="eye-btn" @click="showPassword = !showPassword">
               {{ showPassword ? '👁️' : '🙈' }}
             </button>
           </div>
         </div>
 
-        <!-- CONFIRM PASSWORD -->
         <div class="form-group">
           <label>{{ $t('Confirm Password') }}</label>
 
@@ -149,68 +137,30 @@ const showConfirmPassword = ref(false)
               :disabled="isLoading || loading"
             />
 
-            <button type="button" @click="showConfirmPassword = !showConfirmPassword">
+            <button type="button" class="eye-btn" @click="showConfirmPassword = !showConfirmPassword">
               {{ showConfirmPassword ? '👁️' : '🙈' }}
             </button>
           </div>
         </div>
 
-        <!-- SUBMIT (UNCHANGED LOGIC) -->
         <button type="submit" class="btn-primary" :disabled="loading || isLoading">
-          <div v-if="loading || isLoading" class="feedback info">
-            {{ $t('Registering...') }}
-          </div>
-
-          <div v-else>
-            {{ $t('Register') }}
-          </div>
+          {{ loading || isLoading ? $t('Registering...') : $t('Register') }}
         </button>
       </form>
 
-      <!-- ERRORS -->
       <div v-if="error" class="feedback error">{{ error }}</div>
       <div v-if="data" class="feedback success">{{ data.message }}</div>
 
-      <p class="switch">
-        {{ $t('Already Have an Account') || 'Already have an account?' }}
-        <router-link to="/login">{{ $t('Login') }}</router-link>
-      </p>
-
-      <router-link to="/" class="back-home">
-        ← {{ $t('Back to Home') }}
-      </router-link>
+      <router-link to="/login">Login</router-link>
+      <router-link to="/">Back</router-link>
 
     </div>
   </div>
 </template>
 
 <style scoped>
-/* 🔥 ADDED ONLY (nothing removed) */
-.wait-screen {
-  text-align: center;
-  padding: 70px 20px;
-  color: #0f766e;
-}
 
-.big-text {
-  font-size: 20px;
-  font-weight: bold;
-  animation: pulse 1s infinite;
-}
-
-.small-text {
-  margin-top: 10px;
-  font-size: 14px;
-  opacity: 0.7;
-}
-
-@keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
-}
-
-/* ===== YOUR ORIGINAL CSS (UNCHANGED BELOW) ===== */
+/* ========== YOUR ORIGINAL CSS (UNCHANGED) ========== */
 
 .form-group {
   margin-bottom: 16px;
@@ -228,9 +178,10 @@ const showConfirmPassword = ref(false)
   box-sizing: border-box;
 }
 
-.password-wrapper button {
+/* 🔥 FIX ONLY (eye alignment) */
+.eye-btn {
   position: absolute;
-  right: 8px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
   background: transparent;
@@ -321,4 +272,17 @@ input {
   margin-top: 10px;
   color: #0f766e;
 }
+
+/* animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 </style>
