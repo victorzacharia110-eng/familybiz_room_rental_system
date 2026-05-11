@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import useRegister from '@/composables/guest/register'
 import { useI18n } from 'vue-i18n'
@@ -23,6 +23,14 @@ const validationError = ref('')
 
 // SINGLE SOURCE OF TRUTH
 const isBusy = loading
+
+// LIVE PASSWORD RULES
+const passwordChecks = computed(() => ({
+  length: form.value.password.length >= 6,
+  uppercase: /[A-Z]/.test(form.value.password),
+  lowercase: /[a-z]/.test(form.value.password),
+  number: /\d/.test(form.value.password),
+}))
 
 // SUBMIT
 const submit = async () => {
@@ -50,8 +58,7 @@ const submit = async () => {
 
   if (!passwordRegex.test(form.value.password)) {
     validationError.value =
-      'Password must be at least 6 characters and include uppercase, lowercase, and a number.'
-
+      'Password does not meet all requirements.'
     return
   }
 
@@ -203,18 +210,30 @@ const showConfirmPassword = ref(false)
 
           </div>
 
-          <!-- PASSWORD REQUIREMENTS -->
-          <small class="password-hint">
-            Password must contain:
-            <br />
-            • At least 6 characters
-            <br />
-            • One uppercase letter
-            <br />
-            • One lowercase letter
-            <br />
-            • One number
-          </small>
+          <!-- LIVE PASSWORD RULES -->
+          <div class="password-rules">
+
+            <p :class="{ valid: passwordChecks.length }">
+              {{ passwordChecks.length ? '✅' : '❌' }}
+              At least 6 characters
+            </p>
+
+            <p :class="{ valid: passwordChecks.uppercase }">
+              {{ passwordChecks.uppercase ? '✅' : '❌' }}
+              One uppercase letter
+            </p>
+
+            <p :class="{ valid: passwordChecks.lowercase }">
+              {{ passwordChecks.lowercase ? '✅' : '❌' }}
+              One lowercase letter
+            </p>
+
+            <p :class="{ valid: passwordChecks.number }">
+              {{ passwordChecks.number ? '✅' : '❌' }}
+              One number
+            </p>
+
+          </div>
 
         </div>
 
@@ -419,12 +438,26 @@ input {
   font-size: 14px;
 }
 
-.password-hint {
-  display: block;
-  margin-top: 6px;
-  color: #666;
-  font-size: 12px;
-  line-height: 1.5;
+/* LIVE PASSWORD RULES */
+
+.password-rules {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.password-rules p {
+  margin: 5px 0;
+  font-size: 13px;
+  color: #dc2626;
+  transition: 0.3s ease;
+}
+
+.password-rules p.valid {
+  color: #16a34a;
+  font-weight: 600;
 }
 
 /* BUTTON */
