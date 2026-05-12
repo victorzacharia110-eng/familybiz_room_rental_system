@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted  } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t, locale } = useI18n()
@@ -20,7 +20,6 @@ const handleAuthClick = () => {
 }
 
 // Corousel functionality
-import { ref, onMounted, onUnmounted } from 'vue'
 
 const currentFeature = ref(0)
 
