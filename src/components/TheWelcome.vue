@@ -18,6 +18,41 @@ const handleAuthClick = () => {
     isLoading.value = false
   }, 2000)
 }
+
+// Corousel functionality
+const currentFeature = ref(0)
+
+const features = [
+  {
+    icon: '📍',
+    title: 'homeFeatureLocationTitle',
+    desc: 'homeFeatureLocationDesc'
+  },
+  {
+    icon: '🔐',
+    title: 'homeFeatureSecurityTitle',
+    desc: 'homeFeatureSecurityDesc'
+  },
+  {
+    icon: '💧',
+    title: 'homeFeatureUtilitiesTitle',
+    desc: 'homeFeatureUtilitiesDesc'
+  },
+  {
+    icon: '💰',
+    title: 'homeFeaturePriceTitle',
+    desc: 'homeFeaturePriceDesc'
+  }
+]
+
+const nextFeature = () => {
+  currentFeature.value = (currentFeature.value + 1) % features.length
+}
+
+const prevFeature = () => {
+  currentFeature.value =
+    (currentFeature.value - 1 + features.length) % features.length
+}
 </script>
 
 <template>
@@ -76,32 +111,39 @@ const handleAuthClick = () => {
       </div>
     </section>
 
-    <!-- FEATURES -->
-    <section class="features">
-      <h2>{{ $t('homeFeaturesTitle') }}</h2>
+<!-- FEATURES CAROUSEL -->
+<section class="features">
+  <h2>{{ $t('homeFeaturesTitle') }}</h2>
 
-      <div class="feature-grid">
-        <div class="feature-card">
-          <h3>📍 {{ $t('homeFeatureLocationTitle') }}</h3>
-          <p>{{ $t('homeFeatureLocationDesc') }}</p>
-        </div>
+  <div class="carousel">
 
-        <div class="feature-card">
-          <h3>🔐 {{ $t('homeFeatureSecurityTitle') }}</h3>
-          <p>{{ $t('homeFeatureSecurityDesc') }}</p>
-        </div>
+    <button class="nav-btn" @click="prevFeature">‹</button>
 
-        <div class="feature-card">
-          <h3>💧 {{ $t('homeFeatureUtilitiesTitle') }}</h3>
-          <p>{{ $t('homeFeatureUtilitiesDesc') }}</p>
-        </div>
+    <div class="feature-card carousel-card">
+      <h3>
+        {{ features[currentFeature].icon }}
+        {{ $t(features[currentFeature].title) }}
+      </h3>
 
-        <div class="feature-card">
-          <h3>💰 {{ $t('homeFeaturePriceTitle') }}</h3>
-          <p>{{ $t('homeFeaturePriceDesc') }}</p>
-        </div>
-      </div>
-    </section>
+      <p>
+        {{ $t(features[currentFeature].desc) }}
+      </p>
+    </div>
+
+    <button class="nav-btn" @click="nextFeature">›</button>
+
+  </div>
+
+  <!-- DOT INDICATORS -->
+  <div class="dots">
+    <span
+      v-for="(f, i) in features"
+      :key="i"
+      :class="{ active: i === currentFeature }"
+      @click="currentFeature = i"
+    ></span>
+  </div>
+</section>
 
     <!-- LOCATION -->
     <section class="location-section">
@@ -160,6 +202,58 @@ const handleAuthClick = () => {
 </template>
 
 <style scoped>
+
+.carousel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.carousel-card {
+  width: 300px;
+  min-height: 160px;
+  text-align: center;
+  transition: 0.4s ease;
+}
+
+.nav-btn {
+  background: #0f766e;
+  color: white;
+  border: none;
+  font-size: 24px;
+  padding: 10px 15px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.nav-btn:hover {
+  transform: scale(1.1);
+}
+
+.dots {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.dots span {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin: 5px;
+  background: #ccc;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.dots span.active {
+  background: #0f766e;
+  transform: scale(1.3);
+}
+
+
 /* MAP */
 .map-container {
   width: 100%;
