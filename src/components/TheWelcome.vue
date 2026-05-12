@@ -213,14 +213,15 @@ onUnmounted(() => clearInterval(interval))
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 15px;
+  gap: 10px;
   margin-top: 30px;
+  width: 100%;
 }
 
-/* VIEWPORT (important) */
+/* RESPONSIVE VIEWPORT */
 .carousel-viewport {
   width: 100%;
-  max-width: 700px;
+  max-width: 100%;
   overflow: hidden;
 }
 
@@ -231,26 +232,31 @@ onUnmounted(() => clearInterval(interval))
   will-change: transform;
 }
 
-/* CARD */
+/* CARD (RESPONSIVE CORE FIX) */
 .feature-card {
   flex: 0 0 100%;
+  box-sizing: border-box;
   background: white;
   padding: 25px;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.08);
   text-align: center;
+
+  /* KEY FIX */
+  min-width: 100%;
 }
 
-/* NAV */
+/* NAV BUTTONS */
 .nav-btn {
   background: #0f766e;
   color: white;
   border: none;
-  font-size: 24px;
-  padding: 10px 15px;
+  font-size: 22px;
+  padding: 10px 14px;
   border-radius: 50%;
   cursor: pointer;
   transition: 0.3s;
+  flex-shrink: 0;
 }
 
 .nav-btn:hover {
@@ -265,13 +271,12 @@ onUnmounted(() => clearInterval(interval))
 
 .dots span {
   display: inline-block;
-  width: 10px;
-  height: 10px;
-  margin: 5px;
+  width: 9px;
+  height: 9px;
+  margin: 4px;
   background: #ccc;
   border-radius: 50%;
   cursor: pointer;
-  transition: 0.3s;
 }
 
 .dots span.active {
@@ -553,17 +558,34 @@ onUnmounted(() => clearInterval(interval))
     font-size: 13px;
   }
 
-    .carousel-viewport {
-    max-width: 90%;
+}
+
+
+@media (max-width: 768px) {
+  .carousel {
+    gap: 5px;
   }
 
   .feature-card {
     padding: 18px;
+    font-size: 14px;
   }
 
   .nav-btn {
-    font-size: 20px;
-    padding: 8px 12px;
+    font-size: 18px;
+    padding: 8px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .feature-card {
+    padding: 15px;
+    border-radius: 10px;
+  }
+
+  .nav-btn {
+    font-size: 16px;
+    padding: 6px 8px;
   }
 }
 
