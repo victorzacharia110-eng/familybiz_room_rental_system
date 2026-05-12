@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted  } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t, locale } = useI18n()
@@ -19,31 +19,14 @@ const handleAuthClick = () => {
   }, 2000)
 }
 
-// Corousel functionality
-
+/* FEATURES */
 const currentFeature = ref(0)
 
 const features = [
-  {
-    icon: '📍',
-    title: 'homeFeatureLocationTitle',
-    desc: 'homeFeatureLocationDesc'
-  },
-  {
-    icon: '🔐',
-    title: 'homeFeatureSecurityTitle',
-    desc: 'homeFeatureSecurityDesc'
-  },
-  {
-    icon: '💧',
-    title: 'homeFeatureUtilitiesTitle',
-    desc: 'homeFeatureUtilitiesDesc'
-  },
-  {
-    icon: '💰',
-    title: 'homeFeaturePriceTitle',
-    desc: 'homeFeaturePriceDesc'
-  }
+  { icon: '📍', title: 'homeFeatureLocationTitle', desc: 'homeFeatureLocationDesc' },
+  { icon: '🔐', title: 'homeFeatureSecurityTitle', desc: 'homeFeatureSecurityDesc' },
+  { icon: '💧', title: 'homeFeatureUtilitiesTitle', desc: 'homeFeatureUtilitiesDesc' },
+  { icon: '💰', title: 'homeFeaturePriceTitle', desc: 'homeFeaturePriceDesc' },
 ]
 
 const nextFeature = () => {
@@ -51,22 +34,17 @@ const nextFeature = () => {
 }
 
 const prevFeature = () => {
-  currentFeature.value =
-    (currentFeature.value - 1 + features.length) % features.length
+  currentFeature.value = (currentFeature.value - 1 + features.length) % features.length
 }
 
 /* AUTO PLAY */
 let interval = null
 
 onMounted(() => {
-  interval = setInterval(() => {
-    nextFeature()
-  }, 3000)
+  interval = setInterval(nextFeature, 3000)
 })
 
-onUnmounted(() => {
-  clearInterval(interval)
-})
+onUnmounted(() => clearInterval(interval))
 </script>
 
 <template>
@@ -126,41 +104,39 @@ onUnmounted(() => {
     </section>
 
 <!-- FEATURES CAROUSEL -->
-<!-- FEATURES CAROUSEL (2-CARD PEEK) -->
 <section class="features">
   <h2>{{ $t('homeFeaturesTitle') }}</h2>
 
-  <div class="carousel-wrapper">
+  <div class="carousel">
 
-    <!-- LEFT ARROW -->
+    <!-- LEFT -->
     <button class="nav-btn" @click="prevFeature">‹</button>
 
-    <!-- TRACK -->
-    <div class="carousel-track">
+    <!-- VIEWPORT -->
+    <div class="carousel-viewport">
 
       <div
-        v-for="(feature, index) in features"
-        :key="index"
-        class="feature-card"
-        :class="{
-          active: index === currentFeature,
-          left: index === (currentFeature - 1 + features.length) % features.length,
-          right: index === (currentFeature + 1) % features.length
-        }"
+        class="carousel-track"
+        :style="{ transform: `translateX(-${currentFeature * 100}%)` }"
       >
-        <h3>
-          {{ feature.icon }}
-          {{ $t(feature.title) }}
-        </h3>
 
-        <p>
-          {{ $t(feature.desc) }}
-        </p>
+        <div
+          v-for="(feature, i) in features"
+          :key="i"
+          class="feature-card"
+        >
+          <h3>
+            {{ feature.icon }}
+            {{ $t(feature.title) }}
+          </h3>
+          <p>{{ $t(feature.desc) }}</p>
+        </div>
+
       </div>
 
     </div>
 
-    <!-- RIGHT ARROW -->
+    <!-- RIGHT -->
     <button class="nav-btn" @click="nextFeature">›</button>
 
   </div>
@@ -233,8 +209,7 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-
-.carousel-wrapper {
+.carousel {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -242,53 +217,31 @@ onUnmounted(() => {
   margin-top: 30px;
 }
 
-/* TRACK holds all cards */
-.carousel-track {
-  position: relative;
-  width: 600px;
-  height: 180px;
+/* VIEWPORT (important) */
+.carousel-viewport {
+  width: 100%;
+  max-width: 700px;
+  overflow: hidden;
 }
 
-/* BASE CARD STYLE */
+/* TRACK */
+.carousel-track {
+  display: flex;
+  transition: transform 0.6s ease-in-out;
+  will-change: transform;
+}
+
+/* CARD */
 .feature-card {
-  position: absolute;
-  top: 0;
-  width: 280px;
-  min-height: 160px;
+  flex: 0 0 100%;
   background: white;
   padding: 25px;
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-  transition: all 0.6s ease;
-  opacity: 0;
-  transform: scale(0.85);
+  text-align: center;
 }
 
-/* CENTER (ACTIVE) */
-.feature-card.active {
-  left: 160px;
-  opacity: 1;
-  transform: scale(1);
-  z-index: 3;
-}
-
-/* LEFT PEEK */
-.feature-card.left {
-  left: 0;
-  opacity: 0.5;
-  transform: scale(0.85) translateX(-20px);
-  z-index: 2;
-}
-
-/* RIGHT PEEK */
-.feature-card.right {
-  left: 320px;
-  opacity: 0.5;
-  transform: scale(0.85) translateX(20px);
-  z-index: 2;
-}
-
-/* NAV BUTTONS */
+/* NAV */
 .nav-btn {
   background: #0f766e;
   color: white;
@@ -327,13 +280,14 @@ onUnmounted(() => {
 }
 
 
+
 /* MAP */
 .map-container {
   width: 100%;
   margin-top: 30px;
   border-radius: 15px;
   overflow: hidden;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
 }
 
 .map-container iframe {
@@ -597,6 +551,19 @@ onUnmounted(() => {
 
   .location-highlight {
     font-size: 13px;
+  }
+
+    .carousel-viewport {
+    max-width: 90%;
+  }
+
+  .feature-card {
+    padding: 18px;
+  }
+
+  .nav-btn {
+    font-size: 20px;
+    padding: 8px 12px;
   }
 }
 
