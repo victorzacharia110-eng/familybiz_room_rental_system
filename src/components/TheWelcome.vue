@@ -126,31 +126,39 @@ onUnmounted(() => {
     </section>
 
 <!-- FEATURES CAROUSEL -->
+<!-- FEATURES CAROUSEL (2-CARD PEEK) -->
 <section class="features">
   <h2>{{ $t('homeFeaturesTitle') }}</h2>
 
-  <div class="carousel">
+  <div class="carousel-wrapper">
 
     <!-- LEFT ARROW -->
     <button class="nav-btn" @click="prevFeature">‹</button>
 
+    <!-- TRACK -->
+    <div class="carousel-track">
 
-<!-- CARD -->
-<div class="feature-wrapper">
-  <div
-    class="feature-card animate-slide"
-    :key="currentFeature"
-  >
-    <h3>
-      {{ features[currentFeature].icon }}
-      {{ $t(features[currentFeature].title) }}
-    </h3>
+      <div
+        v-for="(feature, index) in features"
+        :key="index"
+        class="feature-card"
+        :class="{
+          active: index === currentFeature,
+          left: index === (currentFeature - 1 + features.length) % features.length,
+          right: index === (currentFeature + 1) % features.length
+        }"
+      >
+        <h3>
+          {{ feature.icon }}
+          {{ $t(feature.title) }}
+        </h3>
 
-    <p>
-      {{ $t(features[currentFeature].desc) }}
-    </p>
-  </div>
-</div>
+        <p>
+          {{ $t(feature.desc) }}
+        </p>
+      </div>
+
+    </div>
 
     <!-- RIGHT ARROW -->
     <button class="nav-btn" @click="nextFeature">›</button>
@@ -226,34 +234,7 @@ onUnmounted(() => {
 
 <style scoped>
 
-.feature-wrapper {
-  width: 320px;
-  overflow: hidden;
-}
-
-.animate-slide {
-  animation: slideFade 0.5s ease-in-out;
-}
-
-
-
-/* keep arrows nice */
-.nav-btn {
-  background: #0f766e;
-  color: white;
-  border: none;
-  font-size: 24px;
-  padding: 10px 15px;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.nav-btn:hover {
-  transform: scale(1.1);
-}
-
-.carousel {
+.carousel-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -261,13 +242,53 @@ onUnmounted(() => {
   margin-top: 30px;
 }
 
-.carousel-card {
-  width: 300px;
-  min-height: 160px;
-  text-align: center;
-  transition: 0.4s ease;
+/* TRACK holds all cards */
+.carousel-track {
+  position: relative;
+  width: 600px;
+  height: 180px;
 }
 
+/* BASE CARD STYLE */
+.feature-card {
+  position: absolute;
+  top: 0;
+  width: 280px;
+  min-height: 160px;
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  transition: all 0.6s ease;
+  opacity: 0;
+  transform: scale(0.85);
+}
+
+/* CENTER (ACTIVE) */
+.feature-card.active {
+  left: 160px;
+  opacity: 1;
+  transform: scale(1);
+  z-index: 3;
+}
+
+/* LEFT PEEK */
+.feature-card.left {
+  left: 0;
+  opacity: 0.5;
+  transform: scale(0.85) translateX(-20px);
+  z-index: 2;
+}
+
+/* RIGHT PEEK */
+.feature-card.right {
+  left: 320px;
+  opacity: 0.5;
+  transform: scale(0.85) translateX(20px);
+  z-index: 2;
+}
+
+/* NAV BUTTONS */
 .nav-btn {
   background: #0f766e;
   color: white;
@@ -283,6 +304,7 @@ onUnmounted(() => {
   transform: scale(1.1);
 }
 
+/* DOTS */
 .dots {
   margin-top: 15px;
   text-align: center;
@@ -296,6 +318,7 @@ onUnmounted(() => {
   background: #ccc;
   border-radius: 50%;
   cursor: pointer;
+  transition: 0.3s;
 }
 
 .dots span.active {
