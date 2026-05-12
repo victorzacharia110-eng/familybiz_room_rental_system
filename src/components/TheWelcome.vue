@@ -578,13 +578,13 @@ onUnmounted(() => {
 }
 
 @keyframes slideFade {
-  from {
+  0% {
     opacity: 0;
-    transform: translateX(40px) scale(0.98);
+    transform: translateX(80px);
   }
-  to {
+  100% {
     opacity: 1;
-    transform: translateX(0) scale(1);
+    transform: translateX(0);
   }
 }
 </style>
