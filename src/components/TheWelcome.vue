@@ -134,19 +134,23 @@ onUnmounted(() => {
     <!-- LEFT ARROW -->
     <button class="nav-btn" @click="prevFeature">‹</button>
 
-    <!-- CARD -->
-    <div class="feature-wrapper">
-      <div class="feature-card animate-slide">
-        <h3>
-          {{ features[currentFeature].icon }}
-          {{ $t(features[currentFeature].title) }}
-        </h3>
 
-        <p>
-          {{ $t(features[currentFeature].desc) }}
-        </p>
-      </div>
-    </div>
+<!-- CARD -->
+<div class="feature-wrapper">
+  <div
+    class="feature-card animate-slide"
+    :key="currentFeature"
+  >
+    <h3>
+      {{ features[currentFeature].icon }}
+      {{ $t(features[currentFeature].title) }}
+    </h3>
+
+    <p>
+      {{ $t(features[currentFeature].desc) }}
+    </p>
+  </div>
+</div>
 
     <!-- RIGHT ARROW -->
     <button class="nav-btn" @click="nextFeature">›</button>
