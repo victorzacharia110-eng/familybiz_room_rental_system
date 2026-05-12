@@ -231,16 +231,7 @@ onUnmounted(() => {
   animation: slideFade 0.5s ease-in-out;
 }
 
-@keyframes slideFade {
-  from {
-    opacity: 0;
-    transform: translateX(40px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-}
+
 
 /* keep arrows nice */
 .nav-btn {
@@ -579,6 +570,17 @@ onUnmounted(() => {
 
   .location-highlight {
     font-size: 13px;
+  }
+}
+
+@keyframes slideFade {
+  from {
+    opacity: 0;
+    transform: translateX(40px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
   }
 }
 </style>
