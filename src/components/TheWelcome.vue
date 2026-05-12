@@ -107,11 +107,27 @@ const handleAuthClick = () => {
     <section class="location-section">
       <div class="location-content">
         <h2>{{ $t('homeLocationTitle') }}</h2>
+
         <p>{{ $t('homeLocationDesc') }}</p>
 
         <p class="highlight">
           {{ $t('homeLocationHighlight') }}
         </p>
+
+        <!-- MAP -->
+        <div class="map-container">
+          <iframe
+            src="https://maps.google.com/maps?q=-6.9139299,39.1565626&z=17&output=embed"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+          ></iframe>
+
+          <div class="location-highlight">
+            📍 Located opposite MASJD IBRAHIM MAJOHE, near Soko la Bwera, Majohe Bwera, Gongo la
+            Mboto, Dar es Salaam.
+          </div>
+        </div>
       </div>
     </section>
 
@@ -138,14 +154,37 @@ const handleAuthClick = () => {
         </div>
       </div>
 
-      <div class="footer-bottom">
-        © {{ new Date().getFullYear() }} Majohe Bwera Rooms
-      </div>
+      <div class="footer-bottom">© {{ new Date().getFullYear() }} Majohe Bwera Rooms</div>
     </footer>
   </div>
 </template>
 
 <style scoped>
+/* MAP */
+.map-container {
+  width: 100%;
+  margin-top: 30px;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+.map-container iframe {
+  width: 100%;
+  height: 350px;
+  border: 0;
+  display: block;
+}
+
+.location-highlight {
+  padding: 12px 15px;
+  background: rgba(20, 184, 166, 0.12);
+  border-left: 4px solid #14b8a6;
+  font-weight: 600;
+  font-size: 14px;
+  color: #0f172a;
+}
+
 /* GENERAL */
 .home-container {
   font-family: Arial, Helvetica, sans-serif;
@@ -306,36 +345,72 @@ const handleAuthClick = () => {
 
 /* ANIMATIONS */
 @keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.6); }
-  70% { box-shadow: 0 0 0 10px rgba(255,255,255,0); }
-  100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { transform: translateY(40px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes zoomIn {
-  from { transform: scale(0.9); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes gradientMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
-.fade-in { animation: fadeIn 1s ease-in-out; }
-.slide-up { animation: slideUp 1.2s ease; }
-.slide-up-delay { animation: slideUp 1.6s ease; }
-.zoom-in { animation: zoomIn 1.8s ease; }
+.fade-in {
+  animation: fadeIn 1s ease-in-out;
+}
+.slide-up {
+  animation: slideUp 1.2s ease;
+}
+.slide-up-delay {
+  animation: slideUp 1.6s ease;
+}
+.zoom-in {
+  animation: zoomIn 1.8s ease;
+}
 
 /* RESPONSIVE */
 @media (max-width: 600px) {
@@ -347,6 +422,14 @@ const handleAuthClick = () => {
     display: block;
     width: 80%;
     margin: 10px auto;
+  }
+
+  .map-container iframe {
+    height: 250px;
+  }
+
+  .location-highlight {
+    font-size: 13px;
   }
 }
 </style>
