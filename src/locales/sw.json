@@ -183,5 +183,10 @@
   "year": "Mwaka",
   "Make Payment": "Fanya Malipo",
 "method1ApprovalWarning": "TAHADHARI!!! Baada ya kufanya malipo, lazima uwasiliane na mwenye nyumba kwa uthibitisho na idhini.",
-  "waitMoment": "Tafadhali subiri kidogo..."
+  "waitMoment": "Tafadhali subiri kidogo...",
+    "locationDescription": "Iko mkabala na MASJD IBRAHIM MAJOHE, karibu na Soko la Bwera, Majohe Bwera, Gongo la Mboto, Dar es Salaam.",
+
+  "howToGetThere": "Jinsi ya kufika: Kutoka Gongo la Mboto elekea Majohe Bwera na fuata maelekezo kuelekea eneo la msikiti.",
+
+  "transportInstructions": "Kutoka Gongo la Mboto panda bodaboda au bajaj hadi stendi ya Majohe Bwera. Ukifika uliza njia ya kwenda msikitini, kisha uliza vyumba vya kupanga vilivyo karibu."
 }

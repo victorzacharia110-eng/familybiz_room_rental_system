@@ -140,19 +140,19 @@
   "userProfile": "User Profile",
   "ruleTitlePlaceholder": "Write a title of a rule...",
   "ruleDescriptionPlaceholder": "Write a rule description...",
-  "updatePhone" : "Update Phone Number",
+  "updatePhone": "Update Phone Number",
   "viewRemark": "View Remarks",
   "resetPassword": "Reset Password",
   "resetPasswordTitle": "Reset Password",
   "resetPasswordDescription": "Enter your email address and we'll send you a link to reset your password.",
   "sendResetLink": "Send Reset Link",
   "resetLinkSent": "Password reset link has been sent to your email.",
-  "Select Room" : "Select Room",
-   "paymentwarning": "After completing your payment, please notify your landlord for confirmation or wait for approval.",
-     "method1Title": "Method 1 - Payment Methods",
+  "Select Room": "Select Room",
+  "paymentwarning": "After completing your payment, please notify your landlord for confirmation or wait for approval.",
+  "method1Title": "Method 1 - Payment Methods",
   "method2Title": "Method 2 - Make Payment",
   "method1Warning": "Method 1 shows the available payment channels provided by the landlord. Use these numbers to send your rent payment manually.",
-"method2Warning": "Method 2 is a direct payment form. Submit your details to process rent payment automatically and update your account immediately.",
+  "method2Warning": "Method 2 is a direct payment form. Submit your details to process rent payment automatically and update your account immediately.",
   "method": "Method",
   "selectRoom": "Select Room",
   "amount": "Amount",
@@ -162,6 +162,10 @@
   "dueDate": "Due Date",
   "makePayment": "Make Payment",
   "method1ApprovalWarning": "WARNING!!! You must communicate with your landlord after making payment for confirmation and approval.",
-    "waitMoment": "Please wait a moment..."
-}
+  "waitMoment": "Please wait a moment...",
+  "locationDescription": "Located opposite MASJD IBRAHIM MAJOHE, near Soko la Bwera, Majohe Bwera, Gongo la Mboto, Dar es Salaam.",
 
+  "howToGetThere": "How to get there: From Gongo la Mboto, head towards Majohe Bwera and follow directions to the mosque area.",
+
+  "transportInstructions": "From Gongo la Mboto, take a motorcycle (bodaboda) or bajaj to Majohe Bwera stand. Once you arrive, ask for directions to the mosque, then request nearby renting rooms."
+}

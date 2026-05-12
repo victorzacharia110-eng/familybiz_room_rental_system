@@ -172,10 +172,17 @@ onUnmounted(() => clearInterval(interval))
             referrerpolicy="no-referrer-when-downgrade"
           ></iframe>
 
-          <div class="location-highlight">
-            📍 Located opposite MASJD IBRAHIM MAJOHE, near Soko la Bwera, Majohe Bwera, Gongo la
-            Mboto, Dar es Salaam.
-          </div>
+<div class="location-highlight">
+  📍 {{ $t('locationDescription') }}
+
+  <br /><br />
+
+  🧭 {{ $t('howToGetThere') }}
+
+  <br /><br />
+
+  🚖 {{ $t('transportInstructions') }}
+</div>
         </div>
       </div>
     </section>
