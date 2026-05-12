@@ -20,6 +20,8 @@ const handleAuthClick = () => {
 }
 
 // Corousel functionality
+import { ref, onMounted, onUnmounted } from 'vue'
+
 const currentFeature = ref(0)
 
 const features = [
@@ -53,6 +55,19 @@ const prevFeature = () => {
   currentFeature.value =
     (currentFeature.value - 1 + features.length) % features.length
 }
+
+/* AUTO PLAY */
+let interval = null
+
+onMounted(() => {
+  interval = setInterval(() => {
+    nextFeature()
+  }, 3000)
+})
+
+onUnmounted(() => {
+  clearInterval(interval)
+})
 </script>
 
 <template>
@@ -117,24 +132,29 @@ const prevFeature = () => {
 
   <div class="carousel">
 
+    <!-- LEFT ARROW -->
     <button class="nav-btn" @click="prevFeature">‹</button>
 
-    <div class="feature-card carousel-card">
-      <h3>
-        {{ features[currentFeature].icon }}
-        {{ $t(features[currentFeature].title) }}
-      </h3>
+    <!-- CARD -->
+    <div class="feature-wrapper">
+      <div class="feature-card animate-slide">
+        <h3>
+          {{ features[currentFeature].icon }}
+          {{ $t(features[currentFeature].title) }}
+        </h3>
 
-      <p>
-        {{ $t(features[currentFeature].desc) }}
-      </p>
+        <p>
+          {{ $t(features[currentFeature].desc) }}
+        </p>
+      </div>
     </div>
 
+    <!-- RIGHT ARROW -->
     <button class="nav-btn" @click="nextFeature">›</button>
 
   </div>
 
-  <!-- DOT INDICATORS -->
+  <!-- DOTS -->
   <div class="dots">
     <span
       v-for="(f, i) in features"
@@ -202,6 +222,42 @@ const prevFeature = () => {
 </template>
 
 <style scoped>
+
+.feature-wrapper {
+  width: 320px;
+  overflow: hidden;
+}
+
+.animate-slide {
+  animation: slideFade 0.5s ease-in-out;
+}
+
+@keyframes slideFade {
+  from {
+    opacity: 0;
+    transform: translateX(40px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* keep arrows nice */
+.nav-btn {
+  background: #0f766e;
+  color: white;
+  border: none;
+  font-size: 24px;
+  padding: 10px 15px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.nav-btn:hover {
+  transform: scale(1.1);
+}
 
 .carousel {
   display: flex;
