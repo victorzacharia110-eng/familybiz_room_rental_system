@@ -1,5 +1,6 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, reactive } from 'vue' // ✅ MODIFIED: added reactive
+
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useI18n } from 'vue-i18n'
@@ -14,11 +15,48 @@ const form = ref({
 
 const isLoading = ref(false)
 
+// ✅ ADDED: validation errors
+const errors = reactive({
+  email: '',
+  password: ''
+})
+
+// ✅ ADDED: email validator
+function validateEmail() {
+  if (!form.value.email) {
+    errors.email = 'Email is required.'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
+    errors.email = 'Enter a valid email address.'
+  } else {
+    errors.email = ''
+  }
+}
+
+// ✅ ADDED: password validator
+function validatePassword() {
+  if (!form.value.password) {
+    errors.password = 'Password is required.'
+  } else if (form.value.password.length < 6) {
+    errors.password = 'Password must be at least 6 characters.'
+  } else {
+    errors.password = ''
+  }
+}
+
+// ✅ ADDED: clear error on input
+function clearError(field) {
+  errors[field] = ''
+}
+
 const submit = async () => {
+  // ✅ ADDED: run validation before anything
+  validateEmail()
+  validatePassword()
+  if (errors.email || errors.password) return
+
+  // everything below is untouched ⬇️
   console.log('Form payload:', form.value)
-
   if (isLoading.value || auth.loading) return
-
   isLoading.value = true
 
   const user = await auth.login(form.value)
@@ -42,7 +80,6 @@ const submit = async () => {
 // -------------------- LANGUAGE TOGGLE --------------------
 const { locale } = useI18n()
 const currentLocale = ref(locale.value)
-
 const setLanguage = (lang) => {
   locale.value = lang
   currentLocale.value = lang
@@ -54,7 +91,6 @@ const showPassword = ref(false)
 
 <template>
   <div class="auth-page">
-
     <!-- 🔥 OVERLAY LOADER (ADDED ONLY) -->
     <div v-if="isLoading || auth.loading" class="overlay">
       <div class="loader-box">
@@ -71,7 +107,6 @@ const showPassword = ref(false)
     </div>
 
     <div class="auth-card">
-
       <!-- Language Toggle -->
       <div class="language-toggle">
         <button :class="{ active: currentLocale === 'en' }" @click="setLanguage('en')">
@@ -87,39 +122,51 @@ const showPassword = ref(false)
       <p class="subtitle">{{ $t('Login to continue') }}</p>
 
       <form @submit.prevent="submit">
-        <div class="form-group">
+        <!-- Email -->
+        <div class="form-group" :class="{ 'has-error': errors.email }">
           <label>{{ $t('Email') }}</label>
-          <input v-model="form.email" type="email" :placeholder="$t('Email')" required />
+          <input
+            v-model="form.email"
+            type="email"
+            :placeholder="$t('Email')"
+            @blur="validateEmail"
+            @input="clearError('email')"
+          />
+          <transition name="shake-fade">
+            <span v-if="errors.email" class="error-msg">⚠️ {{ errors.email }}</span>
+          </transition>
         </div>
 
-        <div class="form-group">
+        <!-- Password -->
+        <div class="form-group" :class="{ 'has-error': errors.password }">
           <label>{{ $t('Password') }}</label>
-
           <div class="password-wrapper">
             <input
               v-model="form.password"
               :type="showPassword ? 'text' : 'password'"
               :placeholder="$t('Password')"
-              required
+              @blur="validatePassword"
+              @input="clearError('password')"
             />
-
             <button type="button" class="toggle-eye" @click="showPassword = !showPassword">
               {{ showPassword ? '👁️' : '🙈' }}
             </button>
           </div>
+          <transition name="shake-fade">
+            <span v-if="errors.password" class="error-msg">⚠️ {{ errors.password }}</span>
+          </transition>
         </div>
 
+        <!-- Forgot Password -->
         <div class="form-options">
           <router-link to="/forgot-password">
             {{ $t('Forgot Password') || 'Forgot Password?' }}
           </router-link>
         </div>
 
-        <button class="btn-primary" :disabled="auth.loading || isLoading">
-          {{ (auth.loading || isLoading)
-            ? ($t('Logging in...') || 'Logging in...')
-            : $t('Login')
-          }}
+        <!-- Submit -->
+        <button class="btn-primary" :disabled="auth.loading || isLoading" @click="validateAll">
+          {{ auth.loading || isLoading ? $t('Logging in...') || 'Logging in...' : $t('Login') }}
         </button>
       </form>
 
@@ -128,15 +175,42 @@ const showPassword = ref(false)
         <router-link to="/register">{{ $t('Register') }}</router-link>
       </p>
 
-      <router-link to="/" class="back-home">
-        ← {{ $t('Back to Home') }}
-      </router-link>
-
+      <router-link to="/" class="back-home"> ← {{ $t('Back to Home') }} </router-link>
     </div>
   </div>
 </template>
 
 <style scoped>
+
+/* Error input border */
+.form-group.has-error input {
+  border-color: #e74c3c;
+  background-color: #fff5f5;
+}
+
+/* Error message */
+.error-msg {
+  display: block;
+  color: #e74c3c;
+  font-size: 0.78rem;
+  margin-top: 4px;
+}
+
+/* Shake + fade animation */
+.shake-fade-enter-active {
+  animation: shake 0.4s ease;
+}
+
+.shake-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.shake-fade-leave-to {
+  opacity: 0;
+}
+
+
+
 /* ================= YOUR ORIGINAL STYLES (UNCHANGED) ================= */
 
 .password-wrapper {
@@ -277,14 +351,26 @@ input:focus {
 }
 
 @keyframes gradientMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ================= 🔥 NEW FEATURE ADDED ================= */
@@ -308,7 +394,7 @@ input:focus {
 .spinner {
   width: 50px;
   height: 50px;
-  border: 5px solid rgba(255,255,255,0.3);
+  border: 5px solid rgba(255, 255, 255, 0.3);
   border-top: 5px solid #0f766e;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -328,13 +414,32 @@ input:focus {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes shake {
+  0%   { transform: translateX(0); opacity: 0; }
+  20%  { transform: translateX(-6px); opacity: 1; }
+  40%  { transform: translateX(6px); }
+  60%  { transform: translateX(-4px); }
+  80%  { transform: translateX(4px); }
+  100% { transform: translateX(0); }
 }
 </style>
