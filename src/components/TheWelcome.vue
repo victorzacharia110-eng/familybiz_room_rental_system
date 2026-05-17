@@ -103,54 +103,44 @@ onUnmounted(() => clearInterval(interval))
       </div>
     </section>
 
-<!-- FEATURES CAROUSEL -->
-<section class="features">
-  <h2>{{ $t('homeFeaturesTitle') }}</h2>
+    <!-- FEATURES CAROUSEL -->
+    <section class="features">
+      <h2>{{ $t('homeFeaturesTitle') }}</h2>
 
-  <div class="carousel">
+      <div class="carousel">
+        <!-- LEFT -->
+        <button class="nav-btn" @click="prevFeature">‹</button>
 
-    <!-- LEFT -->
-    <button class="nav-btn" @click="prevFeature">‹</button>
-
-    <!-- VIEWPORT -->
-    <div class="carousel-viewport">
-
-      <div
-        class="carousel-track"
-        :style="{ transform: `translateX(-${currentFeature * 100}%)` }"
-      >
-
-        <div
-          v-for="(feature, i) in features"
-          :key="i"
-          class="feature-card"
-        >
-          <h3>
-            {{ feature.icon }}
-            {{ $t(feature.title) }}
-          </h3>
-          <p>{{ $t(feature.desc) }}</p>
+        <!-- VIEWPORT -->
+        <div class="carousel-viewport">
+          <div
+            class="carousel-track"
+            :style="{ transform: `translateX(-${currentFeature * 100}%)` }"
+          >
+            <div v-for="(feature, i) in features" :key="i" class="feature-card">
+              <h3>
+                {{ feature.icon }}
+                {{ $t(feature.title) }}
+              </h3>
+              <p>{{ $t(feature.desc) }}</p>
+            </div>
+          </div>
         </div>
 
+        <!-- RIGHT -->
+        <button class="nav-btn" @click="nextFeature">›</button>
       </div>
 
-    </div>
-
-    <!-- RIGHT -->
-    <button class="nav-btn" @click="nextFeature">›</button>
-
-  </div>
-
-  <!-- DOTS -->
-  <div class="dots">
-    <span
-      v-for="(f, i) in features"
-      :key="i"
-      :class="{ active: i === currentFeature }"
-      @click="currentFeature = i"
-    ></span>
-  </div>
-</section>
+      <!-- DOTS -->
+      <div class="dots">
+        <span
+          v-for="(f, i) in features"
+          :key="i"
+          :class="{ active: i === currentFeature }"
+          @click="currentFeature = i"
+        ></span>
+      </div>
+    </section>
 
     <!-- LOCATION -->
     <section class="location-section">
@@ -172,17 +162,17 @@ onUnmounted(() => clearInterval(interval))
             referrerpolicy="no-referrer-when-downgrade"
           ></iframe>
 
-<div class="location-highlight">
-  📍 {{ $t('locationDescription') }}
+          <div class="location-highlight">
+            📍 {{ $t('locationDescription') }}
 
-  <br /><br />
+            <br /><br />
 
-  🧭 {{ $t('howToGetThere') }}
+            🧭 {{ $t('howToGetThere') }}
 
-  <br /><br />
+            <br /><br />
 
-  🚖 {{ $t('transportInstructions') }}
-</div>
+            🚖 {{ $t('transportInstructions') }}
+          </div>
         </div>
       </div>
     </section>
@@ -246,7 +236,7 @@ onUnmounted(() => clearInterval(interval))
   background: white;
   padding: 25px;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
   text-align: center;
 
   /* KEY FIX */
@@ -290,8 +280,6 @@ onUnmounted(() => clearInterval(interval))
   background: #0f766e;
   transform: scale(1.3);
 }
-
-
 
 /* MAP */
 .map-container {
@@ -564,9 +552,7 @@ onUnmounted(() => clearInterval(interval))
   .location-highlight {
     font-size: 13px;
   }
-
 }
-
 
 @media (max-width: 768px) {
   .carousel {
