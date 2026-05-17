@@ -886,32 +886,22 @@ const hasNewAnnouncements = computed(() => {
 
           <!-- Table -->
           <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>{{ $t('Title') }}</th>
-                  <th>{{ $t('Message') }}</th>
-                  <th>{{ $t('Date') }}</th>
-                </tr>
-              </thead>
+            <div v-if="!announcementStore.announcements.length" class="no-data">
+              🚫 No Announcements
+            </div>
 
-              <tbody>
-                <tr
-                  v-for="(announcement, index) in announcementStore.announcements"
-                  :key="announcement.id"
-                >
-                  <td>{{ index + 1 }}</td>
-                  <td>{{ announcement.title }}</td>
-                  <td>{{ announcement.message }}</td>
-                  <td>{{ formatDate(announcement.created_at) }}</td>
-                </tr>
-
-                <tr v-if="!announcementStore.announcements.length">
-                  <td colspan="4" class="no-data">🚫 No Announcements</td>
-                </tr>
-              </tbody>
-            </table>
+            <div
+              v-for="(announcement, index) in announcementStore.announcements"
+              :key="announcement.id"
+              class="message-card"
+            >
+              <div class="message-header">
+                <span class="message-index">#{{ index + 1 }}</span>
+                <span class="message-date">{{ formatDate(announcement.created_at) }}</span>
+              </div>
+              <div class="message-title">{{ announcement.title }}</div>
+              <div class="message-body">{{ announcement.message }}</div>
+            </div>
           </div>
         </div>
       </div>
@@ -967,6 +957,42 @@ const hasNewAnnouncements = computed(() => {
 </template>
 
 <style scoped>
+
+.message-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #999;
+  margin-bottom: 6px;
+}
+
+.message-title {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.message-body {
+  font-size: 0.92rem;
+  color: #444;
+  line-height: 1.5;
+}
+
+.no-data {
+  text-align: center;
+  color: #aaa;
+  padding: 20px;
+}
+
 .payment-alert {
   background-color: #fff3cd;
   color: #856404;
@@ -1543,7 +1569,7 @@ td {
     margin-left: 90%;
   }
 
-    .modal {
+  .modal {
     width: 95%;
     padding: 15px;
     max-height: 90vh;
