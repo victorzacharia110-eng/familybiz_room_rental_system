@@ -118,6 +118,13 @@ const showPassword = ref(false)
       <p class="subtitle">{{ $t('Login to continue') }}</p>
 
       <form @submit.prevent="submit">
+        <!-- ✅ ADDED: backend error message -->
+        <transition name="shake-fade">
+          <div v-if="errors.general" class="error-alert">
+            <span class="error-alert-icon">⚠️</span>
+            <span class="error-alert-text">{{ errors.general }}</span>
+          </div>
+        </transition>
         <!-- Email -->
         <div class="form-group" :class="{ 'has-error': errors.email }">
           <label>{{ $t('Email') }}</label>
@@ -160,11 +167,6 @@ const showPassword = ref(false)
           </router-link>
         </div>
 
-        <!-- ✅ ADDED: backend error message -->
-        <transition name="shake-fade">
-          <span v-if="errors.general" class="error-msg">⚠️ {{ errors.general }}</span>
-        </transition>
-
         <button class="btn-primary" :disabled="auth.loading || isLoading">
           {{ auth.loading || isLoading ? $t('Logging in...') || 'Logging in...' : $t('Login') }}
         </button>
@@ -181,10 +183,25 @@ const showPassword = ref(false)
 </template>
 
 <style scoped>
-/* Error input border */
-.form-group.has-error input {
-  border-color: #e74c3c;
+.error-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 8px;
   background-color: #fff5f5;
+  border: 1px solid #f5c6cb;
+  margin-bottom: 12px;
+}
+
+.error-alert-icon {
+  font-size: 1.1rem;
+}
+
+.error-alert-text {
+  font-size: 0.88rem;
+  color: #c0392b;
+  font-weight: 500;
 }
 
 /* Error message */
