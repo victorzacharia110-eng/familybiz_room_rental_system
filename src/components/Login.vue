@@ -1,6 +1,5 @@
 <script setup>
-import { ref, reactive } from 'vue' // ✅ MODIFIED: added reactive
-
+import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useI18n } from 'vue-i18n'
@@ -15,13 +14,12 @@ const form = ref({
 
 const isLoading = ref(false)
 
-// ✅ ADDED: validation errors
 const errors = reactive({
   email: '',
-  password: ''
+  password: '',
+  general: '', // ✅ ADDED: for backend errors
 })
 
-// ✅ ADDED: email validator
 function validateEmail() {
   if (!form.value.email) {
     errors.email = 'Email is required.'
@@ -32,7 +30,6 @@ function validateEmail() {
   }
 }
 
-// ✅ ADDED: password validator
 function validatePassword() {
   if (!form.value.password) {
     errors.password = 'Password is required.'
@@ -43,18 +40,16 @@ function validatePassword() {
   }
 }
 
-// ✅ ADDED: clear error on input
 function clearError(field) {
   errors[field] = ''
+  errors.general = '' // ✅ ADDED: also clear backend error when user starts typing
 }
 
 const submit = async () => {
-  // ✅ ADDED: run validation before anything
   validateEmail()
   validatePassword()
   if (errors.email || errors.password) return
 
-  // everything below is untouched ⬇️
   console.log('Form payload:', form.value)
   if (isLoading.value || auth.loading) return
   isLoading.value = true
@@ -64,6 +59,7 @@ const submit = async () => {
 
   if (!user) {
     console.log('Login failed:', auth.error)
+    errors.general = auth.error || 'Invalid email or password.' // ✅ MODIFIED: show backend error
     isLoading.value = false
     return
   }
@@ -164,8 +160,12 @@ const showPassword = ref(false)
           </router-link>
         </div>
 
-        <!-- Submit -->
-        <button class="btn-primary" :disabled="auth.loading || isLoading" @click="validateAll">
+        <!-- ✅ ADDED: backend error message -->
+        <transition name="shake-fade">
+          <span v-if="errors.general" class="error-msg">⚠️ {{ errors.general }}</span>
+        </transition>
+
+        <button class="btn-primary" :disabled="auth.loading || isLoading">
           {{ auth.loading || isLoading ? $t('Logging in...') || 'Logging in...' : $t('Login') }}
         </button>
       </form>
@@ -181,7 +181,6 @@ const showPassword = ref(false)
 </template>
 
 <style scoped>
-
 /* Error input border */
 .form-group.has-error input {
   border-color: #e74c3c;
@@ -208,8 +207,6 @@ const showPassword = ref(false)
 .shake-fade-leave-to {
   opacity: 0;
 }
-
-
 
 /* ================= YOUR ORIGINAL STYLES (UNCHANGED) ================= */
 
@@ -435,11 +432,25 @@ input:focus {
 }
 
 @keyframes shake {
-  0%   { transform: translateX(0); opacity: 0; }
-  20%  { transform: translateX(-6px); opacity: 1; }
-  40%  { transform: translateX(6px); }
-  60%  { transform: translateX(-4px); }
-  80%  { transform: translateX(4px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  20% {
+    transform: translateX(-6px);
+    opacity: 1;
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 </style>
