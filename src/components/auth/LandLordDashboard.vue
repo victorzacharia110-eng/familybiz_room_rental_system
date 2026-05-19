@@ -254,8 +254,52 @@ const deleteRoom = async (id) => {
 
 // payment method deletion action is done here
 const deletingPaymentMethod = async (id) => {
-  await paymentMethodStore.deletePaymentMethod(id)
-}
+  const confirmed = window.confirm(
+    '⚠️ This will permanently delete the payment method. Continue?'
+  )
+
+  if (!confirmed) return
+
+  try {
+    const response = await paymentMethodStore.deletePaymentMethod(id)
+
+    if (response) {
+      alert('✅ Payment method deleted successfully!')
+    } else {
+      alert('❌ Failed to delete payment method')
+    }
+  } catch (error) {
+    console.error(error)
+    alert('❌ Something went wrong while deleting the payment method')
+  }
+
+  // After deletion, refresh the payment methods list
+  paymentMethodFetching()
+
+  // Payment deletion action is done here
+  const deletePayment = async (id) => {
+    const confirmed = window.confirm(
+      '⚠️ This will permanently delete the payment. Continue?'
+    )
+
+    if (!confirmed) return
+
+    try {
+      const response = await paymentStore.deletePayment(id)
+
+      if (response) {
+        alert('✅ Payment deleted successfully!')
+      } else {
+        alert('❌ Failed to delete payment')
+      }
+    } catch (error) {
+      console.error(error)
+      alert('❌ Something went wrong while deleting the payment')
+    }
+
+    // After deletion, refresh the payments list
+    paymentFetching()
+  }
 
 // ------------------------- MODAL FUNCTIONS FOR THE PAYMENTS MODAL ---------------------------
 
