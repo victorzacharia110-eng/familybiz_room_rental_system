@@ -151,12 +151,23 @@ const saveRoom = async () => {
 
 const deleteRoom = async (id) => {
   const confirmed = window.confirm(
-    '⚠️ Are you sure you want to delete this room? This action cannot be undone.',
+    '⚠️ This will permanently delete the room. Continue?'
   )
 
   if (!confirmed) return
 
-  await roomStore.deleteRoom(id)
+  try {
+    const response = await roomStore.deleteRoom(id)
+
+    if (response) {
+      alert('✅ Room deleted successfully!')
+    } else {
+      alert('❌ Failed to delete room')
+    }
+  } catch (error) {
+    console.error(error)
+    alert('❌ Something went wrong while deleting the room')
+  }
 }
 
 const handleImageUpload = (event) => {
