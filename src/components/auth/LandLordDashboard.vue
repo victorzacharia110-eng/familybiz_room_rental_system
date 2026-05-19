@@ -1,8 +1,21 @@
 <script setup>
-import Footer from './Footer.vue'
-import { ref, onMounted } from 'vue'
-import { computed } from 'vue'
+/* =========================================================
+   📦 CORE IMPORTS (Vue + Router + i18n + Pinia)
+   ========================================================= */
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { storeToRefs } from 'pinia'
+
+/* =========================================================
+   🧩 COMPONENT IMPORTS
+   ========================================================= */
+import Footer from './Footer.vue'
+
+/* =========================================================
+   🗂️ PINIA STORES (ALL DATA LAYERS)
+   Each store handles API + state for a domain
+   ========================================================= */
 import { useAuthStore } from '@/stores/auth'
 import { useRoomStore } from '@/stores/room'
 import { usePaymentStore } from '@/stores/payment'
@@ -12,9 +25,10 @@ import { useLatePaymentReasonStore } from '@/stores/latePaymentReason'
 import { useAnnouncementStore } from '@/stores/announcement'
 import { useRuleStore } from '@/stores/rules'
 import { useCommentStore } from '@/stores/comment'
-import { useI18n } from 'vue-i18n'
-import { storeToRefs } from 'pinia'
 
+/* =========================================================
+   🔐 STORE INITIALIZATION (GLOBAL APP STATE)
+   ========================================================= */
 const router = useRouter()
 const auth = useAuthStore()
 const roomStore = useRoomStore()
@@ -22,12 +36,21 @@ const paymentStore = usePaymentStore()
 const paymentMethodStore = usePaymentMethodStore()
 const criticalRemarkStore = useCriticalRemarkStore()
 const latePaymentReasonStore = useLatePaymentReasonStore()
-const ruleStore = useRuleStore()
 const announcementStore = useAnnouncementStore()
+const ruleStore = useRuleStore()
 const commentStore = useCommentStore()
+
+/* =========================================================
+   🏠 DERIVED STATE (ROOM DASHBOARD STATS)
+   Reactive values pulled directly from store
+   ========================================================= */
 const { roomsAvailableCount, roomsMaintananceCount, roomsOccupiedCount, totalRooms } =
   storeToRefs(roomStore)
 
+/* =========================================================
+   🚀 INITIAL DATA LOADING (APP START)
+   Loads all essential dashboard data once page mounts
+   ========================================================= */
 onMounted(async () => {
   await roomStore.fetchRooms()
   await auth.fetchUsers()
@@ -39,276 +62,111 @@ onMounted(async () => {
   await latePaymentReasonStore.fetchLatePaymentReasons()
 })
 
+/* =========================================================
+   🔔 GLOBAL UI MESSAGES (SUCCESS FEEDBACK)
+   ========================================================= */
 const successMessage = ref('')
 const successPaymentMessage = ref('')
 const successPaymentMethodMessage = ref('')
-const fileInput = ref(null)
+const successAddingRemarkMessage = ref('')
+const successCreationRuleMessage = ref('')
+const successAnnouncementMessage = ref('')
+const successCommentMessage = ref('')
+const successPasswordResetMessage = ref('')
 
+/* =========================================================
+   🚪 AUTH ACTIONS
+   ========================================================= */
 const logoutUser = async () => {
   await auth.logout()
-
   router.push('/login')
 }
 
-// This function computes the monthly income
+/* =========================================================
+   💰 PAYMENT ANALYTICS (TOTAL INCOME)
+   Only sums PAID payments
+   ========================================================= */
 const monthlyIncome = computed(() => {
   return paymentStore.payments
     ?.filter((p) => p.status === 'paid')
     .reduce((sum, p) => sum + Number(p.amount || 0), 0)
 })
 
-// Modal toggle
+/* =========================================================
+   🪟 MODAL STATES (UI CONTROL CENTER)
+   Each section has its own modal state
+   ========================================================= */
 const showModal = ref(false)
 
-function openModal() {
-  showModal.value = true
-}
+// Payments
+const activePaymentsModal = ref(null)
 
-function closeModal() {
-  showModal.value = false
-}
+// Payment Methods
+const activePaymentMethodModal = ref(null)
 
-const myRemarks = computed(() => criticalRemarkStore.criticalRemarks)
-// This is the function for validating if the data is present
-const getTenantLatePayments = (tenantId) => {
-  return latePaymentReasonStore.latePaymentReasons?.filter((r) => r.user_id === tenantId) || []
-}
-// Same for the critical remarks
-const successAddingRemarkMessage = ref('')
+// Rooms
+const activeRoomsModal = ref(null)
 
-// This is the function that checks if the landlord can add remark
-// to the tenant, it checks if the tenant has less than 3 remarks
-// and if the latest payment is unpaid or doesn't exist
-const canAddRemark = (tenant) => {
-  const status = tenant.room?.latest_payment?.status?.toLowerCase()
+// Profile
+const activeProfileModal = ref(null)
 
-  const remarksCount =
-    latePaymentReasonStore.latePaymentReasons?.filter((r) => r.user_id === tenant.id).length ?? 0
+// Remarks
+const activeRemarksModal = ref(null)
 
-  return remarksCount < 3 && (!status || status === 'unpaid')
-}
+// Announcements
+const activeAnnouncementModal = ref(null)
 
-// Add critical remark function
-async function addRemark(tenant) {
-  if (!canAddRemark(tenant)) return
+// Comments
+const activeCommentsModal = ref(null)
 
-  const remarksForTenant = criticalRemarkStore.criticalRemarks.filter(
-    (r) => r.user_id === tenant.id,
-  )
+// Password reset
+const activePasswordResetModal = ref(null)
 
-  if (remarksForTenant.length >= 3) {
-    alert('Maximum critical remarks reached for this tenant!')
-    return
-  }
-
-  const remark = prompt('Enter critical remark for tenant:')
-
-  // ❗ Only proceed if valid input
-  if (remark && remark.trim()) {
-    const response = await criticalRemarkStore.registerCriticalRemarks({
-      user_id: tenant.id,
-      reason: remark,
-      type: 'critical',
-      active: true,
-    })
-
-    // ✅ Only show message if backend succeeded
-    if (response) {
-      successAddingRemarkMessage.value = '✅ Remark created successfully!'
-
-      setTimeout(() => {
-        successAddingRemarkMessage.value = ''
-      }, 3000)
-    }
-  }
-}
+/* =========================================================
+   🏠 ROOM MANAGEMENT
+   ========================================================= */
+const fileInput = ref(null)
 
 const roomForm = ref({
   room_number: '',
   room_price: 0,
   type: 'Single',
   status: 'Available',
-  photo: null, // actual file
-  preview: null, // preview image
+  photo: null,
+  preview: null,
 })
 
-const paymentForm = ref({
-  room_id: '',
-  month: '',
-  year: '',
-  due_date: '',
-  amount: '',
-  status: 'unpaid',
-})
-
-const paymentMethodForm = ref({
-  airtel_money_number: 0,
-  mixx_by_yas_number: 0,
-  m_pesa_number: 0,
-  halopesa_number: 0,
-  nmb_account_number: 0,
-  crdb_account_number: 0,
-  nbc_account_number: 0,
-})
-
-const ruleForm = ref({
-  title: '',
-  description: '',
-  type: '',
-})
-
-// Payment Method fetching ( from backend )
-const paymentMethodFetching = async () => {
-  const paymentMethodFetched = await paymentMethodStore.fetchPaymentMethods()
-  console.log('Payment Methods Fetched : ', paymentMethodFetched)
-}
-
-// Ferch payments ( from backend )
-const paymentFetching = async () => {
-  const paymentFetched = await paymentStore.fetchPayments()
-  console.log('fetched payments : ', paymentFetched)
-}
-
-// Save payment into the backend
-const savePayment = async () => {
-  const newPayment = await paymentStore.registerPayment(paymentForm.value)
-
-  console.log('new payment data', newPayment)
-
-  if (newPayment) {
-    successPaymentMessage.value = '✅ Payment created successfully!'
-    resetPaymentForm() //  invoking the form clearance function
-  }
-}
-
-// Save Payment Methods into the backend
-const savePaymentMethod = async () => {
-  const newPaymentMethod = await paymentMethodStore.registerPaymentMethods(paymentMethodForm.value)
-  console.log('New Payment Method : ', newPaymentMethod)
-
-  if (newPaymentMethod) {
-    successPaymentMethodMessage.value = '✅ Payment method created successfully!'
-    // This function clears the data after being created
-    resetPaymentMethodForm()
-  }
-}
-
-const successCreationRuleMessage = ref('')
-// Save Rules into the backend
-const savingRules = async () => {
-  const newRule = await ruleStore.registerRules(ruleForm.value)
-  console.log('Rule added : ', newRule)
-
-  if (newRule) {
-    successCreationRuleMessage.value = '✅ Rule created successfully!'
-    resetRulesForm()
-  }
-}
-
-function resetRulesForm() {
-  ruleForm.value = {
-    title: '',
-    description: '',
-    type: '',
-  }
-}
-// Fetch rooms (from backend)
 const roomFetching = async () => {
-  const roomsFetched = await roomStore.fetchRooms()
-  console.log('Fetched Rooms:', roomsFetched)
+  return await roomStore.fetchRooms()
 }
 
-// Save new room
 const saveRoom = async () => {
   const newRoom = await roomStore.registerRoom(roomForm.value)
 
-  console.log('Data saved :', newRoom)
-
   if (newRoom) {
     successMessage.value = '✅ Room created successfully!'
-    resetRoomForm() //  invoking the form clearance function
+    resetRoomForm()
   }
 }
 
-// room deletion process is done by this function here...
 const deleteRoom = async (id) => {
+  const confirmed = window.confirm(
+    '⚠️ Are you sure you want to delete this room? This action cannot be undone.',
+  )
+
+  if (!confirmed) return
+
   await roomStore.deleteRoom(id)
 }
 
-// payment method deletion action is done here
-const deletingPaymentMethod = async (id) => {
-  await paymentMethodStore.deletePaymentMethod(id)
-}
-
-// ------------------------- MODAL FUNCTIONS FOR THE PAYMENTS MODAL ---------------------------
-
-// controls which modal is open AND which sidebar item is active
-const activePaymentsModal = ref(null)
-
-// opens payments modal
-function openPaymentsModal(ModalName) {
-  activePaymentsModal.value = ModalName
-
-  if (ModalName === 'payments') {
-    // this will log the fetched payments data
-    paymentFetching()
-  }
-}
-
-// closing payments modal
-function closePaymentsModal() {
-  activePaymentsModal.value = null
-}
-
-// ------------------- MODAL FUNCTIONS FOR THE PAYMENT METHOD MODAL -------------------------
-// controls which modal is open  and which sidebar item is active
-const activePaymentMethodModal = ref(null)
-
-// open payment methods modal
-function openPaymentMethodModal(ModalName) {
-  activePaymentMethodModal.value = ModalName
-
-  if (ModalName === 'paymentMethod') {
-    // This function loads the data  from the backend into the modal when it opens
-    paymentMethodFetching()
-  }
-}
-
-// closing the payment method modal
-function closePaymentMethodModal() {
-  activePaymentMethodModal.value = null
-}
-
-// ---------- MODAL FUNCTIONS FOR THE ROOM MODAL---------------------
-
-// controls which modal is open AND which sidebar item is active
-const activeRoomsModal = ref(null)
-
-// open rooms modal
-function openRoomsModal(modalName) {
-  activeRoomsModal.value = modalName
-
-  if (modalName === 'rooms') {
-    roomFetching() // Now this will log the fetched rooms
-  }
-}
-
-// close modal
-function closeRoomsModal() {
-  activeRoomsModal.value = null
-}
-
-// file handling
 const handleImageUpload = (event) => {
   const file = event.target.files[0]
-
   if (!file) return
 
   roomForm.value.photo = file
   roomForm.value.preview = URL.createObjectURL(file)
 }
 
-// This is a reset function after the registration of newly added room
 const resetRoomForm = () => {
   roomForm.value = {
     room_number: '',
@@ -319,12 +177,34 @@ const resetRoomForm = () => {
     preview: null,
   }
 
-  if (fileInput.value) {
-    fileInput.value.value = ''
+  if (fileInput.value) fileInput.value.value = ''
+}
+
+/* =========================================================
+   💳 PAYMENT MANAGEMENT
+   ========================================================= */
+const paymentForm = ref({
+  room_id: '',
+  month: '',
+  year: '',
+  due_date: '',
+  amount: '',
+  status: 'unpaid',
+})
+
+const paymentFetching = async () => {
+  return await paymentStore.fetchPayments()
+}
+
+const savePayment = async () => {
+  const newPayment = await paymentStore.registerPayment(paymentForm.value)
+
+  if (newPayment) {
+    successPaymentMessage.value = '✅ Payment created successfully!'
+    resetPaymentForm()
   }
 }
 
-// This is a reset function after the creation of the payment
 const resetPaymentForm = () => {
   paymentForm.value = {
     room_id: '',
@@ -332,12 +212,39 @@ const resetPaymentForm = () => {
     year: '',
     due_date: '',
     amount: 0,
-    status: 'pending',
+    status: 'unpaid',
+  }
+}
+
+/* =========================================================
+   💳 PAYMENT METHODS MANAGEMENT
+   ⚠️ FIXED BUG: must use .value
+   ========================================================= */
+const paymentMethodForm = ref({
+  airtel_money_number: 0,
+  mixx_by_yas_number: 0,
+  m_pesa_number: 0,
+  halopesa_number: 0,
+  nmb_account_number: 0,
+  crdb_account_number: 0,
+  nbc_account_number: 0,
+})
+
+const paymentMethodFetching = async () => {
+  return await paymentMethodStore.fetchPaymentMethods()
+}
+
+const savePaymentMethod = async () => {
+  const newPaymentMethod = await paymentMethodStore.registerPaymentMethods(paymentMethodForm.value)
+
+  if (newPaymentMethod) {
+    successPaymentMethodMessage.value = '✅ Payment method created successfully!'
+    resetPaymentMethodForm()
   }
 }
 
 const resetPaymentMethodForm = () => {
-  paymentMethodForm = {
+  paymentMethodForm.value = {
     airtel_money_number: 0,
     mixx_by_yas_number: 0,
     m_pesa_number: 0,
@@ -348,138 +255,102 @@ const resetPaymentMethodForm = () => {
   }
 }
 
-// -------------------- LANGUAGE TOGGLE --------------------
-const { locale } = useI18n()
-const currentLocale = ref(locale.value)
-
-const setLanguage = (lang) => {
-  locale.value = lang
-  currentLocale.value = lang
+const deletingPaymentMethod = async (id) => {
+  await paymentMethodStore.deletePaymentMethod(id)
 }
 
-// ---------------------- SIDEBAR RESPONSIVENESS FUNCTIONS -------------------------------------
-const isSidebarOpen = ref(false)
+/* =========================================================
+   🧾 RULES MANAGEMENT
+   ========================================================= */
+const ruleForm = ref({
+  title: '',
+  description: '',
+  type: '',
+})
 
-// ----------------------------- User Profile Functions and variables -------------------------------------
-const activeProfileModal = ref(null)
+const savingRules = async () => {
+  const newRule = await ruleStore.registerRules(ruleForm.value)
 
-const profileFetching = async () => {
-  const profile = await auth.fetchUser()
-  console.log('User Profile : ', profile)
-}
-
-const openProfileModal = (ModalName) => {
-  activeProfileModal.value = ModalName
-
-  if (ModalName === 'profile') {
-    profileFetching()
+  if (newRule) {
+    successCreationRuleMessage.value = '✅ Rule created successfully!'
+    resetRulesForm()
   }
 }
 
-const closeProfileModal = () => {
-  activeProfileModal.value = null
+const resetRulesForm = () => {
+  ruleForm.value = { title: '', description: '', type: '' }
 }
 
-// -------------------- Update Phone Number Function ------------------------------
-const updatingPhoneNumber = async (user) => {
-  const newPhone = prompt('Enter new phone number:')
+/* =========================================================
+   ⚠️ CRITICAL REMARKS (TENANT CONTROL SYSTEM)
+   ========================================================= */
+const getTenantLatePayments = (tenantId) => {
+  return latePaymentReasonStore.latePaymentReasons?.filter((r) => r.user_id === tenantId) || []
+}
 
-  if (!newPhone || !newPhone.trim()) return
+const canAddRemark = (tenant) => {
+  const status = tenant.room?.latest_payment?.status?.toLowerCase()
 
-  const response = await auth.updatePhoneNumber(user.id, newPhone)
+  const remarksCount =
+    latePaymentReasonStore.latePaymentReasons?.filter((r) => r.user_id === tenant.id).length ?? 0
+
+  return remarksCount < 3 && (!status || status === 'unpaid')
+}
+
+const addRemark = async (tenant) => {
+  if (!canAddRemark(tenant)) return
+
+  const remark = prompt('Enter critical remark for tenant:')
+  if (!remark?.trim()) return
+
+  const response = await criticalRemarkStore.registerCriticalRemarks({
+    user_id: tenant.id,
+    reason: remark,
+    type: 'critical',
+    active: true,
+  })
 
   if (response) {
-    alert('✅ Phone number updated successfully!')
-  } else {
-    alert(auth.error || '❌ Failed to update phone number')
+    successAddingRemarkMessage.value = '✅ Remark created successfully!'
+    setTimeout(() => (successAddingRemarkMessage.value = ''), 3000)
   }
 }
 
-// -------------------------- REMARKS FUNCTIONS AND VARIABLES ----------------------------------------------------
-const activeRemarksModal = ref(null)
-
-const remarksFetching = async () => {
-  const remarksFetch = await criticalRemarkStore.fetchCriticalRemarks()
-
-  console.log('remarks fetched from the component : ', remarksFetch)
-}
-
-const openRemarksModal = (ModalName) => {
-  activeRemarksModal.value = ModalName
-
-  if (ModalName === 'remarks') {
-    remarksFetching()
-  }
-}
-
-const closeRemarksModal = () => {
-  activeRemarksModal.value = null
-}
-
-// ------------------------------ ANNOUNCEMENTS FUNCTIONS AND VARIABLES ---------------------------------
-const activeAnnouncementModal = ref(null)
-const successAnnouncementMessage = ref('')
-const closeAnnouncementsModal = () => {
-  activeAnnouncementModal.value = null
-}
-
-const openAnnouncementModal = (ModalName) => {
-  activeAnnouncementModal.value = ModalName
-  if (ModalName === 'announcements') {
-    announcementsFetching()
-  }
-}
-const announcementsFetching = async () => {
-  const fetchedAnnouncements = await announcementStore.fetchAnnouncements()
-  console.log('announcements', fetchedAnnouncements)
-}
-
+/* =========================================================
+   📢 ANNOUNCEMENTS
+   ========================================================= */
 const announcementForm = ref({
   title: '',
   message: '',
 })
 
+const announcementsFetching = async () => {
+  return await announcementStore.fetchAnnouncements()
+}
+
 const saveAnnouncement = async () => {
   const newAnnouncement = await announcementStore.registerAnnouncement(announcementForm.value)
-  console.log('new Announcement added : ', newAnnouncement)
 
   if (newAnnouncement) {
     successAnnouncementMessage.value = '✅ Announcement created successfully!'
-
     resetAnnouncementForm()
   }
 }
 
 const resetAnnouncementForm = () => {
-  announcementForm.value = {
-    title: '',
-    message: '',
-  }
+  announcementForm.value = { title: '', message: '' }
 }
-// ------------------------------------------- COMMENTS FUNCTIONS AND VARIABLES ------------------------------------
-const activeCommentsModal = ref(null)
 
-const successCommentMessage = ref('')
-
+/* =========================================================
+   💬 COMMENTS SYSTEM
+   ========================================================= */
 const commentForm = ref({
   comment: '',
   rating: 5,
 })
 
-const openCommentsModal = (ModalName) => {
-  activeCommentsModal.value = ModalName
-
-  if (ModalName === 'comments') {
-    commentFetching()
-  }
-}
-
-const closeCommentsModal = () => {
-  activeCommentsModal.value = null
-}
-
 const commentFetching = async () => {
-  await commentStore.fetchComments()
+  return await commentStore.fetchComments()
 }
 
 const saveComment = async () => {
@@ -487,8 +358,7 @@ const saveComment = async () => {
 
   if (response) {
     successCommentMessage.value = '✅ Comment added successfully!'
-    commentForm.value.comment = ''
-    commentForm.value.rating = 5
+    commentForm.value = { comment: '', rating: 5 }
   }
 }
 
@@ -496,18 +366,46 @@ const deleteComment = async (id) => {
   await commentStore.deleteComment(id)
 }
 
-// -------- PASSWORD RESET FUNCTIONS AND VARIABLES -----------------------------
-const activePasswordResetModal = ref(null)
-const successPasswordResetMessage = ref('')
+/* =========================================================
+   👤 PROFILE MANAGEMENT
+   ========================================================= */
+const profileFetching = async () => {
+  return await auth.fetchUser()
+}
+
+const updatingPhoneNumber = async (user) => {
+  const newPhone = prompt('Enter new phone number:')
+  if (!newPhone?.trim()) return
+
+  const response = await auth.updatePhoneNumber(user.id, newPhone)
+
+  alert(
+    response
+      ? '✅ Phone number updated successfully!'
+      : auth.error || '❌ Failed to update phone number',
+  )
+}
+
+/* =========================================================
+   🔐 PASSWORD RESET
+   ========================================================= */
 const passwordResetForm = ref({
   email: '',
 })
 
-const openPasswordResetModal = (ModalName) => {
-  activePasswordResetModal.value = ModalName
-  if (ModalName === 'passwordReset') {
-    // Pre-fill with current user's email
+const openPasswordResetModal = (name) => {
+  activePasswordResetModal.value = name
+  if (name === 'passwordReset') {
     passwordResetForm.value.email = auth.user?.email || ''
+  }
+}
+
+const sendPasswordResetLink = async () => {
+  const response = await auth.requestPasswordReset(passwordResetForm.value.email)
+
+  if (response) {
+    successPasswordResetMessage.value = $t('resetLinkSent')
+    setTimeout(() => closePasswordResetModal(), 3000)
   }
 }
 
@@ -517,18 +415,11 @@ const closePasswordResetModal = () => {
   passwordResetForm.value.email = ''
 }
 
-const sendPasswordResetLink = async () => {
-  const response = await auth.requestPasswordReset(passwordResetForm.value.email)
+/* =========================================================
+   🌍 UTILITIES (HELPERS)
+   ========================================================= */
 
-  if (response) {
-    successPasswordResetMessage.value = $t('resetLinkSent')
-    setTimeout(() => {
-      closePasswordResetModal()
-    }, 3000)
-  }
-}
-
-// -------- Date function --------------------------
+// format date for UI display
 const formatDate = (date) => {
   if (!date) return ''
   return new Date(date).toLocaleString('en-GB', {
@@ -540,7 +431,7 @@ const formatDate = (date) => {
   })
 }
 
-// Months array used in payment management modal
+// months dropdown
 const months = [
   'January',
   'February',
@@ -556,10 +447,26 @@ const months = [
   'December',
 ]
 
-// Payment status function for dynamic styling in tenants table
+// payment status helper
 const paymentStatus = (tenant) => {
   return tenant.room?.latest_payment?.status === 'paid' ? 'paid' : 'unpaid'
 }
+
+/* =========================================================
+   🌐 LANGUAGE SWITCHING (i18n)
+   ========================================================= */
+const { locale } = useI18n()
+const currentLocale = ref(locale.value)
+
+const setLanguage = (lang) => {
+  locale.value = lang
+  currentLocale.value = lang
+}
+
+/* =========================================================
+   📱 UI STATE (SIDEBAR)
+   ========================================================= */
+const isSidebarOpen = ref(false)
 </script>
 
 <template>
@@ -2092,7 +1999,7 @@ td {
     margin-left: 90%;
   }
 
-    .modal {
+  .modal {
     width: 95%;
     padding: 15px;
     max-height: 90vh;
