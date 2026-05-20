@@ -232,9 +232,7 @@ const saveRoom = async () => {
 
 // room deletion process is done by this function here...
 const deleteRoom = async (id) => {
-  const confirmed = window.confirm(
-    '⚠️ This will permanently delete the room. Continue?'
-  )
+  const confirmed = window.confirm('⚠️ This will permanently delete the room. Continue?')
 
   if (!confirmed) return
 
@@ -254,9 +252,7 @@ const deleteRoom = async (id) => {
 
 // payment method deletion action is done here
 const deletingPaymentMethod = async (id) => {
-  const confirmed = window.confirm(
-    '⚠️ This will permanently delete the payment method. Continue?'
-  )
+  const confirmed = window.confirm('⚠️ This will permanently delete the payment method. Continue?')
 
   if (!confirmed) return
 
@@ -275,31 +271,29 @@ const deletingPaymentMethod = async (id) => {
 
   // After deletion, refresh the payment methods list
   paymentMethodFetching()
+}
+// Payment deletion action is done here
+const deletePayment = async (id) => {
+  const confirmed = window.confirm('⚠️ This will permanently delete the payment. Continue?')
 
-  // Payment deletion action is done here
-  const deletePayment = async (id) => {
-    const confirmed = window.confirm(
-      '⚠️ This will permanently delete the payment. Continue?'
-    )
+  if (!confirmed) return
 
-    if (!confirmed) return
+  try {
+    const response = await paymentStore.deletePayment(id)
 
-    try {
-      const response = await paymentStore.deletePayment(id)
-
-      if (response) {
-        alert('✅ Payment deleted successfully!')
-      } else {
-        alert('❌ Failed to delete payment')
-      }
-    } catch (error) {
-      console.error(error)
-      alert('❌ Something went wrong while deleting the payment')
+    if (response) {
+      alert('✅ Payment deleted successfully!')
+    } else {
+      alert('❌ Failed to delete payment')
     }
-
-    // After deletion, refresh the payments list
-    paymentFetching()
+  } catch (error) {
+    console.error(error)
+    alert('❌ Something went wrong while deleting the payment')
   }
+
+  // After deletion, refresh the payments list
+  paymentFetching()
+}
 
 // ------------------------- MODAL FUNCTIONS FOR THE PAYMENTS MODAL ---------------------------
 
