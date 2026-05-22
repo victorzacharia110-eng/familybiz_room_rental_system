@@ -27,12 +27,13 @@ onMounted(async () => {
 })
 
 const submit = async () => {
-  const updated = await paymentStore.updatePayment(paymentId)
+  const updated = await paymentStore.updatePayments(paymentId)
 
   if (updated) {
     router.push('/landlord')
   }
 }
+
 </script>
 
 <template>

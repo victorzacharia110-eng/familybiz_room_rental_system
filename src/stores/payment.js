@@ -8,6 +8,39 @@ export const usePaymentStore = defineStore('payment', () => {
   const count_tenant_unpaid_payment = ref(0)
   const error = ref(null)
   const loading = ref(false)
+  const paymentForm = ref({
+    room_id: '',
+    month: '',
+    year: '',
+    amount: '',
+    status: 'unpaid',
+    due_date: '',
+  })
+
+  const loadPaymentForEdit = async (id) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      await api.get('/sanctum/csrf-cookie')
+      const response = await api.get(`/api/payment/show/${id}`)
+
+      const payment = response.data.payment
+
+      paymentForm.value = {
+        room_id: payment.room_id,
+        month: payment.month,
+        year: payment.year,
+        amount: payment.amount,
+        status: payment.status,
+        due_date: payment.due_date,
+      }
+    } catch (err) {
+      error.value = err.response?.data?.message || err.message
+    } finally {
+      loading.value = false
+    }
+  }
 
   const fetchPayment = async () => {
     try {
@@ -96,5 +129,6 @@ export const usePaymentStore = defineStore('payment', () => {
     fetchPayments,
     fetchPayment,
     updatePayments,
+    loadPaymentForEdit,
   }
 })
