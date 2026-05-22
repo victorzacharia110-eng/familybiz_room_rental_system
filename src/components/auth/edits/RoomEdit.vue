@@ -5,7 +5,7 @@ import { useRoomStore } from '@/stores/room'
 import { useI18n } from 'vue-i18n'
 
 // -------------------- I18n (legacy mode) --------------------
-const { locale , h, t } = useI18n()
+const { locale } = useI18n()
 const currentLocale = ref(locale.value)
 
 const setLanguage = (lang) => {
@@ -33,7 +33,7 @@ onMounted(async () => {
 const submit = async () => {
   const updated = await updateRoom()
   if (updated) {
-    alert(t('save') + ' ' + t('room') + ' ' + t('success')) // Optional: create 'success' key in en.json
+
     router.push('/landlord') // redirect to room list after update
   }
 }
