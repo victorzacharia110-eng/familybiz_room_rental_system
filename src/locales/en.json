@@ -167,5 +167,12 @@
 
   "howToGetThere": "How to get there: From Gongo la Mboto, head towards Majohe Bwera and follow directions to the mosque area.",
 
-  "transportInstructions": "From Gongo la Mboto, take a motorcycle (bodaboda) or bajaj to Majohe Bwera stand. Once you arrive, ask for directions to the mosque, then request nearby renting rooms."
+  "transportInstructions": "From Gongo la Mboto, take a motorcycle (bodaboda) or bajaj to Majohe Bwera stand. Once you arrive, ask for directions to the mosque, then request nearby renting rooms.",
+  "editPayment": "Edit Payment",
+  "editPaymentSubtitle": "Update payment details below",
+  "loadingForm": "Loading form...",
+  "unpaid": "Unpaid",
+  "saveChanges": "Save Changes",
+  "updatingPayment": "Updating payment...",
+  "back": "Back"
 }

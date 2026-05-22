@@ -188,5 +188,13 @@
 
   "howToGetThere": "Jinsi ya kufika: Kutoka Gongo la Mboto elekea Majohe Bwera na fuata maelekezo kuelekea eneo la msikiti.",
 
-  "transportInstructions": "Kutoka Gongo la Mboto panda bodaboda au bajaj hadi stendi ya Majohe Bwera. Ukifika uliza njia ya kwenda msikitini, kisha uliza vyumba vya kupanga vilivyo karibu."
+  "transportInstructions": "Kutoka Gongo la Mboto panda bodaboda au bajaj hadi stendi ya Majohe Bwera. Ukifika uliza njia ya kwenda msikitini, kisha uliza vyumba vya kupanga vilivyo karibu.",
+  "editPayment": "Hariri Malipo",
+  "editPaymentSubtitle": "Sasisha taarifa za malipo hapa chini",
+  "loadingForm": "Fomu inapakia...",
+  "unpaid": "Haijalipwa",
+  "dueDate": "Tarehe ya Mwisho",
+  "saveChanges": "Hifadhi Mabadiliko",
+  "updatingPayment": "Malipo yanasasishwa...",
+  "back": "Rudi"
 }

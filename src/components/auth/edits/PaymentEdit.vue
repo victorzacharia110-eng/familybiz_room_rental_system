@@ -40,31 +40,39 @@ const submit = async () => {
 <template>
   <div class="auth-page">
     <div class="auth-card">
-      <h2>Edit Payment</h2>
-      <p class="subtitle">Update payment details below</p>
+      <h2>{{ t('editPayment') }}</h2>
+      <p class="subtitle">{{ t('editPaymentSubtitle') }}</p>
 
       <!-- Language Toggle -->
       <div class="language-toggle">
         <button :class="{ active: currentLocale === 'en' }" @click="setLanguage('en')">
           🇬🇧 English
         </button>
+
         <button :class="{ active: currentLocale === 'sw' }" @click="setLanguage('sw')">
           🇹🇿 Swahili
         </button>
       </div>
 
-      <!-- SAFETY: wait for form -->
       <div v-if="!paymentForm">
-        Loading form...
+        {{ t('loadingForm') }}
       </div>
 
       <form v-else @submit.prevent="submit">
         <!-- Room -->
         <div class="form-group">
-          <label>Room</label>
+          <label>{{ t('room') }}</label>
+
           <select v-model="paymentForm.room_id" required>
-            <option disabled value="">Select Room</option>
-            <option v-for="room in roomStore.rooms" :key="room.id" :value="room.id">
+            <option disabled value="">
+              {{ t('selectRoom') }}
+            </option>
+
+            <option
+              v-for="room in roomStore.rooms"
+              :key="room.id"
+              :value="room.id"
+            >
               {{ room.room_number }} - {{ room.status }}
             </option>
           </select>
@@ -72,48 +80,77 @@ const submit = async () => {
 
         <!-- Month -->
         <div class="form-group">
-          <label>Month</label>
-          <input v-model="paymentForm.month" type="text" required />
+          <label>{{ t('month') }}</label>
+
+          <input
+            v-model="paymentForm.month"
+            type="text"
+            :placeholder="t('month')"
+            required
+          />
         </div>
 
         <!-- Year -->
         <div class="form-group">
-          <label>Year</label>
-          <input v-model="paymentForm.year" type="number" required />
+          <label>{{ t('year') }}</label>
+
+          <input
+            v-model="paymentForm.year"
+            type="number"
+            :placeholder="t('year')"
+            required
+          />
         </div>
 
         <!-- Amount -->
         <div class="form-group">
-          <label>Amount</label>
-          <input v-model="paymentForm.amount" type="number" required />
+          <label>{{ t('amount') }}</label>
+
+          <input
+            v-model="paymentForm.amount"
+            type="number"
+            :placeholder="t('amount')"
+            required
+          />
         </div>
 
         <!-- Status -->
         <div class="form-group">
-          <label>Status</label>
+          <label>{{ t('status') }}</label>
+
           <select v-model="paymentForm.status">
-            <option value="paid">Paid</option>
-            <option value="unpaid">Unpaid</option>
+            <option value="paid">
+              {{ t('paid') }}
+            </option>
+
+            <option value="unpaid">
+              {{ t('unpaid') }}
+            </option>
           </select>
         </div>
 
         <!-- Due Date -->
         <div class="form-group">
-          <label>Due Date</label>
-          <input v-model="paymentForm.due_date" type="date" required />
+          <label>{{ t('dueDate') }}</label>
+
+          <input
+            v-model="paymentForm.due_date"
+            type="date"
+            required
+          />
         </div>
 
         <button class="btn-primary" :disabled="paymentStore.loading">
-          Save Changes
+          {{ t('saveChanges') }}
         </button>
       </form>
 
       <div v-if="paymentStore.loading" class="feedback info">
-        Updating payment...
+        {{ t('updatingPayment') }}
       </div>
 
       <router-link to="/landlord" class="back-home">
-        ← Back
+        ← {{ t('back') }}
       </router-link>
     </div>
   </div>
