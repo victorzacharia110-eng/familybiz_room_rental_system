@@ -124,6 +124,7 @@ export const usePaymentStore = defineStore('payment', () => {
     count_tenant_unpaid_payment,
     error,
     loading,
+    paymentForm,
     deletePayment,
     registerPayment,
     fetchPayments,
