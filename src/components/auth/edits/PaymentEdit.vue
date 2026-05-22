@@ -5,7 +5,7 @@ import { usePaymentStore } from '@/stores/payment'
 import { useRoomStore } from '@/stores/room'
 import { useI18n } from 'vue-i18n'
 
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 const currentLocale = ref(locale.value)
 
 const setLanguage = (lang) => {
@@ -19,15 +19,17 @@ const route = useRoute()
 const paymentStore = usePaymentStore()
 const roomStore = useRoomStore()
 
+const { paymentForm, loadPaymentForEdit, updatePayments } = paymentStore
+
 const paymentId = route.params.id
 
 onMounted(async () => {
   await roomStore.fetchRooms()
-  await paymentStore.loadPaymentForEdit(paymentId)
+  await loadPaymentForEdit(paymentId)
 })
 
 const submit = async () => {
-  const updated = await paymentStore.updatePayments(paymentId)
+  const updated = await updatePayments(paymentId, paymentForm)
 
   if (updated) {
     router.push('/landlord')
@@ -36,21 +38,31 @@ const submit = async () => {
 </script>
 
 <template>
-  <div class="page">
-    <div class="card">
+  <div class="auth-page">
+    <div class="auth-card">
       <h2>Edit Payment</h2>
+      <p class="subtitle">Update payment details below</p>
 
-      <!-- Language -->
+      <!-- Language Toggle -->
       <div class="language-toggle">
-        <button :class="{ active: currentLocale === 'en' }" @click="setLanguage('en')">EN</button>
-        <button :class="{ active: currentLocale === 'sw' }" @click="setLanguage('sw')">SW</button>
+        <button :class="{ active: currentLocale === 'en' }" @click="setLanguage('en')">
+          🇬🇧 English
+        </button>
+        <button :class="{ active: currentLocale === 'sw' }" @click="setLanguage('sw')">
+          🇹🇿 Swahili
+        </button>
       </div>
 
-      <form @submit.prevent="submit">
+      <!-- SAFETY: wait for form -->
+      <div v-if="!paymentForm">
+        Loading form...
+      </div>
+
+      <form v-else @submit.prevent="submit">
         <!-- Room -->
         <div class="form-group">
           <label>Room</label>
-          <select v-if="paymentStore.paymentForm" v-model="paymentStore.paymentForm.room_id">
+          <select v-model="paymentForm.room_id" required>
             <option disabled value="">Select Room</option>
             <option v-for="room in roomStore.rooms" :key="room.id" :value="room.id">
               {{ room.room_number }} - {{ room.status }}
@@ -61,25 +73,25 @@ const submit = async () => {
         <!-- Month -->
         <div class="form-group">
           <label>Month</label>
-          <input v-model="paymentStore.paymentForm.month" type="text" required />
+          <input v-model="paymentForm.month" type="text" required />
         </div>
 
         <!-- Year -->
         <div class="form-group">
           <label>Year</label>
-          <input v-model="paymentStore.paymentForm.year" type="number" required />
+          <input v-model="paymentForm.year" type="number" required />
         </div>
 
         <!-- Amount -->
         <div class="form-group">
           <label>Amount</label>
-          <input v-model="paymentStore.paymentForm.amount" type="number" required />
+          <input v-model="paymentForm.amount" type="number" required />
         </div>
 
         <!-- Status -->
         <div class="form-group">
           <label>Status</label>
-          <select v-model="paymentStore.paymentForm.status">
+          <select v-model="paymentForm.status">
             <option value="paid">Paid</option>
             <option value="unpaid">Unpaid</option>
           </select>
@@ -88,50 +100,96 @@ const submit = async () => {
         <!-- Due Date -->
         <div class="form-group">
           <label>Due Date</label>
-          <input v-model="paymentStore.paymentForm.due_date" type="date" required />
+          <input v-model="paymentForm.due_date" type="date" required />
         </div>
 
-        <button class="btn-primary" :disabled="paymentStore.loading">Save Changes</button>
+        <button class="btn-primary" :disabled="paymentStore.loading">
+          Save Changes
+        </button>
       </form>
 
-      <div v-if="paymentStore.loading">Updating payment...</div>
+      <div v-if="paymentStore.loading" class="feedback info">
+        Updating payment...
+      </div>
 
-      <router-link to="/landlord">← Back</router-link>
+      <router-link to="/landlord" class="back-home">
+        ← Back
+      </router-link>
     </div>
   </div>
 </template>
 
 <style scoped>
-.page {
+.language-toggle {
+  margin: 10px 0;
+  display: flex;
+  gap: 5px;
+  justify-content: flex-end;
+}
+
+.language-toggle button {
+  padding: 5px 12px;
+  background: transparent;
+  border: 1px solid #888;
+  color: black;
+  cursor: pointer;
+  border-radius: 20px;
+  font-weight: bold;
+  transition: 0.25s ease;
+}
+
+.language-toggle button:hover {
+  background: rgba(0, 0, 0, 0.05);
+  transform: scale(1.05);
+}
+
+.language-toggle button.active {
+  background: rgba(0, 123, 255, 0.15);
+  border-color: #007bff;
+  color: #007bff;
+}
+
+/* Layout */
+.auth-page {
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #f1f5f9;
+  background: linear-gradient(270deg, #0f766e, #14b8a6, #0f766e);
+  background-size: 400% 400%;
+  animation: gradientMove 12s ease infinite;
   padding: 20px;
 }
 
-.card {
+.auth-card {
   background: white;
-  padding: 30px;
-  border-radius: 12px;
+  padding: 35px;
   width: 100%;
-  max-width: 450px;
+  max-width: 400px;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  animation: fadeUp 0.6s ease;
 }
 
 h2 {
-  color: #0f766e;
   text-align: center;
+  color: #0f766e;
+}
+
+.subtitle {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #555;
 }
 
 .form-group {
-  margin-bottom: 12px;
+  margin-bottom: 15px;
 }
 
 input,
 select {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   border-radius: 6px;
   border: 1px solid #ccc;
 }
@@ -143,14 +201,37 @@ select {
   color: white;
   border: none;
   border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
 }
-.language-toggle {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-bottom: 10px;
+
+.btn-primary:hover {
+  background: #022c22;
+  transform: translateY(-2px);
 }
-.language-toggle button.active {
-  color: #007bff;
+
+.feedback.info {
+  margin-top: 10px;
+  text-align: center;
+  color: #0f766e;
+}
+
+.back-home {
+  display: block;
+  text-align: center;
+  margin-top: 15px;
+  color: #0f766e;
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
