@@ -5,7 +5,7 @@ import { useRoomStore } from '@/stores/room'
 import { useI18n } from 'vue-i18n'
 
 // -------------------- I18n (legacy mode) --------------------
-const { locale } = useI18n()
+const { locale , h, t } = useI18n()
 const currentLocale = ref(locale.value)
 
 const setLanguage = (lang) => {
