@@ -82,9 +82,7 @@ export const usePaymentStore = defineStore('payment', () => {
       console.log('Payment deleted successfully', response.data)
     } catch (err) {
       error.value = err.response?.data?.message || err.message
-
     }
-
   }
 
   return {

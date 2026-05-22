@@ -41,8 +41,13 @@ const submit = async () => {
 
       <!-- Language Toggle -->
       <div class="language-toggle">
-        <button :class="{ active: locale === 'en' }" @click="locale = 'en'">English</button>
-        <button :class="{ active: locale === 'sw' }" @click="locale = 'sw'">Swahili</button>
+        <button :class="{ active: currentLocale === 'en' }" @click="setLanguage('en')">
+          🇬🇧 English
+        </button>
+
+        <button :class="{ active: currentLocale === 'sw' }" @click="setLanguage('sw')">
+          🇹🇿 Swahili
+        </button>
       </div>
 
       <!-- Room Edit Form -->
@@ -88,26 +93,34 @@ const submit = async () => {
 </template>
 
 <style scoped>
-/* Language toggle buttons */
+/* translation buttons */
 .language-toggle {
   margin: 10px 0;
   display: flex;
   gap: 5px;
+  justify-content: flex-end;
 }
 
 .language-toggle button {
   padding: 5px 12px;
+  background: transparent;
   border: 1px solid #888;
-  background: #f4f4f4;
+  color: black; /* 👈 key change */
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 20px;
   font-weight: bold;
+  transition: 0.25s ease;
+}
+
+.language-toggle button:hover {
+  background: rgba(0, 0, 0, 0.05); /* light hover */
+  transform: scale(1.05);
 }
 
 .language-toggle button.active {
-  background: #007bff;
-  color: white;
+  background: rgba(0, 123, 255, 0.15);
   border-color: #007bff;
+  color: #007bff; /* active stays blue */
 }
 
 /* Layout */
