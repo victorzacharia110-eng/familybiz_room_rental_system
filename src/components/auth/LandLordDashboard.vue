@@ -766,6 +766,7 @@ const paymentStatus = (tenant) => {
               <th>{{ $t('Action') }}</th>
             </tr>
           </thead>
+
           <tbody>
             <tr v-for="(tenant, index) in auth.users" :key="tenant?.id">
               <td>{{ index + 1 }}</td>
