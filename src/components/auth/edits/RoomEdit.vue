@@ -5,7 +5,13 @@ import { useRoomStore } from '@/stores/room'
 import { useI18n } from 'vue-i18n'
 
 // -------------------- I18n (legacy mode) --------------------
-const { locale, t } = useI18n({ useScope: 'global' })
+const { locale } = useI18n()
+const currentLocale = ref(locale.value)
+
+const setLanguage = (lang) => {
+  locale.value = lang
+  currentLocale.value = lang
+}
 
 // -------------------- Router & Store --------------------
 const router = useRouter()
