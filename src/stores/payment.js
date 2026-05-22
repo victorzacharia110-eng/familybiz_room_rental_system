@@ -78,9 +78,13 @@ export const usePaymentStore = defineStore('payment', () => {
   const deletePayment = async (id) => {
     try {
       await api.get('/sanctum/csrf-cookie')
-      const response = await api.get(`/api/payment/delete/${id}`)
+      const response = await api.delete(`/api/payment/delete/${id}`)
       console.log('Payment deleted successfully', response.data)
-    } catch (err) {}
+    } catch (err) {
+      error.value = err.response?.data?.message || err.message
+
+    }
+
   }
 
   return {
