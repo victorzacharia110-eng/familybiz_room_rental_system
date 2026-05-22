@@ -33,7 +33,6 @@ const submit = async () => {
     router.push('/landlord')
   }
 }
-
 </script>
 
 <template>
@@ -51,7 +50,7 @@ const submit = async () => {
         <!-- Room -->
         <div class="form-group">
           <label>Room</label>
-          <select v-model="paymentStore.paymentForm.room_id" required>
+          <select v-if="paymentStore.paymentForm" v-model="paymentStore.paymentForm.room_id">
             <option disabled value="">Select Room</option>
             <option v-for="room in roomStore.rooms" :key="room.id" :value="room.id">
               {{ room.room_number }} - {{ room.status }}

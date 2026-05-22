@@ -101,20 +101,29 @@ export const usePaymentStore = defineStore('payment', () => {
 
     try {
       await api.get('/sanctum/csrf-cookie')
-      const response = api.patch(`/api/payment/update/${id}`, {
+      const response = await api.patch(`/api/payment/update/${id}`, {
         amount: payload.amount,
         status: payload.status,
       })
-    } catch (err) {}
+    } catch (err) {
+      error.value = err.response?.data?.message || err.message
+      return error.value
+    } finally {
+      loading.value = false
+    }
   }
 
   const deletePayment = async (id) => {
+    
     try {
       await api.get('/sanctum/csrf-cookie')
       const response = await api.delete(`/api/payment/delete/${id}`)
       console.log('Payment deleted successfully', response.data)
     } catch (err) {
       error.value = err.response?.data?.message || err.message
+      return error.value
+    } finally {
+      loading.value = false
     }
   }
 
