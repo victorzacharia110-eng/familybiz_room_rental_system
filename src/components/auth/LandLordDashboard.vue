@@ -1198,7 +1198,7 @@ const paymentStatus = (tenant) => {
                   <td>
                     <span class="room-actions">
                       <!-- Edit -->
-                      <router-link :to="`/payments/edit/${payment.id}`" class="btn-edit">
+                      <router-link :to="`/payment/show/${payment.id}`" class="btn-edit">
                         Edit
                       </router-link>
 
