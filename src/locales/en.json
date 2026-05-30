@@ -174,5 +174,15 @@
   "unpaid": "Unpaid",
   "saveChanges": "Save Changes",
   "updatingPayment": "Updating payment...",
-  "back": "Back"
+  "back": "Back",
+  "editPaymentMethod": "Edit Payment Method",
+  "editPaymentMethodSubtitle": "Update your payment details",
+
+  "airtelMoney": "Airtel Money",
+  "mpesa": "M-Pesa",
+  "mixxByYas": "Mixx by Yas",
+  "halopesa": "Halopesa",
+  "nmbAccount": "NMB Account",
+  "crdbAccount": "CRDB Account",
+  "nbcAccount": "NCB Account"
 }

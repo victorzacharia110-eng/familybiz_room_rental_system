@@ -3,8 +3,9 @@ import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { usePaymentMethodStore } from '@/stores/paymentMethod'
 import { useI18n } from 'vue-i18n'
+import { storeToRefs } from 'pinia'
 
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 const currentLocale = ref(locale.value)
 
 const setLanguage = (lang) => {
@@ -16,6 +17,7 @@ const router = useRouter()
 const route = useRoute()
 
 const paymentMethodStore = usePaymentMethodStore()
+const { paymentMethodForm, loading } = storeToRefs(paymentMethodStore)
 
 const methodId = route.params.id
 
@@ -33,96 +35,132 @@ const submit = async () => {
 </script>
 
 <template>
-  <div class="page">
-    <div class="card">
-      <h2>Edit Payment Method</h2>
+  <div class="auth-page">
+    <div class="auth-card">
+
+      <h2>{{ t('editPaymentMethod') }}</h2>
+      <p class="subtitle">{{ t('editPaymentMethodSubtitle') }}</p>
 
       <!-- Language -->
       <div class="language-toggle">
-        <button :class="{ active: currentLocale === 'en' }" @click="setLanguage('en')">EN</button>
-        <button :class="{ active: currentLocale === 'sw' }" @click="setLanguage('sw')">SW</button>
+        <button :class="{ active: currentLocale === 'en' }" @click="setLanguage('en')">
+          🇬🇧 English
+        </button>
+        <button :class="{ active: currentLocale === 'sw' }" @click="setLanguage('sw')">
+          🇹🇿 Swahili
+        </button>
       </div>
 
-      <form @submit.prevent="submit">
+      <form v-if="paymentMethodForm" @submit.prevent="submit">
+
         <div class="form-group">
-          <label>Airtel Money</label>
-          <input v-model="paymentMethodStore.paymentMethodForm.airtel_money_number" type="number" />
+          <label>{{ t('airtelMoneyNumber') }}</label>
+          <input v-model="paymentMethodForm.airtel_money_number" type="number" />
         </div>
 
         <div class="form-group">
-          <label>M-Pesa</label>
-          <input v-model="paymentMethodStore.paymentMethodForm.m_pesa_number" type="number" />
+          <label>{{ t('mPesaNumber') }}</label>
+          <input v-model="paymentMethodForm.m_pesa_number" type="number" />
         </div>
 
         <div class="form-group">
-          <label>Mixx by Yas</label>
-          <input v-model="paymentMethodStore.paymentMethodForm.mixx_by_yas_number" type="number" />
+          <label>{{ t('mixxByYasNumber') }}</label>
+          <input v-model="paymentMethodForm.mixx_by_yas_number" type="number" />
         </div>
 
         <div class="form-group">
-          <label>Halopesa</label>
-          <input v-model="paymentMethodStore.paymentMethodForm.halopesa_number" type="number" />
+          <label>{{ t('halopesaNumber') }}</label>
+          <input v-model="paymentMethodForm.halopesa_number" type="number" />
         </div>
 
         <div class="form-group">
-          <label>NMB Account</label>
-          <input v-model="paymentMethodStore.paymentMethodForm.nmb_account_number" type="number" />
+          <label>{{ t('nmbAccountNumber') }}</label>
+          <input v-model="paymentMethodForm.nmb_account_number" type="number" />
         </div>
 
         <div class="form-group">
-          <label>CRDB Account</label>
-          <input v-model="paymentMethodStore.paymentMethodForm.crdb_account_number" type="number" />
+          <label>{{ t('crdbAccountNumber') }}</label>
+          <input v-model="paymentMethodForm.crdb_account_number" type="number" />
         </div>
 
         <div class="form-group">
-          <label>NCB Account</label>
-          <input v-model="paymentMethodStore.paymentMethodForm.nbc_account_number" type="number" />
+          <label>{{ t('nbcAccountNumber') }}</label>
+          <input v-model="paymentMethodForm.nbc_account_number" type="number" />
         </div>
 
-        <button class="btn-primary" :disabled="paymentMethodStore.loading">Save Changes</button>
+        <button class="btn-primary" :disabled="loading">
+          {{ t('saveChanges') }}
+        </button>
       </form>
 
-      <div v-if="paymentMethodStore.loading">Updating...</div>
+      <div v-if="loading" class="feedback info">
+        {{ t('updatingPayment') }}
+      </div>
 
-      <router-link to="/landlord">← Back</router-link>
+      <router-link to="/landlord" class="back-home">
+        ← {{ t('back') }}
+      </router-link>
+
     </div>
   </div>
 </template>
 
 <style scoped>
-.page {
+/* ===== SAME STYLE SYSTEM AS YOUR PAYMENT PAGE ===== */
+
+.auth-page {
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #f1f5f9;
+  background: linear-gradient(270deg, #0f766e, #14b8a6, #0f766e);
+  background-size: 400% 400%;
+  animation: gradientMove 12s ease infinite;
   padding: 20px;
 }
 
-.card {
+.auth-card {
   background: white;
-  padding: 30px;
-  border-radius: 12px;
+  padding: 35px;
   width: 100%;
-  max-width: 450px;
+  max-width: 420px;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  animation: fadeUp 0.6s ease;
 }
 
+/* TEXT */
 h2 {
-  color: #0f766e;
   text-align: center;
+  color: #0f766e;
 }
 
+.subtitle {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #555;
+}
+
+/* FORM */
 .form-group {
-  margin-bottom: 12px;
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 6px;
+  color: #333;
 }
 
 input {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   border-radius: 6px;
   border: 1px solid #ccc;
 }
 
+/* BUTTON */
 .btn-primary {
   width: 100%;
   padding: 12px;
@@ -130,15 +168,76 @@ input {
   color: white;
   border: none;
   border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
+.btn-primary:hover {
+  background: #022c22;
+  transform: translateY(-2px);
+}
+
+.btn-primary:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* FEEDBACK */
+.feedback.info {
+  margin-top: 10px;
+  text-align: center;
+  color: #0f766e;
+}
+
+/* LANGUAGE TOGGLE */
 .language-toggle {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
+
+.language-toggle button {
+  padding: 5px 12px;
+  background: transparent;
+  border: 1px solid #888;
+  color: black;
+  cursor: pointer;
+  border-radius: 20px;
+  font-weight: bold;
+  transition: 0.25s ease;
+}
+
+.language-toggle button:hover {
+  background: rgba(0, 0, 0, 0.05);
+  transform: scale(1.05);
+}
+
 .language-toggle button.active {
+  background: rgba(0, 123, 255, 0.15);
+  border-color: #007bff;
   color: #007bff;
+}
+
+/* BACK */
+.back-home {
+  display: block;
+  text-align: center;
+  margin-top: 15px;
+  color: #0f766e;
+  text-decoration: none;
+}
+
+/* ANIMATIONS */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
