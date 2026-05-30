@@ -114,7 +114,6 @@ export const usePaymentStore = defineStore('payment', () => {
   }
 
   const deletePayment = async (id) => {
-    
     try {
       await api.get('/sanctum/csrf-cookie')
       const response = await api.delete(`/api/payment/delete/${id}`)

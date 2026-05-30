@@ -1336,7 +1336,7 @@ const paymentStatus = (tenant) => {
                       <!-- Edit navigates to the edit form for this room -->
                       <router-link
                         v-if="payment_method?.id"
-                        :to="`/method/show/${method?.id}`"
+                        :to="`/method/show/${payment_method?.id}`"
                         class="btn-edit"
                       >
                         {{ $t('edit') }}
