@@ -62,24 +62,30 @@ export const useRoomStore = defineStore('room', () => {
   }
 
   // Load a single room into the form by ID
-  const loadRoomForEdit = async (id) => {
-    try {
-      api.get('sanctum/csrf-cookie')
-      const response = await api.get(`/api/room/show/${id}`)
-      if (response && response.data) {
-        roomForm.value = {
-          id: response.data.room.id,
-          room_number: response.data.room.room_number,
-          type: response.data.room.type,
-          status: response.data.room.status,
-        }
-        return roomForm.value
-      }
-    } catch (err) {
-      error.value = err.response?.data?.message || err.message
-      return error.value
+const loadRoomForEdit = async (id) => {
+  try {
+    await api.get('sanctum/csrf-cookie')
+
+    const response = await api.get(`/api/room/show/${id}`)
+
+    const room = response?.data?.room
+
+    if (!room) {
+      throw new Error('Room data not found in response')
     }
+
+    // ✅ update fields reactively (IMPORTANT)
+    roomForm.value.id = room.id
+    roomForm.value.room_number = room.room_number
+    roomForm.value.type = room.type
+    roomForm.value.status = room.status
+
+    return roomForm.value
+  } catch (err) {
+    error.value = err.response?.data?.message || err.message
+    return null
   }
+}
 
   // Update a room from the form
   const updateRoom = async () => {
