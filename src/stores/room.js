@@ -89,7 +89,7 @@ export const useRoomStore = defineStore('room', () => {
 
     try {
       api.get('sanctum/csrf-cookie')
-      const response = await api.put(`/api/room/update/${roomForm.value.id}`, {
+      const response = await api.patch(`/api/room/update/${roomForm.value.id}`, {
         room_number: roomForm.value.room_number,
         type: roomForm.value.type,
         status: roomForm.value.status,
