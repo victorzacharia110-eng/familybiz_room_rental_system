@@ -68,10 +68,10 @@ export const useRoomStore = defineStore('room', () => {
       const response = await api.get(`/api/room/show/${id}`)
       if (response && response.data) {
         roomForm.value = {
-          id: response.data.id,
-          room_number: response.data.room_number,
-          type: response.data.type,
-          status: response.data.status,
+          id: response.data.room.id,
+          room_number: response.data.room.room_number,
+          type: response.data.room.type,
+          status: response.data.room.status,
         }
         return roomForm.value
       }
