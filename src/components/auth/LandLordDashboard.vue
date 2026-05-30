@@ -38,9 +38,7 @@ onMounted(async () => {
   await criticalRemarkStore.fetchCriticalRemarks()
   await latePaymentReasonStore.fetchLatePaymentReasons()
 
-  await paymentMethodStore.loadPaymentMethodForEdit(methodId)
 
-  console.log('FORM AFTER LOAD:', paymentMethodForm.value)
 })
 
 const successMessage = ref('')

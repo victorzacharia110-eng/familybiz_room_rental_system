@@ -23,6 +23,9 @@ const methodId = route.params.id
 
 onMounted(async () => {
   await paymentMethodStore.loadPaymentMethodForEdit(methodId)
+
+
+  console.log('FORM AFTER LOAD:', paymentMethodForm.value)
 })
 
 const submit = async () => {
