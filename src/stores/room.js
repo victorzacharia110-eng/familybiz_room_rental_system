@@ -14,7 +14,7 @@ export const useRoomStore = defineStore('room', () => {
   // Form state for editing a single room
   const roomForm = ref({
     id: null,
-    number: '',
+    room_number: '',
     type: '',
     status: '',
   })

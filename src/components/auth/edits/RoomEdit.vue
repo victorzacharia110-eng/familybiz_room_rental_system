@@ -60,7 +60,7 @@ const submit = async () => {
       <form @submit.prevent="submit">
         <div class="form-group">
           <label>{{ t('roomNumber') }}</label>
-          <input v-model="roomForm.number" type="text" :placeholder="t('roomNumber')" required />
+          <input v-model="roomForm.room_number" type="text" :placeholder="t('roomNumber')" required />
         </div>
 
         <div class="form-group">
