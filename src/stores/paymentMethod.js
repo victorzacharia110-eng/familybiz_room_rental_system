@@ -113,6 +113,7 @@ export const usePaymentMethodStore = defineStore('paymentMethod', () => {
     paymentMethods,
     error,
     loading,
+    paymentMethodForm,
     fetchPaymentMethods,
     registerPaymentMethods,
     deletePaymentMethod,
