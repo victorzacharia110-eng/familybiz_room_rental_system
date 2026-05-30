@@ -88,31 +88,48 @@ const loadRoomForEdit = async (id) => {
 }
 
   // Update a room from the form
-  const updateRoom = async () => {
-    if (!roomForm.value.id) return null
-    loading.value = true
-    error.value = null
+ const updateRoom = async () => {
+  if (!roomForm.value.id) return null
 
-    try {
-      api.get('sanctum/csrf-cookie')
-      const response = await api.patch(`/api/room/update/${roomForm.value.id}`, {
+  loading.value = true
+  error.value = null
+
+  try {
+    await api.get('sanctum/csrf-cookie')
+
+    const response = await api.patch(
+      `/api/room/update/${roomForm.value.id}`,
+      {
         room_number: roomForm.value.room_number,
         type: roomForm.value.type,
         status: roomForm.value.status,
-      })
+      }
+    )
 
-      // Update the room in the list
-      const index = rooms.value.findIndex((r) => r.id === roomForm.value.id)
-      if (index !== -1) rooms.value[index] = response.data
+    // ✅ Laravel returns: { room: {...} }
+    const updatedRoom = response?.data?.room
 
-      return response.data
-    } catch (err) {
-      error.value = err.response?.data?.message || err.message
-      return null
-    } finally {
-      loading.value = false
+    if (!updatedRoom) {
+      throw new Error('Updated room not found in response')
     }
+
+    // ✅ update local list safely
+    const index = rooms.value.findIndex(
+      (r) => r.id === roomForm.value.id
+    )
+
+    if (index !== -1) {
+      rooms.value[index] = updatedRoom
+    }
+
+    return updatedRoom
+  } catch (err) {
+    error.value = err.response?.data?.message || err.message
+    return null
+  } finally {
+    loading.value = false
   }
+}
 
   // Update just the status of the room
   const updateRoomStatus = async (id, checked) => {
