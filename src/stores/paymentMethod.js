@@ -22,6 +22,31 @@ export const usePaymentMethodStore = defineStore('paymentMethod', () => {
     }
   }
 
+  const loadPaymentMethodForEdit = async (id) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      await api.get('/sanctum/csrf-cookie')
+      const response = await api.get(`/api/method/show/${id}`)
+      const paymentMethod = response.data.paymentMethod
+
+      paymentMethods.value = {
+        airtel_money_number: paymentMethod.airtel_money_number,
+        m_pesa_number: paymentMethod.m_pesa_number,
+        mixx_by_yas_number: paymentMethod.mixx_by_yas_number,
+        halopesa_number: paymentMethod.halopesa_number,
+        nmb_account_number: paymentMethod.nmb_account_number,
+        crdb_account_number: paymentMethod.crdb_account_number,
+        nbc_account_number: paymentMethod.nbc_account_number,
+      }
+    } catch (err) {
+      error.value = err.response?.data?.message || err.message
+    } finally {
+      loading.value = false
+    }
+  }
+
   const registerPaymentMethods = async (payload) => {
     try {
       await api.get('/sanctum/csrf-cookie')
@@ -60,5 +85,6 @@ export const usePaymentMethodStore = defineStore('paymentMethod', () => {
     fetchPaymentMethods,
     registerPaymentMethods,
     deletePaymentMethod,
+    loadPaymentMethodForEdit,
   }
 })
