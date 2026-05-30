@@ -392,14 +392,14 @@ const resetPaymentForm = () => {
 }
 
 const resetPaymentMethodForm = () => {
-  paymentMethodForm = {
-    airtel_money_number: 0,
-    mixx_by_yas_number: 0,
-    m_pesa_number: 0,
-    halopesa_number: 0,
-    nmb_account_number: 0,
-    crdb_account_number: 0,
-    nbc_account_number: 0,
+  paymentMethodForm.value = {
+    airtel_money_number: '',
+    m_pesa_number: '',
+    mixx_by_yas_number: '',
+    halopesa_number: '',
+    nmb_account_number: '',
+    crdb_account_number: '',
+    nbc_account_number: '',
   }
 }
 
