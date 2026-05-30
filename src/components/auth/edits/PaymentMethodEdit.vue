@@ -106,96 +106,11 @@ const submit = async () => {
 </template>
 
 <style scoped>
-/* ===== SAME STYLE SYSTEM AS YOUR PAYMENT PAGE ===== */
-
-.auth-page {
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: linear-gradient(270deg, #0f766e, #14b8a6, #0f766e);
-  background-size: 400% 400%;
-  animation: gradientMove 12s ease infinite;
-  padding: 20px;
-}
-
-.auth-card {
-  background: white;
-  padding: 35px;
-  width: 100%;
-  max-width: 420px;
-  border-radius: 12px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  animation: fadeUp 0.6s ease;
-}
-
-/* TEXT */
-h2 {
-  text-align: center;
-  color: #0f766e;
-}
-
-.subtitle {
-  text-align: center;
-  margin-bottom: 20px;
-  color: #555;
-}
-
-/* FORM */
-.form-group {
-  margin-bottom: 15px;
-}
-
-label {
-  display: block;
-  font-weight: bold;
-  margin-bottom: 6px;
-  color: #333;
-}
-
-input {
-  width: 100%;
-  padding: 12px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-/* BUTTON */
-.btn-primary {
-  width: 100%;
-  padding: 12px;
-  background: #0f766e;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.btn-primary:hover {
-  background: #022c22;
-  transform: translateY(-2px);
-}
-
-.btn-primary:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-/* FEEDBACK */
-.feedback.info {
-  margin-top: 10px;
-  text-align: center;
-  color: #0f766e;
-}
-
-/* LANGUAGE TOGGLE */
 .language-toggle {
+  margin: 10px 0;
   display: flex;
+  gap: 5px;
   justify-content: flex-end;
-  gap: 10px;
-  margin-bottom: 15px;
 }
 
 .language-toggle button {
@@ -220,16 +135,81 @@ input {
   color: #007bff;
 }
 
-/* BACK */
+/* Layout */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(270deg, #0f766e, #14b8a6, #0f766e);
+  background-size: 400% 400%;
+  animation: gradientMove 12s ease infinite;
+  padding: 20px;
+}
+
+.auth-card {
+  background: white;
+  padding: 35px;
+  width: 100%;
+  max-width: 500px;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  animation: fadeUp 0.6s ease;
+}
+
+h2 {
+  text-align: center;
+  color: #0f766e;
+}
+
+.subtitle {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #555;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  background: #0f766e;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-primary:hover {
+  background: #022c22;
+  transform: translateY(-2px);
+}
+
+.feedback.info {
+  margin-top: 10px;
+  text-align: center;
+  color: #0f766e;
+}
+
 .back-home {
   display: block;
   text-align: center;
   margin-top: 15px;
   color: #0f766e;
-  text-decoration: none;
 }
 
-/* ANIMATIONS */
 @keyframes gradientMove {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
