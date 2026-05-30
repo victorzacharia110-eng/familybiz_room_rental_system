@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useRoomStore } from '@/stores/room'
 import { useI18n } from 'vue-i18n'
+import { storeToRefs } from 'pinia'
 
 // -------------------- I18n (legacy mode) --------------------
 const { locale , t } = useI18n()
@@ -22,11 +23,13 @@ const roomStore = useRoomStore()
 const roomId = route.params.id
 
 // Destructure roomForm, store actions
-const { roomForm, loadRoomForEdit, updateRoom } = roomStore
+const { roomForm } = storeToRefs(roomStore)
+const { loadRoomForEdit, updateRoom } = roomStore
 
 // Load room details on mount
 onMounted(async () => {
   await loadRoomForEdit(roomId)
+  console.log('FORM AFTER LOAD:', roomForm.value)
 })
 
 // Submit handler
