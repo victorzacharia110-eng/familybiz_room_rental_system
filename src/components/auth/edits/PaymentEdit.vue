@@ -29,6 +29,7 @@ const paymentId = route.params.id
 onMounted(async () => {
   await roomStore.fetchRooms()
   await loadPaymentForEdit(paymentId)
+    console.log('FORM AFTER LOAD:', paymentForm.value)
 })
 
 const submit = async () => {
