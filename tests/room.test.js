@@ -81,12 +81,14 @@ it('updates a room', async () => {
   }
 
   api.get.mockResolvedValueOnce({})
-  api.put.mockResolvedValueOnce({
+  api.patch.mockResolvedValueOnce({
     data: {
-      id: 1,
-      room_number: "A2",
-      type: "Double",
-      status: "Occupied"
+      room: {
+        id: 1,
+        room_number: "A2",
+        type: "Double",
+        status: "Occupied"
+      }
     }
   })
 

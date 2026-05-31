@@ -34,7 +34,6 @@ onMounted(async () => {
   hasSeenAnnouncements.value = false
 
   await roomStore.fetchRooms()
-  await roomStore.updateRoomStatus()
   await paymentStore.fetchPayment()
   await paymentMethodStore.fetchPaymentMethods()
   await announcementStore.fetchAnnouncements()

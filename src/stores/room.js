@@ -137,11 +137,13 @@ const loadRoomForEdit = async (id) => {
       const status = checked ? 'Occupied' : 'Available'
       await api.patch(`/api/room/update/status/${id}`, { status })
 
-      const room = this.rooms.find((r) => r.id === id)
+      const room = rooms.value.find((r) => r.id === id)
 
       if (room) {
         room.status = status
       }
+
+      return status
     } catch (err) {
       error.value = err.response?.data?.message || err.message
     }
