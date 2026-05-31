@@ -185,5 +185,6 @@
   "nmbAccount": "NMB Account",
   "crdbAccount": "CRDB Account",
   "nbcAccount": "NCB Account",
-  "UpdatingRoom": "Updating Room..."
+  "UpdatingRoom": "Updating Room...",
+  "homeStatsTitle": "Overview Statistics"
 }
