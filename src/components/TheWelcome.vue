@@ -10,586 +10,884 @@ const changeLanguage = (lang) => {
   locale.value = lang
 }
 
-// Simulate loading (replace with real auth logic later)
 const handleAuthClick = () => {
   isLoading.value = true
-
   setTimeout(() => {
     isLoading.value = false
   }, 2000)
 }
 
-/* FEATURES */
+/* ─── FEATURES (kept for i18n compatibility) ─── */
 const currentFeature = ref(0)
-
 const features = [
-  { icon: '📍', title: 'homeFeatureLocationTitle', desc: 'homeFeatureLocationDesc' },
-  { icon: '🔐', title: 'homeFeatureSecurityTitle', desc: 'homeFeatureSecurityDesc' },
-  { icon: '💧', title: 'homeFeatureUtilitiesTitle', desc: 'homeFeatureUtilitiesDesc' },
-  { icon: '💰', title: 'homeFeaturePriceTitle', desc: 'homeFeaturePriceDesc' },
+  { icon: '📍', title: 'homeFeatureLocationTitle', desc: 'homeFeatureLocationDesc', backTitle: 'Why it matters', backDesc: 'Close to Gongo la Mboto main road. Dala dala route 36 stops right outside.' },
+  { icon: '🔐', title: 'homeFeatureSecurityTitle', desc: 'homeFeatureSecurityDesc', backTitle: 'Peace of mind', backDesc: 'Licensed guards, full CCTV coverage and secure gate entry every day.' },
+  { icon: '💧', title: 'homeFeatureUtilitiesTitle', desc: 'homeFeatureUtilitiesDesc', backTitle: 'No surprises', backDesc: 'Fixed monthly rate. Water, electricity and maintenance all covered — zero hidden fees.' },
+  { icon: '💰', title: 'homeFeaturePriceTitle', desc: 'homeFeaturePriceDesc', backTitle: 'Great value', backDesc: 'Competitive pricing with flexible payment plans to suit your monthly budget.' },
 ]
 
-const nextFeature = () => {
-  currentFeature.value = (currentFeature.value + 1) % features.length
+/* ─── STATS ─── */
+const stats = [
+  { target: 120, current: ref(0), label: 'Happy Tenants' },
+  { target: 5,   current: ref(0), label: 'Years Running' },
+  { target: 98,  current: ref(0), label: '% Satisfaction' },
+  { target: 24,  current: ref(0), label: 'Hr Security' },
+]
+
+/* ─── REFS ─── */
+const heroSection  = ref(null)
+const bgCanvas     = ref(null)
+const cubesWrapper = ref(null)
+const revealEls    = ref([])
+
+let rafId        = null
+let resizeTimer  = null
+let ioInstance   = null
+let autoInterval = null
+
+/* ════════════════════════════════════════
+   STAR-FIELD CANVAS
+════════════════════════════════════════ */
+function initCanvas () {
+  const canvas = bgCanvas.value
+  if (!canvas) return
+  const ctx = canvas.getContext('2d')
+  let stars = []
+
+  function size () {
+    canvas.width  = canvas.offsetWidth  || window.innerWidth
+    canvas.height = heroSection.value?.offsetHeight || 600
+    stars = Array.from({ length: 180 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.5 + 0.3,
+      a: Math.random() * Math.PI * 2,
+      vx: (Math.random() - 0.5) * 0.15,
+      vy: (Math.random() - 0.5) * 0.15,
+      opacity: Math.random(),
+    }))
+  }
+
+  function draw () {
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    stars.forEach(s => {
+      s.a       += 0.02
+      s.opacity  = 0.4 + Math.sin(s.a) * 0.4
+      s.x       += s.vx
+      s.y       += s.vy
+      if (s.x < 0) s.x = canvas.width
+      if (s.x > canvas.width) s.x = 0
+      if (s.y < 0) s.y = canvas.height
+      if (s.y > canvas.height) s.y = 0
+      ctx.beginPath()
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2)
+      ctx.fillStyle = `rgba(20,184,166,${s.opacity})`
+      ctx.fill()
+    })
+    rafId = requestAnimationFrame(draw)
+  }
+
+  size()
+  draw()
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer)
+    resizeTimer = setTimeout(size, 200)
+  })
 }
 
-const prevFeature = () => {
-  currentFeature.value = (currentFeature.value - 1 + features.length) % features.length
+/* ════════════════════════════════════════
+   CSS 3D FLOATING CUBES
+════════════════════════════════════════ */
+function buildCubes () {
+  const container = cubesWrapper.value
+  if (!container) return
+  container.innerHTML = ''
+
+  for (let i = 0; i < 8; i++) {
+    const size  = 20 + Math.random() * 30
+    const left  = Math.random() * 90
+    const top   = Math.random() * 90
+    const dur   = 6  + Math.random() * 8
+    const delay = Math.random() * 6
+    const hw    = size / 2
+
+    const cube = document.createElement('div')
+    cube.className = 'cube'
+    cube.style.cssText = `left:${left}%;top:${top}%;width:${size}px;height:${size}px;animation-duration:${dur}s;animation-delay:-${delay}s;transform-style:preserve-3d`
+
+    const transforms = [
+      `translateZ(${hw}px)`,
+      `translateZ(-${hw}px) rotateY(180deg)`,
+      `translateX(${hw}px) rotateY(90deg)`,
+      `translateX(-${hw}px) rotateY(-90deg)`,
+      `translateY(-${hw}px) rotateX(90deg)`,
+      `translateY(${hw}px) rotateX(-90deg)`,
+    ]
+    transforms.forEach(tf => {
+      const face = document.createElement('div')
+      face.className = 'cube-face'
+      face.style.cssText = `width:${size}px;height:${size}px;position:absolute;transform:${tf};border:1px solid rgba(20,184,166,${0.15 + Math.random() * 0.2});background:rgba(20,184,166,.03)`
+      cube.appendChild(face)
+    })
+    container.appendChild(cube)
+  }
 }
 
-/* AUTO PLAY */
-let interval = null
+/* ════════════════════════════════════════
+   MOUSE PARALLAX
+════════════════════════════════════════ */
+function onMouseMove (e) {
+  const x = (e.clientX / window.innerWidth  - 0.5) * 16
+  const y = (e.clientY / window.innerHeight - 0.5) * 16
+  const inner = heroSection.value?.querySelector('.hero-inner')
+  if (inner) inner.style.transform = `perspective(900px) rotateX(${-y * 0.25}deg) rotateY(${x * 0.25}deg) translateZ(10px)`
+  heroSection.value?.querySelectorAll('.ring').forEach((r, i) => {
+    const f = (i + 1) * 0.5
+    r.style.marginLeft = `${-250 + 180 * i + x * f}px`
+  })
+}
 
+/* ════════════════════════════════════════
+   SCROLL REVEAL + COUNTERS
+════════════════════════════════════════ */
+function initReveal () {
+  ioInstance = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return
+      entry.target.classList.add('in')
+
+      // counter animation
+      const numEl = entry.target.querySelector('[data-target]')
+      if (numEl && !numEl._done) {
+        numEl._done = true
+        const target = +numEl.dataset.target
+        let current  = 0
+        const step   = target / 55
+        const tick   = setInterval(() => {
+          current = Math.min(current + step, target)
+          numEl.textContent = Math.round(current)
+          if (current >= target) clearInterval(tick)
+        }, 16)
+      }
+    })
+  }, { threshold: 0.15 })
+
+  document.querySelectorAll('.rv').forEach(el => ioInstance.observe(el))
+}
+
+/* ════════════════════════════════════════
+   LIFECYCLE
+════════════════════════════════════════ */
 onMounted(() => {
-  interval = setInterval(nextFeature, 3000)
+  initCanvas()
+  buildCubes()
+  initReveal()
+  window.addEventListener('mousemove', onMouseMove)
+
+  // auto-advance features carousel (kept from original)
+  autoInterval = setInterval(() => {
+    currentFeature.value = (currentFeature.value + 1) % features.length
+  }, 3000)
 })
 
-onUnmounted(() => clearInterval(interval))
+onUnmounted(() => {
+  cancelAnimationFrame(rafId)
+  clearInterval(autoInterval)
+  clearTimeout(resizeTimer)
+  ioInstance?.disconnect()
+  window.removeEventListener('mousemove', onMouseMove)
+})
 </script>
 
 <template>
   <div class="home-container">
-    <!-- HERO SECTION -->
-    <section class="hero">
-      <div class="hero-content">
-        <h1 class="fade-in">{{ $t('homeWelcomeTitle') }}</h1>
 
-        <p class="location slide-up">
-          {{ $t('homeLocationDescription') }}
-        </p>
+    <!-- ══════════════ HERO ══════════════ -->
+    <section class="hero" id="hero-sec" ref="heroSection">
 
-        <p class="description slide-up-delay">
-          {{ $t('homeHeroDescription') }}
-        </p>
+      <!-- star-field canvas -->
+      <canvas id="bg-canvas" ref="bgCanvas"></canvas>
 
-        <!-- LANGUAGE SWITCH -->
-        <div class="language-switch zoom-in">
-          <button @click="changeLanguage('en')" :class="{ active: locale === 'en' }">
-            🇬🇧 ENGLISH
-          </button>
+      <!-- scanlines overlay -->
+      <div class="scanlines"></div>
 
-          <button @click="changeLanguage('sw')" :class="{ active: locale === 'sw' }">
-            🇹🇿 SWAHILI
-          </button>
+      <!-- rotating 3-D rings -->
+      <div class="ring-wrap">
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+      </div>
+
+      <!-- floating CSS 3-D cubes (built in JS) -->
+      <div class="cubes" ref="cubesWrapper"></div>
+
+      <!-- content -->
+      <div class="hero-inner">
+
+        <div class="badge">
+          <span class="badge-dot"></span>
+          <span>📍 Dar es Salaam, Tanzania</span>
         </div>
 
-        <!-- ACTION BUTTONS -->
-        <div class="actions zoom-in">
+        <h1>
+          {{ $t('homeWelcomeTitle') }}
+          <span class="teal">Majohe Bwera</span>
+        </h1>
+
+        <p class="hero-desc">{{ $t('homeHeroDescription') }}</p>
+
+        <!-- language switch -->
+        <div class="langs">
+          <button
+            class="lbtn"
+            :class="{ on: locale === 'en' }"
+            @click="changeLanguage('en')"
+          >🇬🇧 ENGLISH</button>
+          <button
+            class="lbtn"
+            :class="{ on: locale === 'sw' }"
+            @click="changeLanguage('sw')"
+          >🇹🇿 SWAHILI</button>
+        </div>
+
+        <!-- action buttons -->
+        <div class="btns">
           <router-link
             to="/login"
-            class="btn login-btn"
+            class="bp"
             :class="{ disabled: isLoading }"
             :aria-disabled="isLoading"
             @click.prevent="isLoading ? null : handleAuthClick()"
-          >
-            {{ $t('login') }}
-          </router-link>
+          >{{ $t('login') }}</router-link>
 
           <router-link
             to="/register"
-            class="btn register-btn"
+            class="bs"
             :class="{ disabled: isLoading }"
             :aria-disabled="isLoading"
             @click.prevent="isLoading ? null : handleAuthClick()"
-          >
-            {{ $t('Register') }}
-          </router-link>
+          >{{ $t('Register') }}</router-link>
         </div>
 
-        <!-- WAIT MESSAGE -->
-        <p v-if="isLoading" class="wait-message">
-          {{ $t('waitMoment') }}
-        </p>
+        <p v-if="isLoading" class="wait-message">{{ $t('waitMoment') }}</p>
       </div>
     </section>
 
-    <!-- FEATURES CAROUSEL -->
-    <section class="features">
-      <h2>{{ $t('homeFeaturesTitle') }}</h2>
+    <!-- ══════════════ FEATURES — 3D flip cards ══════════════ -->
+    <section class="sec sec-dark">
+      <p class="sec-sub rv">{{ $t('homeFeaturesTitle') }}</p>
+      <h2 class="sec-title rv">{{ $t('homeFeaturesTitle') }}</h2>
 
-      <div class="carousel">
-        <!-- LEFT -->
-        <button class="nav-btn" @click="prevFeature">‹</button>
-
-        <!-- VIEWPORT -->
-        <div class="carousel-viewport">
-          <div
-            class="carousel-track"
-            :style="{ transform: `translateX(-${currentFeature * 100}%)` }"
-          >
-            <div v-for="(feature, i) in features" :key="i" class="feature-card">
-              <h3>
-                {{ feature.icon }}
-                {{ $t(feature.title) }}
-              </h3>
+      <div class="flip-grid">
+        <div
+          v-for="(feature, i) in features"
+          :key="i"
+          class="flip-card rv"
+          :class="`d${i + 1}`"
+        >
+          <div class="flip-inner">
+            <!-- front -->
+            <div class="flip-front">
+              <span class="flip-icon">{{ feature.icon }}</span>
+              <h3>{{ $t(feature.title) }}</h3>
               <p>{{ $t(feature.desc) }}</p>
+            </div>
+            <!-- back -->
+            <div class="flip-back">
+              <h3>{{ feature.backTitle }}</h3>
+              <p>{{ feature.backDesc }}</p>
             </div>
           </div>
         </div>
-
-        <!-- RIGHT -->
-        <button class="nav-btn" @click="nextFeature">›</button>
-      </div>
-
-      <!-- DOTS -->
-      <div class="dots">
-        <span
-          v-for="(f, i) in features"
-          :key="i"
-          :class="{ active: i === currentFeature }"
-          @click="currentFeature = i"
-        ></span>
       </div>
     </section>
 
-    <!-- LOCATION -->
-    <section class="location-section">
-      <div class="location-content">
-        <h2>{{ $t('homeLocationTitle') }}</h2>
-
-        <p>{{ $t('homeLocationDesc') }}</p>
-
-        <p class="highlight">
-          {{ $t('homeLocationHighlight') }}
-        </p>
-
-        <!-- MAP -->
-        <div class="map-container">
-          <iframe
-            src="https://maps.google.com/maps?q=-6.9139299,39.1565626&z=17&output=embed"
-            allowfullscreen=""
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-          ></iframe>
-
-          <div class="location-highlight">
-            📍 {{ $t('locationDescription') }}
-
-            <br /><br />
-
-            🧭 {{ $t('howToGetThere') }}
-
-            <br /><br />
-
-            🚖 {{ $t('transportInstructions') }}
-          </div>
+    <!-- ══════════════ STATS / COUNTERS ══════════════ -->
+    <section class="sec sec-darker">
+      <h2 class="sec-title rv" style="margin-bottom:36px">{{ $t('homeStatsTitle') }}</h2>
+      <div class="counter-row">
+        <div
+          v-for="(stat, i) in stats"
+          :key="i"
+          class="ctr rv"
+          :class="`d${i + 1}`"
+        >
+          <span class="ctr-num" :data-target="stat.target">0</span>
+          <div class="ctr-lbl">{{ stat.label }}</div>
         </div>
       </div>
     </section>
 
-    <!-- FOOTER -->
-    <footer class="footer">
-      <div class="footer-container">
-        <div>
+    <!-- ══════════════ LOCATION ══════════════ -->
+    <section class="sec sec-dark">
+      <p class="sec-sub rv">{{ $t('homeLocationTitle') }}</p>
+      <h2 class="sec-title rv" style="margin-bottom:32px">{{ $t('homeLocationTitle') }}</h2>
+
+      <div class="map-box rv">
+        <iframe
+          src="https://maps.google.com/maps?q=-6.9139299,39.1565626&z=17&output=embed"
+          allowfullscreen
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+
+        <div class="map-info">
+          <p>📍 {{ $t('locationDescription') }}</p>
+          <p>🧭 {{ $t('howToGetThere') }}</p>
+          <p>🚖 {{ $t('transportInstructions') }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ FOOTER ══════════════ -->
+    <footer class="foot">
+      <div class="foot-grid">
+
+        <div class="rv">
           <h3>{{ $t('homeFooterTitle') }}</h3>
           <p>{{ $t('homeFooterDescription') }}</p>
         </div>
 
-        <div>
+        <div class="rv d1">
           <h3>{{ $t('homeContact') }}</h3>
-          <p><strong>Software Engineer Victor</strong></p>
+          <p class="contact-name">Software Engineer Victor</p>
           <p>📞 0683 870 268</p>
           <p>📞 0794 770 268</p>
         </div>
 
-        <div>
+        <div class="rv d2">
           <h3>{{ $t('homeAddress') }}</h3>
           <p>Gongo la Mboto</p>
           <p>Majohe Bwera</p>
           <p>Dar es Salaam, Tanzania</p>
         </div>
+
       </div>
 
-      <div class="footer-bottom">© {{ new Date().getFullYear() }} Majohe Bwera Rooms</div>
+      <div class="foot-btm">
+        © {{ new Date().getFullYear() }} Majohe Bwera Rooms — All rights reserved
+      </div>
     </footer>
+
   </div>
 </template>
 
 <style scoped>
-.carousel {
+/* ══════════════════════════════════════════════
+   GOOGLE FONT (add to index.html if not present)
+   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+══════════════════════════════════════════════ */
+
+/* ── GLOBAL RESET (scoped to component) ── */
+.home-container {
+  font-family: 'Inter', Arial, Helvetica, sans-serif;
+  background: #030810;
+  color: #fff;
+  overflow-x: hidden;
+}
+
+/* ══════════════════════════════════════════════
+   HERO
+══════════════════════════════════════════════ */
+.hero {
+  min-height: 600px;
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  margin-top: 30px;
-  width: 100%;
+  padding: 60px 20px;
 }
 
-/* RESPONSIVE VIEWPORT */
-.carousel-viewport {
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
+/* star canvas */
+#bg-canvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
 }
 
-/* TRACK */
-.carousel-track {
-  display: flex;
-  transition: transform 0.6s ease-in-out;
-  will-change: transform;
+/* scanlines */
+.scanlines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,.08) 2px,
+    rgba(0,0,0,.08) 4px
+  );
 }
 
-/* CARD (RESPONSIVE CORE FIX) */
-.feature-card {
-  flex: 0 0 100%;
-  box-sizing: border-box;
-  background: white;
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-  text-align: center;
-
-  /* KEY FIX */
-  min-width: 100%;
+/* ── rotating rings ── */
+.ring-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
 }
-
-/* NAV BUTTONS */
-.nav-btn {
-  background: #0f766e;
-  color: white;
-  border: none;
-  font-size: 22px;
-  padding: 10px 14px;
+.ring {
+  position: absolute;
   border-radius: 50%;
-  cursor: pointer;
-  transition: 0.3s;
-  flex-shrink: 0;
+  border: 1px solid rgba(20,184,166,.18);
+  animation: ringRotate linear infinite;
+}
+.ring:nth-child(1) {
+  width: 500px; height: 500px;
+  top: 50%; left: 50%;
+  margin: -250px 0 0 -250px;
+  animation-duration: 18s;
+}
+.ring:nth-child(2) {
+  width: 360px; height: 360px;
+  top: 50%; left: 50%;
+  margin: -180px 0 0 -180px;
+  animation-duration: 12s;
+  animation-direction: reverse;
+  border-color: rgba(20,184,166,.12);
+}
+.ring:nth-child(3) {
+  width: 220px; height: 220px;
+  top: 50%; left: 50%;
+  margin: -110px 0 0 -110px;
+  animation-duration: 7s;
+  border-color: rgba(20,184,166,.25);
+}
+@keyframes ringRotate {
+  from { transform: rotateX(70deg) rotateZ(0deg); }
+  to   { transform: rotateX(70deg) rotateZ(360deg); }
 }
 
-.nav-btn:hover {
-  transform: scale(1.1);
+/* ── CSS 3D cubes (DOM built in JS) ── */
+.cubes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+/* These selectors target elements injected by buildCubes() */
+:deep(.cube) {
+  position: absolute;
+  transform-style: preserve-3d;
+  animation: cubeFloat linear infinite;
+}
+:deep(.cube-face) {
+  position: absolute;
+}
+@keyframes cubeFloat {
+  0%   { transform: translateY(0px)   rotateX(0deg)   rotateY(0deg)   rotateZ(0deg); }
+  100% { transform: translateY(-40px) rotateX(360deg) rotateY(360deg) rotateZ(180deg); }
 }
 
-/* DOTS */
-.dots {
-  margin-top: 15px;
+/* ── hero content ── */
+.hero-inner {
+  position: relative;
+  z-index: 3;
   text-align: center;
+  max-width: 720px;
+  transition: transform 0.05s linear;
 }
 
-.dots span {
-  display: inline-block;
-  width: 9px;
-  height: 9px;
-  margin: 4px;
-  background: #ccc;
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-.dots span.active {
-  background: #0f766e;
-  transform: scale(1.3);
-}
-
-/* MAP */
-.map-container {
-  width: 100%;
-  margin-top: 30px;
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
-}
-
-.map-container iframe {
-  width: 100%;
-  height: 350px;
-  border: 0;
-  display: block;
-}
-
-.location-highlight {
-  padding: 12px 15px;
-  background: rgba(20, 184, 166, 0.12);
-  border-left: 4px solid #14b8a6;
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(20,184,166,.10);
+  border: 1px solid rgba(20,184,166,.35);
+  color: #5dcaa5;
+  font-size: 11px;
   font-weight: 600;
-  font-size: 14px;
-  color: #0f172a;
-}
-
-/* GENERAL */
-.home-container {
-  font-family: Arial, Helvetica, sans-serif;
-  color: #333;
-}
-
-/* LANGUAGE SWITCH */
-.language-switch {
-  margin-bottom: 20px;
-}
-
-.language-switch button {
-  margin: 10px;
-  padding: 8px 16px;
-  border: 2px solid white;
-  background: transparent;
-  color: white;
+  padding: 6px 16px;
   border-radius: 20px;
-  cursor: pointer;
-  transition: 0.3s ease;
-  font-weight: bold;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  animation: popIn .6s cubic-bezier(.34,1.56,.64,1) both;
 }
-
-.language-switch button.active {
-  background: white;
-  color: #0f766e;
-  transform: scale(1.1);
-  animation: pulse 1.5s infinite;
+.badge-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #14b8a6;
+  animation: pulse2 1.5s ease-in-out infinite;
 }
-
-.language-switch button:hover {
-  transform: scale(1.15);
-  background: rgba(255, 255, 255, 0.2);
+@keyframes pulse2 {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50%     { opacity: .4; transform: scale(1.4); }
 }
-
-/* HERO */
-.hero {
-  background: linear-gradient(270deg, #0f766e, #14b8a6, #0f766e);
-  background-size: 400% 400%;
-  animation: gradientMove 10s ease infinite;
-  color: white;
-  padding: 80px 20px;
-  text-align: center;
-}
-
-.hero-content {
-  max-width: 800px;
-  margin: auto;
+@keyframes popIn {
+  from { opacity: 0; transform: scale(.7) translateY(-10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .hero h1 {
-  font-size: 2.6rem;
-  margin-bottom: 20px;
+  font-size: clamp(2rem, 5.5vw, 4rem);
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: 16px;
+  animation: titleDrop .9s cubic-bezier(.34,1.56,.64,1) both .1s;
+}
+@keyframes titleDrop {
+  from { opacity: 0; transform: perspective(600px) translateZ(-200px) rotateX(40deg); }
+  to   { opacity: 1; transform: perspective(600px) translateZ(0) rotateX(0); }
+}
+.teal {
+  color: #14b8a6;
+  display: inline-block;
+  animation: tealSpin .8s cubic-bezier(.34,1.56,.64,1) both .4s;
+}
+@keyframes tealSpin {
+  from { opacity: 0; transform: rotateY(-90deg) scale(.5); }
+  to   { opacity: 1; transform: rotateY(0) scale(1); }
 }
 
-/* BUTTONS */
-.actions {
-  margin-top: 30px;
+.hero-desc {
+  font-size: 15px;
+  color: rgba(255,255,255,.6);
+  margin-bottom: 28px;
+  line-height: 1.7;
+  animation: fadeUp .8s ease both .5s;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.btn {
-  padding: 12px 28px;
+/* ── language buttons ── */
+.langs {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 24px;
+  animation: fadeUp .8s ease both .6s;
+}
+.lbtn {
+  padding: 7px 18px;
   border-radius: 20px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: transparent;
+  color: rgba(255,255,255,.6);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  transition: .25s;
+  font-family: inherit;
+}
+.lbtn.on,
+.lbtn:hover {
+  background: #0f766e;
+  border-color: #14b8a6;
+  color: #fff;
+  transform: scale(1.07) translateY(-2px);
+}
+
+/* ── action buttons ── */
+.btns {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  animation: fadeUp .8s ease both .7s;
+}
+.bp, .bs {
+  padding: 13px 32px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: .3s;
+  font-family: inherit;
+  position: relative;
+  overflow: hidden;
   text-decoration: none;
-  font-weight: bold;
-  margin: 10px;
-  transition: 0.3s ease;
   display: inline-block;
 }
+.bp {
+  background: #0f766e;
+  color: #fff;
+}
+.bp:hover {
+  background: #14b8a6;
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 12px 35px rgba(20,184,166,.4);
+}
+.bs {
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.2);
+  color: #fff;
+}
+.bs:hover {
+  background: rgba(255,255,255,.13);
+  transform: translateY(-5px);
+  border-color: #14b8a6;
+}
+.bp::after, .bs::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(255,255,255,.15), transparent);
+  opacity: 0;
+  transition: .3s;
+}
+.bp:hover::after, .bs:hover::after { opacity: 1; }
 
-/* DISABLED STATE */
 .disabled {
   pointer-events: none;
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.login-btn {
-  background: white;
-  color: #0f766e;
-}
-
-.register-btn {
-  background: #022c22;
-  color: white;
-}
-
-.btn:hover {
-  transform: translateY(-4px);
-}
-
-/* WAIT MESSAGE */
 .wait-message {
   margin-top: 15px;
-  color: white;
+  color: #fff;
   font-weight: bold;
-  animation: pulse 1s infinite;
+  animation: pulseAnim 1s infinite;
+}
+@keyframes pulseAnim {
+  0%   { box-shadow: 0 0 0 0 rgba(255,255,255,.6); }
+  70%  { box-shadow: 0 0 0 10px rgba(255,255,255,0); }
+  100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
 }
 
-/* FEATURES */
-.features {
-  padding: 60px 20px;
-  background: #f8fafc;
+/* ══════════════════════════════════════════════
+   SECTIONS — shared
+══════════════════════════════════════════════ */
+.sec {
+  padding: 70px 16px;
+  position: relative;
+  overflow: hidden;
+}
+.sec-dark   { background: #020608; }
+.sec-darker { background: #010406; }
+
+.sec-title {
   text-align: center;
+  font-size: clamp(1.4rem, 3.5vw, 2.2rem);
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+.sec-sub {
+  text-align: center;
+  font-size: 13px;
+  color: rgba(255,255,255,.4);
+  margin-bottom: 40px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
 }
 
-.feature-grid {
-  margin-top: 30px;
+/* ══════════════════════════════════════════════
+   3D FLIP CARDS
+══════════════════════════════════════════════ */
+.flip-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 20px;
+  max-width: 880px;
+  margin: 0 auto;
+  perspective: 1000px;
 }
-
-.feature-card {
-  background: white;
-  padding: 25px;
-  border-radius: 8px;
-  transition: 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+.flip-card {
+  height: 220px;
+  cursor: pointer;
+  perspective: 800px;
 }
-
-.feature-card:hover {
-  transform: translateY(-8px);
+.flip-inner {
+  width: 100%; height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform .7s cubic-bezier(.4,0,.2,1);
 }
-
-/* LOCATION */
-.location-section {
-  padding: 60px 20px;
+.flip-card:hover .flip-inner {
+  transform: rotateY(180deg);
+}
+.flip-front, .flip-back {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
   text-align: center;
 }
-
-.highlight {
-  margin-top: 15px;
-  font-weight: bold;
-  color: #14b8a6;
+.flip-front {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(20,184,166,.15);
 }
-
-/* FOOTER */
-.footer {
-  background: #022c22;
-  color: #e2e8f0;
-  padding-top: 40px;
+.flip-back {
+  background: linear-gradient(135deg, #0f766e, #085041);
+  border: 1px solid #14b8a6;
+  transform: rotateY(180deg);
 }
+.flip-icon {
+  font-size: 2.2rem;
+  margin-bottom: 12px;
+  display: block;
+  transition: .4s;
+}
+.flip-card:hover .flip-icon {
+  transform: scale(1.15) rotateZ(10deg);
+}
+.flip-front h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+}
+.flip-front p { font-size: 12px; color: rgba(255,255,255,.45); line-height: 1.6; }
+.flip-back h3 { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.flip-back p  { font-size: 12px; color: rgba(255,255,255,.8); line-height: 1.6; }
 
-.footer-container {
+/* ══════════════════════════════════════════════
+   STATS / COUNTERS
+══════════════════════════════════════════════ */
+.counter-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 30px;
-  padding: 20px 30px;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 24px;
+  max-width: 700px;
+  margin: 0 auto;
 }
-
-.footer-bottom {
+.ctr {
   text-align: center;
-  padding: 15px;
-  background: #021a15;
-  margin-top: 20px;
+  padding: 28px 16px;
+  background: rgba(20,184,166,.06);
+  border: 1px solid rgba(20,184,166,.12);
+  border-radius: 16px;
+  transition: .35s;
+}
+.ctr:hover {
+  background: rgba(20,184,166,.12);
+  transform: translateY(-6px) rotateX(4deg) scale(1.04);
+  border-color: rgba(20,184,166,.4);
+}
+.ctr-num {
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 900;
+  color: #14b8a6;
+  display: block;
+  line-height: 1;
+}
+.ctr-lbl {
+  font-size: 12px;
+  color: rgba(255,255,255,.45);
+  margin-top: 6px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
 }
 
-/* ANIMATIONS */
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.6);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
-  }
+/* ══════════════════════════════════════════════
+   SCROLL REVEAL
+══════════════════════════════════════════════ */
+.rv {
+  opacity: 0;
+  transform: translateY(50px) rotateX(15deg);
+  transition: opacity .75s ease, transform .75s cubic-bezier(.34,1.2,.64,1);
+}
+.rv.in {
+  opacity: 1;
+  transform: translateY(0) rotateX(0);
+}
+.rv.left     { transform: translateX(-60px) rotateY(20deg); }
+.rv.left.in  { transform: translateX(0) rotateY(0); }
+.rv.right    { transform: translateX(60px) rotateY(-20deg); }
+.rv.right.in { transform: translateX(0) rotateY(0); }
+
+.d1 { transition-delay: .1s; }
+.d2 { transition-delay: .2s; }
+.d3 { transition-delay: .3s; }
+.d4 { transition-delay: .4s; }
+
+/* ══════════════════════════════════════════════
+   LOCATION
+══════════════════════════════════════════════ */
+.map-box {
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(20,184,166,.2);
+  max-width: 820px;
+  margin: 0 auto;
+}
+.map-box iframe {
+  width: 100%;
+  height: 300px;
+  display: block;
+  border: 0;
+}
+.map-info {
+  padding: 18px 20px;
+  background: rgba(20,184,166,.07);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+.map-info p {
+  font-size: 13px;
+  color: rgba(255,255,255,.65);
+  line-height: 1.7;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+/* ══════════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════════ */
+.foot {
+  background: #010304;
+  padding: 50px 20px 0;
+  border-top: 1px solid rgba(20,184,166,.12);
+}
+.foot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 32px;
+  max-width: 860px;
+  margin: 0 auto;
+}
+.foot h3 {
+  color: #14b8a6;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  margin-bottom: 12px;
+}
+.foot p {
+  font-size: 13px;
+  color: rgba(255,255,255,.45);
+  line-height: 1.8;
+}
+.contact-name {
+  color: rgba(255,255,255,.75) !important;
+  font-weight: 600;
+}
+.foot-btm {
+  text-align: center;
+  padding: 20px;
+  margin-top: 36px;
+  border-top: 1px solid rgba(255,255,255,.05);
+  font-size: 12px;
+  color: rgba(255,255,255,.25);
 }
 
-@keyframes slideUp {
-  from {
-    transform: translateY(40px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes zoomIn {
-  from {
-    transform: scale(0.9);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-@keyframes gradientMove {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.fade-in {
-  animation: fadeIn 1s ease-in-out;
-}
-.slide-up {
-  animation: slideUp 1.2s ease;
-}
-.slide-up-delay {
-  animation: slideUp 1.6s ease;
-}
-.zoom-in {
-  animation: zoomIn 1.8s ease;
-}
-
-/* RESPONSIVE */
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════ */
 @media (max-width: 600px) {
-  .hero h1 {
-    font-size: 2rem;
-  }
-
-  .btn {
-    display: block;
-    width: 80%;
-    margin: 10px auto;
-  }
-
-  .map-container iframe {
-    height: 250px;
-  }
-
-  .location-highlight {
-    font-size: 13px;
-  }
+  .hero h1 { font-size: 2rem; }
+  .bp, .bs { padding: 11px 22px; font-size: 13px; }
+  .map-box iframe { height: 240px; }
+  .ring:nth-child(1) { width: 300px; height: 300px; margin: -150px 0 0 -150px; }
+  .ring:nth-child(2) { width: 210px; height: 210px; margin: -105px 0 0 -105px; }
+  .ring:nth-child(3) { width: 130px; height: 130px; margin: -65px 0 0 -65px; }
 }
 
 @media (max-width: 768px) {
-  .carousel {
-    gap: 5px;
-  }
-
-  .feature-card {
-    padding: 18px;
-    font-size: 14px;
-  }
-
-  .nav-btn {
-    font-size: 18px;
-    padding: 8px 10px;
-  }
-}
-
-@media (max-width: 480px) {
-  .feature-card {
-    padding: 15px;
-    border-radius: 10px;
-  }
-
-  .nav-btn {
-    font-size: 16px;
-    padding: 6px 8px;
-  }
-}
-
-@keyframes slideFade {
-  0% {
-    opacity: 0;
-    transform: translateX(80px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  .flip-grid { grid-template-columns: repeat(2, 1fr); }
+  .sec { padding: 50px 16px; }
 }
 </style>
