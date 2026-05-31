@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { usePaymentStore } from '@/stores/payment'
 import { useRoomStore } from '@/stores/room'
 import { useI18n } from 'vue-i18n'
+import { storeToRefs } from 'pinia'
 
 const { locale, t } = useI18n()
 const currentLocale = ref(locale.value)
@@ -19,17 +20,20 @@ const route = useRoute()
 const paymentStore = usePaymentStore()
 const roomStore = useRoomStore()
 
-const { paymentForm, loadPaymentForEdit, updatePayments } = paymentStore
+// ✅ FIX HERE (THIS IS THE KEY)
+const { paymentForm } = storeToRefs(paymentStore)
+const { loadPaymentForEdit, updatePayments } = paymentStore
 
 const paymentId = route.params.id
 
 onMounted(async () => {
   await roomStore.fetchRooms()
   await loadPaymentForEdit(paymentId)
+    console.log('FORM AFTER LOAD:', paymentForm.value)
 })
 
 const submit = async () => {
-  const updated = await updatePayments(paymentId, paymentForm)
+  const updated = await updatePayments(paymentId, paymentForm.value)
 
   if (updated) {
     router.push('/landlord')

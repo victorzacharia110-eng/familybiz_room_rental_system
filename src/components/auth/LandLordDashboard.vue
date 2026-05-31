@@ -37,6 +37,8 @@ onMounted(async () => {
   await paymentMethodStore.fetchPaymentMethods()
   await criticalRemarkStore.fetchCriticalRemarks()
   await latePaymentReasonStore.fetchLatePaymentReasons()
+
+
 })
 
 const successMessage = ref('')

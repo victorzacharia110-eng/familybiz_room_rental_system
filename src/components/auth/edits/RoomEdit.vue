@@ -3,9 +3,10 @@ import { onMounted, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useRoomStore } from '@/stores/room'
 import { useI18n } from 'vue-i18n'
+import { storeToRefs } from 'pinia'
 
 // -------------------- I18n (legacy mode) --------------------
-const { locale } = useI18n()
+const { locale , t } = useI18n()
 const currentLocale = ref(locale.value)
 
 const setLanguage = (lang) => {
@@ -22,11 +23,13 @@ const roomStore = useRoomStore()
 const roomId = route.params.id
 
 // Destructure roomForm, store actions
-const { roomForm, loadRoomForEdit, updateRoom } = roomStore
+const { roomForm } = storeToRefs(roomStore)
+const { loadRoomForEdit, updateRoom } = roomStore
 
 // Load room details on mount
 onMounted(async () => {
   await loadRoomForEdit(roomId)
+  console.log('FORM AFTER LOAD:', roomForm.value)
 })
 
 // Submit handler
@@ -60,7 +63,7 @@ const submit = async () => {
       <form @submit.prevent="submit">
         <div class="form-group">
           <label>{{ t('roomNumber') }}</label>
-          <input v-model="roomForm.number" type="text" :placeholder="t('roomNumber')" required />
+          <input v-model="roomForm.room_number" type="text" :placeholder="t('roomNumber')" required />
         </div>
 
         <div class="form-group">

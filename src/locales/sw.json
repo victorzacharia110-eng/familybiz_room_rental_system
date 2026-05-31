@@ -211,5 +211,8 @@
   "dueDate": "Tarehe ya Mwisho",
   "saveChanges": "Hifadhi Mabadiliko",
   "updatingPayment": "Malipo yanasasishwa...",
-  "back": "Rudi"
+  "back": "Rudi",
+  "editPaymentMethod": "Hariri Njia ya Malipo",
+"editPaymentMethodSubtitle": "Sasisha taarifa za njia yako ya malipo",
+"UpdatingRoom": "Chumba kinasasishwa..."
 }
