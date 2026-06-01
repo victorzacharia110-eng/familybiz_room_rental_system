@@ -316,7 +316,6 @@ onMounted(async () => {
   await auth.fetchUser()
   await roomStore.fetchRooms()
   await roomStore.updateRoomStatus()
-  await paymentStore.fetchPayments()
   await paymentStore.fetchPayment()
   await paymentMethodStore.fetchPaymentMethods()
   await announcementStore.fetchAnnouncements()
