@@ -186,5 +186,6 @@
   "crdbAccount": "CRDB Account",
   "nbcAccount": "NCB Account",
   "UpdatingRoom": "Updating Room...",
-  "homeStatsTitle": "Overview Statistics"
+  "homeStatsTitle": "Overview Statistics",
+  "tenantDashboard":"Tenant Dashboard"
 }
