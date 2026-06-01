@@ -1534,6 +1534,10 @@ function buildCubes() {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
 
+* {
+  box-sizing: border-box;
+}
+
 /* ════════════════════════════════════════
    SHELL
 ════════════════════════════════════════ */
@@ -2272,6 +2276,19 @@ tbody tr:last-child td {
 
 .mfield {
   min-width: 0;
+}
+
+/* Chrome, Safari, Edge */
+.mfield input[type=number]::-webkit-outer-spin-button,
+.mfield input[type=number]::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+/* Firefox + standard */
+.mfield input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }
 .mfield label {
   display: block;
