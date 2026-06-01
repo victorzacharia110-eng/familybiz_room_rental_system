@@ -2321,7 +2321,7 @@ tbody tr:last-child td {
 .form-2col {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap:6px;
+  gap:16px;
 }
 @media (max-width: 560px) {
   .form-2col {
