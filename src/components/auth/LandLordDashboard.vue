@@ -2271,7 +2271,7 @@ tbody tr:last-child td {
 }
 
 .mfield {
-  margin-bottom: 16px;
+  min-width: 0;
 }
 .mfield label {
   display: block;
@@ -2321,7 +2321,7 @@ tbody tr:last-child td {
 .form-2col {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0 16px;
+  gap:6px;
 }
 @media (max-width: 560px) {
   .form-2col {
