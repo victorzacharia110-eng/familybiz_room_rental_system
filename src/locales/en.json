@@ -187,5 +187,8 @@
   "nbcAccount": "NCB Account",
   "UpdatingRoom": "Updating Room...",
   "homeStatsTitle": "Overview Statistics",
-  "tenantDashboard":"Tenant Dashboard"
+  "tenantDashboard":"Tenant Dashboard",
+  "yourPaymentHistory":"Your Payment History",
+  "manageYourRental":"Manage Your Rental",
+  "propertyImages":"Property Images"
 }
