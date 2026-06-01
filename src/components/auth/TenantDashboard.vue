@@ -1,115 +1,71 @@
 <script setup>
+import Footer from './Footer.vue'
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useRoomStore } from '@/stores/room'
 import { usePaymentStore } from '@/stores/payment'
-import { usePaymentMethodStore } from '@/stores/paymentMethod'
+import { usePaymentMethodStore } '@/stores/paymentMethod'
 import { useLatePaymentReasonStore } from '@/stores/latePaymentReason'
 import { useCommentStore } from '@/stores/comment'
 import { useAnnouncementStore } from '@/stores/announcement'
 import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
-import Footer from './Footer.vue'
 
-// -------------------- AUTH --------------------
 const router = useRouter()
 const auth = useAuthStore()
 const roomStore = useRoomStore()
 const paymentStore = usePaymentStore()
 const paymentMethodStore = usePaymentMethodStore()
-const commentStore = useCommentStore()
 const latePaymentReasonStore = useLatePaymentReasonStore()
+const commentStore = useCommentStore()
 const announcementStore = useAnnouncementStore()
 
 const { totalRooms, roomsAvailableCount } = storeToRefs(roomStore)
 
+/* ── messages ── */
+const successLatePaymentReasonSubmissionMessage = ref('')
+const successCommentMessage = ref('')
+const successUpdateRoomStatus = ref('')
+const successPasswordResetMessage = ref('')
+
+/* ── logout ── */
 const logoutUser = () => {
   auth.logout()
   router.push('/login')
 }
 
-onMounted(async () => {
-  activeAnnouncementModal.value = null
-  hasSeenAnnouncements.value = false
+/* ── modals ── */
+const activeRoomsModal = ref(null)
+const activePaymentMethod = ref(null)
+const activeProfileModal = ref(null)
+const activeCommentsModal = ref(null)
+const activeAnnouncementModal = ref(null)
+const activePasswordResetModal = ref(null)
+const hasSeenAnnouncements = ref(false)
 
-  await roomStore.fetchRooms()
-  await roomStore.updateRoomStatus()
-  await paymentStore.fetchPayment()
-  await paymentMethodStore.fetchPaymentMethods()
-  await announcementStore.fetchAnnouncements()
-
-  if (announcementStore.announcements.length > 0) {
-    activeAnnouncementModal.value = 'announcements'
-    console.log('trigger', activeAnnouncementModal.value)
-  }
-})
-
-// -------------------- HOUSE DATA --------------------
-const house = ref({
-  // totalRooms: 24,
-  // availableRooms: 6,
-  // images: ['/assets/room1.jpg', '/assets/room2.jpg', '/assets/common.jpg'],
-})
-
-// -------------------- LATE PAYMENT FUNCTION --------------------
-const successLatePaymentReasonSubmissionMessage = ref('')
-
+/* ── late payment reason ── */
 async function submitLateReason(payment) {
   if (latePaymentReasonStore.latePaymentReasons.length >= 3) {
     alert('You have reached the maximum of 3 late payment submissions!')
     return
   }
 
-  const reason_text = prompt(
-    'Please enter your reason for late payment. Note: Max 3 submissions allowed.',
-  )
+  const reason_text = prompt('Please enter your reason for late payment. Note: Max 3 submissions allowed.')
 
   if (reason_text) {
     await latePaymentReasonStore.registerLatePaymentReasons({
       payment_id: payment.id,
       reason_text: reason_text,
     })
-
     successLatePaymentReasonSubmissionMessage.value = '✅ Reason Submitted successfully!'
-  }
-}
-// ----------------------- SIDEBAR RESPONSIVE FUNCTIONS --------------------------------------
-const isSidebarOpen = ref(false)
-
-// ---------- MODAL FUNCTIONS FOR THE ROOM MODAL---------------------
-
-// controls which active modal is open AND which sidebar item is active
-const activeRoomsModal = ref(null)
-
-// open rooms modal
-function openRoomsModal(modalName) {
-  activeRoomsModal.value = modalName
-
-  if (modalName === 'rooms') {
-    roomFetching() // Now this will log the fetched rooms
+    setTimeout(() => {
+      successLatePaymentReasonSubmissionMessage.value = ''
+    }, 3000)
   }
 }
 
-// close modal
-function closeRoomsModal() {
-  activeRoomsModal.value = null
-}
-
-// Fetch rooms (from backend)
-const roomFetching = async () => {
-  const roomsFetched = await roomStore.fetchRooms()
-  console.log('Fetched Rooms:', roomsFetched)
-}
-
-// Payment Method fetching ( from backend )
-const paymentMethodFetching = async () => {
-  const paymentMethodFetched = await paymentMethodStore.fetchPaymentMethods()
-  console.log('Payment Methods Fetched : ', paymentMethodFetched)
-  console.log('API URL:', import.meta.env.VITE_API_URL)
-}
-
-// Payment form data and functions
+/* ── payment form ── */
 const paymentForm = ref({
   room_id: '',
   month: '',
@@ -118,9 +74,9 @@ const paymentForm = ref({
   amount: '',
   status: 'paid',
 })
+
 const savePayment = async () => {
   const response = await paymentStore.registerPayment(paymentForm.value)
-
   if (response) {
     alert('✅ Payment registered successfully!')
     paymentForm.value = {
@@ -131,67 +87,39 @@ const savePayment = async () => {
       amount: '',
       status: 'paid',
     }
+    await paymentStore.fetchPayments()
   } else {
     alert('❌ Failed to register payment')
   }
 }
-// Months array used in payment management modal
+
 const months = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
 ]
-// ----------- MODAL FUNCTIONS FOR ROOM PAYMENT METHOD MODAL -------------
-// controls which active modal is open AND which sidebar item is active
-const activePaymentMethod = ref(null)
 
-// open payment methods modal
-function openPaymentMethodModal(ModalName) {
-  activePaymentMethod.value = ModalName
-
-  if (ModalName === 'paymentMethod') {
-    // This function loads the data  from the backend into the modal when it opens
-    paymentMethodFetching()
+/* ── rooms modal ── */
+const openRoomsModal = (modalName) => {
+  activeRoomsModal.value = modalName
+  if (modalName === 'rooms') {
+    roomFetching()
   }
 }
 
-const closePaymentMethodModal = () => {
-  activePaymentMethod.value = null
+const closeRoomsModal = () => {
+  activeRoomsModal.value = null
 }
 
-// -------------------- LANGUAGE TOGGLE --------------------
-const { locale } = useI18n()
-const currentLocale = ref(locale.value)
-
-const setLanguage = (lang) => {
-  locale.value = lang
-  currentLocale.value = lang
+const roomFetching = async () => {
+  await roomStore.fetchRooms()
+  await roomStore.updateRoomStatus()
 }
-
-console.log('total rooms  :', roomsAvailableCount)
-
-async function updatingRoomStatus(id, checked) {
-  const updating = await roomStore.updateRoomStatus(id, checked)
-  console.log('show me the response : ', updating)
-}
-
-// CONFIRM ROOM SELECTION FUNCTIONS
-// TEXT = I HAVE CONFIRMED THAT I HAVE SELECTED THIS ROOM IN MY RIGHT MIND AND I HAVE INTENDED TO GET THIS ROOM AND WHATEVER HAPPENS I SHALL PAY
 
 const isDisabled = (room) => {
   return room.status === 'Occupied' && room.user_id !== auth.user?.id
 }
+
 const confirmText = 'CONFIRMED'
-const successUpdateRoomStatus = ref('')
 
 const confirmToggle = async (room, checked) => {
   if (room.status === 'Occupied' && room.user_id !== auth.user?.id) {
@@ -203,30 +131,39 @@ const confirmToggle = async (room, checked) => {
 
   if (input?.trim() === confirmText) {
     await updatingRoomStatus(room.id, checked)
-
     successUpdateRoomStatus.value = '✅ Action Completed successfully!'
-
     setTimeout(() => {
       successUpdateRoomStatus.value = ''
     }, 3000)
-
-    roomStore.fetchRooms()
+    await roomStore.fetchRooms()
   } else {
     alert('Incorrect text. Action Cancelled')
   }
 }
 
-// ----------------------------- User Profile Functiona and variables -------------------------------------
-const activeProfileModal = ref(null)
-
-const profileFetching = async () => {
-  const profile = await auth.fetchUser()
-  console.log('User Profile : ', profile)
+const updatingRoomStatus = async (id, checked) => {
+  return await roomStore.updateRoomStatus(id, checked)
 }
 
+/* ── payment method modal ── */
+const openPaymentMethodModal = (ModalName) => {
+  activePaymentMethod.value = ModalName
+  if (ModalName === 'paymentMethod') {
+    paymentMethodFetching()
+  }
+}
+
+const closePaymentMethodModal = () => {
+  activePaymentMethod.value = null
+}
+
+const paymentMethodFetching = async () => {
+  await paymentMethodStore.fetchPaymentMethods()
+}
+
+/* ── profile modal ── */
 const openProfileModal = (ModalName) => {
   activeProfileModal.value = ModalName
-
   if (ModalName === 'profile') {
     profileFetching()
   }
@@ -236,14 +173,14 @@ const closeProfileModal = () => {
   activeProfileModal.value = null
 }
 
-// -------------------- Update Phone Number Function ------------------------------
+const profileFetching = async () => {
+  await auth.fetchUser()
+}
+
 const updatingPhoneNumber = async (user) => {
   const newPhone = prompt('Enter new phone number:')
-
   if (!newPhone || !newPhone.trim()) return
-
   const response = await auth.updatePhoneNumber(user.id, newPhone)
-
   if (response) {
     alert('✅ Phone number updated successfully!')
   } else {
@@ -251,19 +188,9 @@ const updatingPhoneNumber = async (user) => {
   }
 }
 
-// ------------------------------------------- COMMENTS FUNCTIONS AND VARIABLES ------------------------------------
-const activeCommentsModal = ref(null)
-
-const successCommentMessage = ref('')
-
-const commentForm = ref({
-  comment: '',
-  rating: 5,
-})
-
+/* ── comments modal ── */
 const openCommentsModal = (ModalName) => {
   activeCommentsModal.value = ModalName
-
   if (ModalName === 'comments') {
     commentFetching()
   }
@@ -273,58 +200,68 @@ const closeCommentsModal = () => {
   activeCommentsModal.value = null
 }
 
+const commentForm = ref({
+  comment: '',
+  rating: 5,
+})
+
 const commentFetching = async () => {
   await commentStore.fetchComments()
 }
 
 const saveComment = async () => {
   const response = await commentStore.registerComments(commentForm.value)
-
   if (response) {
     successCommentMessage.value = '✅ Comment added successfully!'
     commentForm.value.comment = ''
     commentForm.value.rating = 5
+    setTimeout(() => {
+      successCommentMessage.value = ''
+    }, 3000)
+    await commentFetching()
   }
 }
 
-// ------------------------------ ANNOUNCEMENTS FUNCTIONS AND VARIABLES ---------------------------------
-const activeAnnouncementModal = ref(null)
-const hasSeenAnnouncements = ref(false)
-const closeAnnouncementsModal = () => {
-  activeAnnouncementModal.value = null
+const deleteComment = async (id) => {
+  if (!confirm('⚠️ Delete this comment permanently?')) return
+  const res = await commentStore.deleteComment(id)
+  alert(res ? '✅ Comment deleted!' : '❌ Failed to delete comment')
+  await commentFetching()
 }
 
+/* ── announcements modal ── */
 const openAnnouncementModal = async (ModalName) => {
   activeAnnouncementModal.value = ModalName
-
   if (ModalName === 'announcements') {
     await announcementsFetching()
-
-    // ✅ mark latest announcement as seen
     const announcements = announcementStore.announcements
-
     if (announcements.length > 0) {
-      const latest = announcements[0] // newest one
+      const latest = announcements[0]
       localStorage.setItem('lastSeenAnnouncementId', latest.id)
     }
   }
 }
-const announcementsFetching = async () => {
-  const fetchedAnnouncements = await announcementStore.fetchAnnouncements()
-  console.log('announcements', fetchedAnnouncements)
+
+const closeAnnouncementsModal = () => {
+  activeAnnouncementModal.value = null
 }
 
-// -------- PASSWORD RESET FUNCTIONS AND VARIABLES -----------------------------
-const activePasswordResetModal = ref(null)
-const successPasswordResetMessage = ref('')
-const passwordResetForm = ref({
-  email: '',
+const announcementsFetching = async () => {
+  await announcementStore.fetchAnnouncements()
+}
+
+const hasNewAnnouncements = computed(() => {
+  const announcements = announcementStore.announcements
+  if (!announcements.length) return false
+  const latest = announcements[0]
+  const lastSeenId = localStorage.getItem('lastSeenAnnouncementId')
+  return String(latest.id) !== lastSeenId
 })
 
+/* ── password reset modal ── */
 const openPasswordResetModal = (ModalName) => {
   activePasswordResetModal.value = ModalName
   if (ModalName === 'passwordReset') {
-    // Pre-fill with current user's email
     passwordResetForm.value.email = auth.user?.email || ''
   }
 }
@@ -335,18 +272,17 @@ const closePasswordResetModal = () => {
   passwordResetForm.value.email = ''
 }
 
+const passwordResetForm = ref({ email: '' })
+
 const sendPasswordResetLink = async () => {
   const response = await auth.requestPasswordReset(passwordResetForm.value.email)
-
   if (response) {
-    successPasswordResetMessage.value = $t('resetLinkSent')
-    setTimeout(() => {
-      closePasswordResetModal()
-    }, 3000)
+    successPasswordResetMessage.value = '✅ Reset link sent!'
+    setTimeout(() => closePasswordResetModal(), 3000)
   }
 }
 
-// -------- Date function --------------------------
+/* ── utils ── */
 const formatDate = (date) => {
   if (!date) return ''
   return new Date(date).toLocaleString('en-GB', {
@@ -358,351 +294,335 @@ const formatDate = (date) => {
   })
 }
 
-// Has new announcements
-const hasNewAnnouncements = computed(() => {
-  const announcements = announcementStore.announcements
+/* ── language ── */
+const { locale } = useI18n()
+const currentLocale = ref(locale.value)
 
-  if (!announcements.length) return false
+const setLanguage = (lang) => {
+  locale.value = lang
+  currentLocale.value = lang
+}
 
-  const latest = announcements[0] // assuming latest comes first
-  const lastSeenId = localStorage.getItem('lastSeenAnnouncementId')
+/* ── sidebar ── */
+const isSidebarOpen = ref(false)
 
-  return String(latest.id) !== lastSeenId
+/* ── house gallery ── */
+const house = ref({
+  images: ['/assets/room1.jpg', '/assets/room2.jpg', '/assets/common.jpg'],
+})
+
+onMounted(async () => {
+  await roomStore.fetchRooms()
+  await roomStore.updateRoomStatus()
+  await paymentStore.fetchPayments()
+  await paymentMethodStore.fetchPaymentMethods()
+  await announcementStore.fetchAnnouncements()
+  await paymentStore.fetchTenantPayment()
+
+  if (announcementStore.announcements.length > 0) {
+    activeAnnouncementModal.value = 'announcements'
+  }
 })
 </script>
 
 <template>
-  <button class="menu-btn" @click="isSidebarOpen = !isSidebarOpen">☰</button>
-  <div class="dashboard">
-    <!-- Sidebar -->
-    <aside class="sidebar" :class="{ open: isSidebarOpen }">
-      <h2 class="logo">FamilyBiz App</h2>
-      <nav>
-        <!-- <router-link to="/tenant" class="nav-item">🏠 {{ $t('home') }}</router-link> -->
-        <router-link to="/tenant" class="nav-item active">📊 {{ $t('dashboard') }}</router-link>
-
-        <a
-          href="#"
-          class="nav-item"
-          :class="{ active: activeAnnouncementModal === 'announcements' }"
-          @click.prevent="openAnnouncementModal('announcements')"
-        >
-          📢 {{ $t('Announcements') }}
-
-          <!-- 🔴 Badge -->
-          <span v-if="hasNewAnnouncements" class="badge"></span>
-        </a>
-
-        <a
-          href="#"
-          class="nav-item"
-          :class="{ active: activeCommentsModal === 'comments' }"
-          @click.prevent="openCommentsModal('comments')"
-        >
-          💬 {{ $t('Comments') }}
-        </a>
-        <a
-          href="#"
-          class="nav-item"
-          :class="{ active: activeProfileModal === 'profile' }"
-          @click.prevent="openProfileModal('profile')"
-        >
-          👤 {{ $t('profile') }}
-        </a>
-
-        <a
-          href="#"
-          class="nav-item"
-          :class="{ active: activePasswordResetModal === 'passwordReset' }"
-          @click.prevent="openPasswordResetModal('passwordReset')"
-        >
-          🔒 {{ $t('resetPassword') }}
-        </a>
-
-        <a
-          href="#"
-          class="nav-item"
-          :class="{ active: activeRoomsModal === 'rooms' }"
-          @click.prevent="openRoomsModal('rooms')"
-        >
-          🚪 {{ $t('viewRooms') }}
-        </a>
-        <a
-          href="#"
-          class="nav-item"
-          :class="{ active: activePaymentMethod === 'paymentMethod' }"
-          @click.prevent="openPaymentMethodModal('paymentMethod')"
-          >💳 {{ $t('paymentMethods') }}</a
-        >
-
-        <!-- <router-link to="/tenant/rules" class="nav-item"
-          >⚠ {{ $t('tenantRulesPolicies') }}</router-link
-        > -->
-      </nav>
-    </aside>
-    <div v-if="isSidebarOpen" class="overlay" @click="isSidebarOpen = false"></div>
-    <!-- Main Content -->
-    <main class="content">
-      <!-- Language Toggle -->
-      <div class="language-toggle">
-        <button :class="{ active: currentLocale === 'en' }" @click="setLanguage('en')">
-          🇬🇧 English
-        </button>
-
-        <button :class="{ active: currentLocale === 'sw' }" @click="setLanguage('sw')">
-          🇹🇿 Swahili
-        </button>
-
-        <button id="logout" @click="logoutUser">{{ $t('logout') }}</button>
+  <div class="dash-shell" :class="{ 'sidebar-open': isSidebarOpen }">
+    <!-- ══════ SIDEBAR ══════ -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-dot"></span>
+        <span>FamilyBiz</span>
       </div>
 
-      <!-- Header -->
-      <header class="topbar">
-        <h2 v-if="auth.user?.last_name">{{ $t('welcome') }}, {{ auth.user?.last_name }}</h2>
-        <p>
-          {{ $t('yourRoom') }}:
-          <span v-if="auth.user.room">
-            {{ auth.user.room.room_number }}
-          </span>
-          <span v-else>
-            {{ $t('noRoomAssigned') }}
-          </span>
-          |
-          {{ $t('phoneNumber') }}: {{ auth.user?.phone_number }}
-        </p>
-      </header>
+      <nav class="sidebar-nav">
+        <router-link to="/tenant" class="nav-item active">
+          <span class="ni">📊</span><span>{{ $t('dashboard') }}</span>
+        </router-link>
 
-      <Transition name="modal-fade">
-        <!-- ROOMS MODAL -->
-        <div v-if="activeRoomsModal === 'rooms'" class="modal-overlay" @click.self="closeModal">
-          <div class="modal large">
-            <!-- <h3 style="color: black">{{ $t('viewRooms') }}</h3> -->
+        <a
+          href="#"
+          class="nav-item"
+          :class="{ on: activeAnnouncementModal === 'announcements' }"
+          @click.prevent="openAnnouncementModal('announcements')"
+        >
+          <span class="ni">📢</span><span>{{ $t('Announcements') }}</span>
+          <span v-if="hasNewAnnouncements" class="badge-new"></span>
+        </a>
 
-            <div v-if="successUpdateRoomStatus" class="success-alert">
-              {{ successUpdateRoomStatus }}
+        <a
+          href="#"
+          class="nav-item"
+          :class="{ on: activeCommentsModal === 'comments' }"
+          @click.prevent="openCommentsModal('comments')"
+        >
+          <span class="ni">💬</span><span>{{ $t('Comments') }}</span>
+        </a>
+
+        <a
+          href="#"
+          class="nav-item"
+          :class="{ on: activeProfileModal === 'profile' }"
+          @click.prevent="openProfileModal('profile')"
+        >
+          <span class="ni">👤</span><span>{{ $t('profile') }}</span>
+        </a>
+
+        <a
+          href="#"
+          class="nav-item"
+          :class="{ on: activePasswordResetModal === 'passwordReset' }"
+          @click.prevent="openPasswordResetModal('passwordReset')"
+        >
+          <span class="ni">🔒</span><span>{{ $t('resetPassword') }}</span>
+        </a>
+
+        <a
+          href="#"
+          class="nav-item"
+          :class="{ on: activeRoomsModal === 'rooms' }"
+          @click.prevent="openRoomsModal('rooms')"
+        >
+          <span class="ni">🚪</span><span>{{ $t('viewRooms') }}</span>
+        </a>
+
+        <a
+          href="#"
+          class="nav-item"
+          :class="{ on: activePaymentMethod === 'paymentMethod' }"
+          @click.prevent="openPaymentMethodModal('paymentMethod')"
+        >
+          <span class="ni">💳</span><span>{{ $t('paymentMethods') }}</span>
+        </a>
+      </nav>
+
+      <button class="sidebar-logout" @click="logoutUser"><span>🚪</span> {{ $t('logout') }}</button>
+    </aside>
+
+    <!-- sidebar overlay (mobile) -->
+    <div class="sidebar-overlay" v-if="isSidebarOpen" @click="isSidebarOpen = false"></div>
+
+    <!-- ══════ MAIN ══════ -->
+    <main class="dash-main">
+      <!-- ── hero banner ── -->
+      <div class="hero-banner">
+        <div class="hero-text">
+          <button class="menu-btn" @click="isSidebarOpen = !isSidebarOpen">☰</button>
+          <div class="topbar-inner">
+            <div>
+              <div class="dash-badge"><span class="badge-dot"></span>Tenant Portal</div>
+              <h1 class="dash-title">{{ $t('tenantDashboard') }}</h1>
+              <p class="dash-sub" v-if="auth.user?.last_name">
+                {{ $t('welcome') }}, <strong>{{ auth.user.last_name }}</strong> —
+                {{ $t('manageYourRental') }}
+              </p>
             </div>
-            <div class="modal-actions">
-              <button type="button" class="btn-secondary" @click="closeRoomsModal">
-                {{ $t('close') }}
-              </button>
-            </div>
-            <!-- Rooms Table -->
-            <div class="table-wrapper">
-              <h4>{{ $t('existingRooms') }}</h4>
-              <table class="room-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>{{ $t('room') }}</th>
-                    <th>{{ $t('type') }}</th>
-                    <th>{{ $t('status') }}</th>
-                    <th>{{ $t('roomPrice') }}</th>
-                    <th>{{ $t('action') }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(room, index) in roomStore.rooms" :key="room?.id">
-                    <td>{{ index + 1 }}</td>
-                    <td>{{ room?.room_number || 'N/A' }}</td>
-                    <td>{{ room?.type || 'Unknown' }}</td>
-                    <td :class="room?.status ? room.status.toLowerCase() : 'unknown'">
-                      {{ room?.status || 'Unknown' }}
-                    </td>
-                    <td>
-                      {{ room?.room_price }}
-                    </td>
-                    <td>
-                      <input
-                        type="checkbox"
-                        :checked="room.status === 'Occupied'"
-                        :disabled="isDisabled(room)"
-                        @click.prevent="confirmToggle(room, $event.target.checked)"
-                      />
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="topbar-right">
+              <div class="lang-row">
+                <button class="lbtn" :class="{ on: currentLocale === 'en' }" @click="setLanguage('en')">🇬🇧 EN</button>
+                <button class="lbtn" :class="{ on: currentLocale === 'sw' }" @click="setLanguage('sw')">🇹🇿 SW</button>
+              </div>
             </div>
           </div>
         </div>
-      </Transition>
+      </div>
 
-      <!-- Stats Cards -->
-      <section class="stats">
-        <div class="card">
-          <h3>{{ $t('totalRooms') }}</h3>
-          <p class="number">{{ totalRooms }}</p>
-        </div>
-        <div class="card">
-          <h3>{{ $t('availableRooms') }}</h3>
-          <p class="number">{{ roomsAvailableCount }}</p>
-        </div>
-        <div class="card">
-          <h3>{{ $t('yourRoom') }}</h3>
-          <p class="number">
-            <span v-if="auth.user.room">
-              {{ auth.user.room.room_number }}
-            </span>
-            <span v-else>
-              {{ $t('noRoomAssigned') }}
-            </span>
-          </p>
-        </div>
-        <div class="card">
-          <h3>{{ $t('paymentsDue') }}</h3>
-          <p class="number">
-            {{ paymentStore.count_tenant_unpaid_payment }}
-          </p>
-        </div>
-      </section>
-
-      <!-- Payment History -->
-      <section class="table-section">
-        <div v-if="successLatePaymentReasonSubmissionMessage" class="success-alert">
-          {{ successLatePaymentReasonSubmissionMessage }}
-        </div>
-        <h2>{{ $t('rentPayments') }}</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>{{ $t('Month') }}</th>
-              <th>{{ $t('Due Date') }}</th>
-              <th>{{ $t('Payment Status') }}</th>
-              <th>{{ $t('Action') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="paymentStore.tenant_payment">
-              <td>
-                {{ paymentStore.tenant_payment.month_name }}
-              </td>
-              <td>{{ paymentStore.tenant_payment.due_date_formatted }}</td>
-              <td>
-                <span :class="paymentStore.tenant_payment.status">
-                  <span v-if="paymentStore.tenant_payment.status === 'paid'">✅ </span>
-                  {{ paymentStore.tenant_payment.status }}
-                </span>
-              </td>
-              <td>
-                <button
-                  class="btn-primary"
-                  @click="submitLateReason(paymentStore.tenant_payment)"
-                  :disabled="paymentStore.tenant_payment.status === 'paid'"
-                >
-                  {{ $t('submitLateReason') }}
-                </button>
-              </td>
-            </tr>
-            <tr v-else>
-              <td colspan="100%" class="no-data-class-statement">
-                {{ $t('noPaymentData') }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      <!-- Rooms / House Gallery -->
-      <section class="gallery-section">
-        <h2>{{ $t('houseGallery') }}</h2>
-        <div class="gallery">
-          <div v-for="img in house.images" :key="img" class="gallery-card">
-            <img :src="img" alt="Room / House" />
+      <!-- ── content wrapper ── -->
+      <div class="main-body">
+        <!-- ── STATS ── -->
+        <section class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">🏢</div>
+            <div>
+              <div class="stat-val">{{ totalRooms }}</div>
+              <div class="stat-lbl">{{ $t('totalRooms') }}</div>
+            </div>
           </div>
-        </div>
-      </section>
+          <div class="stat-card green">
+            <div class="stat-icon">✅</div>
+            <div>
+              <div class="stat-val">{{ roomsAvailableCount }}</div>
+              <div class="stat-lbl">{{ $t('availableRooms') }}</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🏠</div>
+            <div>
+              <div class="stat-val">
+                <span v-if="auth.user.room">{{ auth.user.room.room_number }}</span>
+                <span v-else>{{ $t('noRoomAssigned') }}</span>
+              </div>
+              <div class="stat-lbl">{{ $t('yourRoom') }}</div>
+            </div>
+          </div>
+          <div class="stat-card amber">
+            <div class="stat-icon">💰</div>
+            <div>
+              <div class="stat-val">{{ paymentStore.count_tenant_unpaid_payment }}</div>
+              <div class="stat-lbl">{{ $t('paymentsDue') }}</div>
+            </div>
+          </div>
+        </section>
 
-      <!-- Tenant Rules & Policies -->
-      <section class="rules-section">
-        <h2>{{ $t('tenantRulesPolicies') }}</h2>
-        <ul>
-          <li>{{ $t('maintainCleanliness') }}</li>
-          <li>{{ $t('noGangs') }}</li>
-          <li>{{ $t('rentOnTime') }}</li>
-          <li>{{ $t('maxLateReasons') }}</li>
-          <li>{{ $t('noIllegalParties') }}</li>
-        </ul>
-      </section>
-      <Footer />
+        <!-- ── PAYMENT HISTORY ── -->
+        <section class="glass-section">
+          <div class="section-head">
+            <div>
+              <h2 class="sec-title">{{ $t('rentPayments') }}</h2>
+              <p class="sec-sub">{{ $t('yourPaymentHistory') }}</p>
+            </div>
+          </div>
+
+          <Transition name="alert-pop">
+            <div v-if="successLatePaymentReasonSubmissionMessage" class="success-alert">
+              {{ successLatePaymentReasonSubmissionMessage }}
+            </div>
+          </Transition>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>{{ $t('Month') }}</th>
+                  <th>{{ $t('Due Date') }}</th>
+                  <th>{{ $t('Payment Status') }}</th>
+                  <th>{{ $t('Action') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="paymentStore.tenant_payment">
+                  <td>{{ paymentStore.tenant_payment.month_name }}</td>
+                  <td>{{ paymentStore.tenant_payment.due_date_formatted }}</td>
+                  <td>
+                    <span class="status-pill" :class="paymentStore.tenant_payment.status">
+                      <span v-if="paymentStore.tenant_payment.status === 'paid'">✅ </span>
+                      {{ paymentStore.tenant_payment.status }}
+                    </span>
+                  </td>
+                  <td>
+                    <button
+                      class="btn-sm"
+                      @click="submitLateReason(paymentStore.tenant_payment)"
+                      :disabled="paymentStore.tenant_payment.status === 'paid'"
+                    >
+                      {{ $t('submitLateReason') }}
+                    </button>
+                  </td>
+                </tr>
+                <tr v-else>
+                  <td colspan="4" class="no-data">{{ $t('noPaymentData') }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ── HOUSE GALLERY ── -->
+        <section class="glass-section">
+          <div class="section-head">
+            <div>
+              <h2 class="sec-title">{{ $t('houseGallery') }}</h2>
+              <p class="sec-sub">{{ $t('propertyImages') }}</p>
+            </div>
+          </div>
+          <div class="gallery-grid">
+            <div v-for="(img, idx) in house.images" :key="idx" class="gallery-card">
+              <div class="gallery-placeholder">🏠 Room {{ idx + 1 }}</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── RULES ── -->
+        <section class="glass-section">
+          <div class="section-head">
+            <div>
+              <h2 class="sec-title">{{ $t('tenantRulesPolicies') }}</h2>
+              <p class="sec-sub">{{ $t('communityGuidelines') }}</p>
+            </div>
+          </div>
+          <ul class="rules-list">
+            <li>{{ $t('maintainCleanliness') }}</li>
+            <li>{{ $t('noGangs') }}</li>
+            <li>{{ $t('rentOnTime') }}</li>
+            <li>{{ $t('maxLateReasons') }}</li>
+            <li>{{ $t('noIllegalParties') }}</li>
+          </ul>
+        </section>
+
+        <Footer />
+      </div>
     </main>
 
+    <!-- ════════════════════════════════════
+         MODALS
+    ════════════════════════════════════ -->
+
+    <!-- ROOMS MODAL -->
     <Transition name="modal-fade">
-      <!-- PROFILE MODAL -->
-      <div
-        v-if="activeProfileModal === 'profile'"
-        class="modal-overlay"
-        @click.self="closeProfileModal"
-      >
-        <div class="modal large">
-          <!-- Header / Actions -->
-          <div class="modal-actions">
-            <button type="button" class="btn-secondary" @click="closeProfileModal">
-              {{ $t('close') }}
-            </button>
+      <div v-if="activeRoomsModal === 'rooms'" class="modal-overlay" @click.self="closeRoomsModal">
+        <div class="glass-modal large">
+          <div class="modal-top">
+            <h3>{{ $t('viewRooms') }}</h3>
+            <button class="close-x" @click="closeRoomsModal">✕</button>
           </div>
 
-          <!-- Title -->
-          <h3 class="modal-title">{{ $t('userProfile') }}</h3>
+          <Transition name="alert-pop">
+            <div v-if="successUpdateRoomStatus" class="success-alert">{{ successUpdateRoomStatus }}</div>
+          </Transition>
 
-          <!-- Profile Content  -->
-          <div class="profile-container">
-            <!-- Profile Avatar (optional) -->
-            <div class="profile-avatar">
-              <span>👤</span>
-            </div>
-
-            <!-- Profile Details -->
-            <div class="profile-details">
-              <div class="profile-item">
-                <label>{{ $t('Last Name') }}</label>
-                <p>{{ auth.user?.last_name || 'N/A' }}</p>
-              </div>
-
-              <div class="profile-item">
-                <label>{{ $t('email') }}</label>
-                <p>{{ auth.user?.email || 'N/A' }}</p>
-              </div>
-
-              <div class="profile-item">
-                <label>{{ $t('Phone Number') }}</label>
-                <p>{{ auth.user?.phone_number || 'N/A' }}</p>
-                <!-- Update Button -->
-                <button class="btn-update" @click="updatingPhoneNumber(auth.user)">
-                  📱 {{ $t('updatePhone') }}
-                </button>
-              </div>
-            </div>
+          <div class="modal-table-wrap">
+            <h4 class="table-subtitle">{{ $t('existingRooms') }}</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>{{ $t('room') }}</th>
+                  <th>{{ $t('type') }}</th>
+                  <th>{{ $t('status') }}</th>
+                  <th>{{ $t('roomPrice') }}</th>
+                  <th>{{ $t('action') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(room, index) in roomStore.rooms" :key="room?.id">
+                  <td class="idx">{{ index + 1 }}</td>
+                  <td><strong>{{ room?.room_number || 'N/A' }}</strong></td>
+                  <td>{{ room?.type || 'Unknown' }}</td>
+                  <td>
+                    <span class="status-pill" :class="room?.status?.toLowerCase()">{{ room?.status || 'Unknown' }}</span>
+                  </td>
+                  <td>TZS {{ room?.room_price?.toLocaleString() }}</td>
+                  <td>
+                    <input
+                      type="checkbox"
+                      :checked="room.status === 'Occupied'"
+                      :disabled="isDisabled(room)"
+                      @click.prevent="confirmToggle(room, $event.target.checked)"
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
     </Transition>
 
+    <!-- PAYMENT METHOD MODAL -->
     <Transition name="modal-fade">
-      <!-- PAYMENT METHOD MODAL -->
-      <div
-        v-if="activePaymentMethod === 'paymentMethod'"
-        class="modal-overlay"
-        @click.self="closePaymentMethodModal"
-      >
-        <div class="modal large">
-          <!-- CLOSE -->
-          <div class="modal-actions">
-            <button type="button" class="btn-secondary" @click="closePaymentMethodModal">
-              {{ $t('close') }}
-            </button>
+      <div v-if="activePaymentMethod === 'paymentMethod'" class="modal-overlay" @click.self="closePaymentMethodModal">
+        <div class="glass-modal large">
+          <div class="modal-top">
+            <h3>{{ $t('paymentMethodManagement') }}</h3>
+            <button class="close-x" @click="closePaymentMethodModal">✕</button>
           </div>
-
-          <!-- ========================= -->
-          <!-- METHOD 1 -->
-          <!-- ========================= -->
-          <h4>{{ $t('method1Title') }}</h4>
 
           <div class="payment-alert">
-            {{ $t('method1Warning') }} <br />
-            <span style="color: red"> ⚠️ {{ $t('method1ApprovalWarning') }} </span>
+            {{ $t('method1Warning') }}<br />
+            <span style="color: #f87171">⚠️ {{ $t('method1ApprovalWarning') }}</span>
           </div>
 
-          <div class="table-wrapper">
+          <div class="modal-table-wrap">
+            <h4 class="table-subtitle">{{ $t('existingPaymentMethods') }}</h4>
             <table>
               <thead>
                 <tr>
@@ -716,12 +636,9 @@ const hasNewAnnouncements = computed(() => {
                   <th>NBC</th>
                 </tr>
               </thead>
-
               <tbody>
                 <tr v-for="(pm, index) in paymentMethodStore.paymentMethods" :key="pm.id">
-                  <td>
-                    <strong>{{ $t('method') }} {{ index + 1 }}</strong>
-                  </td>
+                  <td class="idx">{{ $t('method') }} {{ index + 1 }}</td>
                   <td>{{ pm.airtel_money_number || 'N/A' }}</td>
                   <td>{{ pm.m_pesa_number || 'N/A' }}</td>
                   <td>{{ pm.mixx_by_yas_number || 'N/A' }}</td>
@@ -734,112 +651,114 @@ const hasNewAnnouncements = computed(() => {
             </table>
           </div>
 
-          <hr />
+          <hr class="divider" />
 
-          <!-- ========================= -->
-          <!-- METHOD 2 -->
-          <!-- ========================= -->
-          <h4>{{ $t('method2Title') }}</h4>
-
-          <div class="payment-alert">
-            {{ $t('method2Warning') }}
-          </div>
+          <h4 class="section-subtitle">{{ $t('method2Title') }}</h4>
+          <div class="payment-alert">{{ $t('method2Warning') }}</div>
 
           <form @submit.prevent="savePayment">
-            <!-- Room -->
-            <div class="form-group">
-              <label>{{ $t('room') }}:</label>
-              <select v-model="paymentForm.room_id" required>
-                <option disabled value="">{{ $t('selectRoom') }}</option>
-                <option v-for="room in roomStore.rooms" :key="room.id" :value="room.id">
-                  {{ room.room_number }} - {{ room.room_price }} - {{ room.status }}
-                </option>
-              </select>
+            <div class="form-2col">
+              <div class="mfield">
+                <label>{{ $t('room') }}</label>
+                <select v-model="paymentForm.room_id" required>
+                  <option disabled value="">{{ $t('selectRoom') }}</option>
+                  <option v-for="room in roomStore.rooms" :key="room.id" :value="room.id">
+                    {{ room.room_number }} - TZS {{ room.room_price }} - {{ room.status }}
+                  </option>
+                </select>
+              </div>
+              <div class="mfield">
+                <label>{{ $t('Amount') }}</label>
+                <input v-model="paymentForm.amount" type="number" required placeholder="0" />
+              </div>
+              <div class="mfield">
+                <label>{{ $t('month') }}</label>
+                <select v-model="paymentForm.month" required>
+                  <option disabled value="">{{ $t('selectMonth') }}</option>
+                  <option v-for="(name, idx) in months" :key="idx" :value="idx + 1">{{ name }}</option>
+                </select>
+              </div>
+              <div class="mfield">
+                <label>{{ $t('Year') }}</label>
+                <input v-model="paymentForm.year" type="number" required placeholder="2025" />
+              </div>
+              <div class="mfield">
+                <label>{{ $t('Due Date') }}</label>
+                <input v-model="paymentForm.due_date" type="date" required />
+              </div>
             </div>
-
-            <!-- Amount -->
-            <div class="form-group">
-              <label>{{ $t('Amount') }}:</label>
-              <input v-model="paymentForm.amount" type="number" required />
-            </div>
-
-            <!-- Month -->
-            <div class="form-group">
-              <label>{{ $t('month') }}:</label>
-              <select v-model="paymentForm.month" required>
-                <option disabled value="">{{ $t('selectMonth') }}</option>
-                <option v-for="(name, index) in months" :key="index" :value="index + 1">
-                  {{ name }}
-                </option>
-              </select>
-            </div>
-
-            <!-- Year -->
-            <div class="form-group">
-              <label>{{ $t('Year') }}:</label>
-              <input v-model="paymentForm.year" type="number" required />
-            </div>
-
-            <!-- Due Date -->
-            <div class="form-group">
-              <label>{{ $t('Due Date') }}:</label>
-              <input v-model="paymentForm.due_date" type="date" required />
-            </div>
-
-            <!-- Submit -->
             <div class="modal-actions">
-              <button type="submit" class="btn-primary">
-                {{ $t('Make Payment') }}
-              </button>
+              <button type="submit" class="btn-teal">{{ $t('Make Payment') }}</button>
             </div>
           </form>
         </div>
       </div>
     </Transition>
 
+    <!-- PROFILE MODAL -->
     <Transition name="modal-fade">
-      <!-- COMMENTS MODAL -->
-      <div
-        v-if="activeCommentsModal === 'comments'"
-        class="modal-overlay"
-        @click.self="closeCommentsModal"
-      >
-        <div class="modal large">
-          <h3 style="color: black">Comments</h3>
+      <div v-if="activeProfileModal === 'profile'" class="modal-overlay" @click.self="closeProfileModal">
+        <div class="glass-modal">
+          <div class="modal-top">
+            <h3>{{ $t('userProfile') }}</h3>
+            <button class="close-x" @click="closeProfileModal">✕</button>
+          </div>
+          <div class="profile-box">
+            <div class="profile-avatar">👤</div>
+            <div class="profile-details">
+              <div class="mfield">
+                <label>{{ $t('Last Name') }}</label>
+                <p>{{ auth.user?.last_name || 'N/A' }}</p>
+              </div>
+              <div class="mfield">
+                <label>{{ $t('email') }}</label>
+                <p>{{ auth.user?.email || 'N/A' }}</p>
+              </div>
+              <div class="mfield">
+                <label>{{ $t('Phone Number') }}</label>
+                <p>{{ auth.user?.phone_number || 'N/A' }}</p>
+                <button class="btn-teal" style="margin-top: 8px" @click="updatingPhoneNumber(auth.user)">
+                  📱 {{ $t('updatePhone') }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
 
-          <!-- Success Message -->
-          <div v-if="successCommentMessage" class="success-alert">
-            {{ successCommentMessage }}
+    <!-- COMMENTS MODAL -->
+    <Transition name="modal-fade">
+      <div v-if="activeCommentsModal === 'comments'" class="modal-overlay" @click.self="closeCommentsModal">
+        <div class="glass-modal large">
+          <div class="modal-top">
+            <h3>{{ $t('Comments') }}</h3>
+            <button class="close-x" @click="closeCommentsModal">✕</button>
           </div>
 
-          <!-- COMMENT FORM -->
-          <form @submit.prevent="saveComment">
-            <div class="form-group">
-              <label>{{ $t('Comment') }}:</label>
-              <textarea
-                v-model="commentForm.comment"
-                placeholder="Write your comment..."
-                required
-              ></textarea>
-            </div>
+          <Transition name="alert-pop">
+            <div v-if="successCommentMessage" class="success-alert">{{ successCommentMessage }}</div>
+          </Transition>
 
-            <div class="form-group">
-              <label>{{ $t('Rating') }}:</label>
+          <form @submit.prevent="saveComment">
+            <div class="mfield">
+              <label>{{ $t('Comment') }}</label>
+              <textarea v-model="commentForm.comment" placeholder="Write your comment..." required></textarea>
+            </div>
+            <div class="mfield">
+              <label>{{ $t('Rating') }}</label>
               <select v-model="commentForm.rating" required>
                 <option v-for="n in 5" :key="n" :value="n">{{ n }} ⭐</option>
               </select>
             </div>
-
             <div class="modal-actions">
-              <button type="submit" class="btn-primary">Submit</button>
-              <button type="button" class="btn-secondary" @click="closeCommentsModal">Close</button>
+              <button type="submit" class="btn-teal">{{ $t('submit') }}</button>
+              <button type="button" class="btn-ghost" @click="closeCommentsModal">{{ $t('close') }}</button>
             </div>
           </form>
 
-          <!-- COMMENTS TABLE -->
-          <div class="table-wrapper">
-            <h4>All Comments</h4>
-
+          <div class="modal-table-wrap">
+            <h4 class="table-subtitle">{{ $t('All Comments') }}</h4>
             <table>
               <thead>
                 <tr>
@@ -851,21 +770,19 @@ const hasNewAnnouncements = computed(() => {
                   <th>{{ $t('Action') }}</th>
                 </tr>
               </thead>
-
               <tbody>
                 <tr v-for="(comment, index) in commentStore.comments" :key="comment.id">
-                  <td>{{ index + 1 }}</td>
+                  <td class="idx">{{ index + 1 }}</td>
                   <td>{{ comment.user?.last_name || 'N/A' }}</td>
                   <td>{{ comment?.comment }}</td>
                   <td>{{ comment?.rating }} ⭐</td>
                   <td>{{ formatDate(comment.created_at) }}</td>
                   <td>
-                    <button class="btn-delete" @click="deleteComment(comment.id)">Delete</button>
+                    <button class="btn-del" @click="deleteComment(comment.id)">{{ $t('delete') }}</button>
                   </td>
                 </tr>
-
                 <tr v-if="!commentStore.comments.length">
-                  <td colspan="5" class="no-data">🚫 No Comments</td>
+                  <td colspan="6" class="no-data">🚫 No Comments</td>
                 </tr>
               </tbody>
             </table>
@@ -874,27 +791,20 @@ const hasNewAnnouncements = computed(() => {
       </div>
     </Transition>
 
+    <!-- ANNOUNCEMENTS MODAL -->
     <Transition name="modal-fade">
-      <!-- ANNOUNCEMENTS MODAL -->
-      <div
-        v-if="activeAnnouncementModal === 'announcements'"
-        class="modal-overlay"
-        @click.self="closeAnnouncementsModal"
-      >
-        <div class="modal large">
-          <h3 style="color: black">{{ $t('announcements') }}</h3>
+      <div v-if="activeAnnouncementModal === 'announcements'" class="modal-overlay" @click.self="closeAnnouncementsModal">
+        <div class="glass-modal large">
+          <div class="modal-top">
+            <h3>{{ $t('announcements') }}</h3>
+            <button class="close-x" @click="closeAnnouncementsModal">✕</button>
+          </div>
 
-          <!-- Table -->
-          <div class="table-wrapper">
+          <div class="announcements-list">
             <div v-if="!announcementStore.announcements.length" class="no-data">
-              🚫 No Announcements
+              🚫 {{ $t('noAnnouncements') }}
             </div>
-
-            <div
-              v-for="(announcement, index) in announcementStore.announcements"
-              :key="announcement.id"
-              class="message-card"
-            >
+            <div v-for="(announcement, index) in announcementStore.announcements" :key="announcement.id" class="message-card">
               <div class="message-header">
                 <span class="message-index">#{{ index + 1 }}</span>
                 <span class="message-date">{{ formatDate(announcement.created_at) }}</span>
@@ -907,47 +817,34 @@ const hasNewAnnouncements = computed(() => {
       </div>
     </Transition>
 
+    <!-- PASSWORD RESET MODAL -->
     <Transition name="modal-fade">
-      <!-- PASSWORD RESET MODAL -->
-      <div
-        v-if="activePasswordResetModal === 'passwordReset'"
-        class="modal-overlay"
-        @click.self="closePasswordResetModal"
-      >
-        <div class="modal">
-          <h3 style="color: black">{{ $t('resetPasswordTitle') }}</h3>
-
-          <!-- Success Message -->
-          <div v-if="successPasswordResetMessage" class="success-alert">
-            {{ successPasswordResetMessage }}
+      <div v-if="activePasswordResetModal === 'passwordReset'" class="modal-overlay" @click.self="closePasswordResetModal">
+        <div class="glass-modal">
+          <div class="modal-top">
+            <h3>{{ $t('resetPasswordTitle') }}</h3>
+            <button class="close-x" @click="closePasswordResetModal">✕</button>
           </div>
 
-          <!-- Error Message -->
-          <div v-if="auth.error" class="error-alert">
-            {{ auth.error }}
-          </div>
+          <Transition name="alert-pop">
+            <div v-if="successPasswordResetMessage" class="success-alert">{{ successPasswordResetMessage }}</div>
+          </Transition>
+          <Transition name="alert-pop">
+            <div v-if="auth.error" class="error-alert">{{ auth.error }}</div>
+          </Transition>
 
-          <p>{{ $t('resetPasswordDescription') }}</p>
+          <p class="modal-desc">{{ $t('resetPasswordDescription') }}</p>
 
-          <!-- PASSWORD RESET FORM -->
           <form @submit.prevent="sendPasswordResetLink">
-            <div class="form-group">
-              <label>{{ $t('email') }}:</label>
-              <input
-                v-model="passwordResetForm.email"
-                type="email"
-                :placeholder="$t('email')"
-                required
-              />
+            <div class="mfield">
+              <label>{{ $t('email') }}</label>
+              <input v-model="passwordResetForm.email" type="email" :placeholder="$t('email')" required />
             </div>
-
             <div class="modal-actions">
-              <button type="submit" class="btn-primary" :disabled="auth.loading">
+              <button type="submit" class="btn-teal" :disabled="auth.loading">
                 {{ auth.loading ? 'Sending...' : $t('sendResetLink') }}
               </button>
-              <button type="button" class="btn-secondary" @click="closePasswordResetModal">
-                {{ $t('close') }}
-              </button>
+              <button type="button" class="btn-ghost" @click="closePasswordResetModal">{{ $t('close') }}</button>
             </div>
           </form>
         </div>
@@ -957,635 +854,1017 @@ const hasNewAnnouncements = computed(() => {
 </template>
 
 <style scoped>
-.message-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 10px;
-  padding: 14px 18px;
-  margin-bottom: 12px;
-  background: #fff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+
+* {
+  box-sizing: border-box;
 }
 
-.message-header {
+/* ════════════════════════════════════════
+   SHELL
+════════════════════════════════════════ */
+.dash-shell {
   display: flex;
-  justify-content: space-between;
-  font-size: 0.8rem;
-  color: #999;
-  margin-bottom: 6px;
+  min-height: 100vh;
+  background: #020810;
+  font-family: 'Inter', sans-serif;
+  color: #fff;
 }
 
-.message-title {
+/* ════════════════════════════════════════
+   SIDEBAR
+════════════════════════════════════════ */
+.sidebar {
+  width: 230px;
+  flex-shrink: 0;
+  background: rgba(2, 8, 20, 0.95);
+  border-right: 1px solid rgba(20, 184, 166, 0.12);
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 100;
+  transition: transform 0.3s ease;
+  backdrop-filter: blur(12px);
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: #14b8a6;
+  margin-bottom: 32px;
+  padding: 0 4px;
+  letter-spacing: 0.04em;
+}
+
+.logo-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #14b8a6;
+  box-shadow: 0 0 10px #14b8a6;
+  animation: logoPulse 2s ease-in-out infinite;
+}
+
+.logo-dot.red {
+  background: #ef4444;
+  box-shadow: 0 0 10px #ef4444;
+  width: 8px;
+  height: 8px;
+  margin-left: 6px;
+}
+
+@keyframes logoPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.5); }
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: 0.2s;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  position: relative;
+}
+
+.nav-item:hover,
+.nav-item.on,
+.nav-item.active {
+  background: rgba(20, 184, 166, 0.1);
+  color: #14b8a6;
+  border-left: 2px solid #14b8a6;
+  padding-left: 10px;
+}
+
+.badge-new {
+  width: 8px;
+  height: 8px;
+  background: #ef4444;
+  border-radius: 50%;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  box-shadow: 0 0 6px #ef4444;
+}
+
+.ni {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.sidebar-logout {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  font-size: 13px;
   font-weight: 600;
-  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.25s;
+  font-family: inherit;
+  margin-top: 16px;
+}
+
+.sidebar-logout:hover {
+  background: rgba(239, 68, 68, 0.2);
+  transform: translateY(-2px);
+}
+
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 99;
+  backdrop-filter: blur(4px);
+}
+
+/* ════════════════════════════════════════
+   MAIN
+════════════════════════════════════════ */
+.dash-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── HERO BANNER ── */
+.hero-banner {
+  position: relative;
+  overflow: hidden;
+  height: 200px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #0a1428 0%, #020810 100%);
+}
+
+.hero-text {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 24px;
+}
+
+.menu-btn {
+  background: rgba(20, 184, 166, 0.15);
+  border: 1px solid rgba(20, 184, 166, 0.3);
+  color: #14b8a6;
+  font-size: 18px;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.menu-btn:hover {
+  background: rgba(20, 184, 166, 0.25);
+}
+
+.topbar-inner {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.dash-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(20, 184, 166, 0.1);
+  border: 1px solid rgba(20, 184, 166, 0.3);
+  color: #5dcaa5;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 12px;
+  border-radius: 20px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.badge-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #14b8a6;
+  animation: logoPulse 1.6s ease-in-out infinite;
+}
+
+.dash-title {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 900;
+  line-height: 1.1;
   margin-bottom: 4px;
 }
 
-.message-body {
-  font-size: 0.92rem;
-  color: #444;
-  line-height: 1.5;
+.dash-sub {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.topbar-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.lang-row {
+  display: flex;
+  gap: 6px;
+}
+
+.lbtn {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  transition: 0.2s;
+}
+
+.lbtn.on,
+.lbtn:hover {
+  background: #0f766e;
+  border-color: #14b8a6;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* ── MAIN BODY ── */
+.main-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── STATS ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: 0.3s;
+  border-left: 3px solid rgba(20, 184, 166, 0.4);
+}
+
+.stat-card:hover {
+  transform: translateY(-5px) rotateX(4deg);
+  background: rgba(20, 184, 166, 0.07);
+  border-color: rgba(20, 184, 166, 0.35);
+  box-shadow: 0 12px 35px rgba(20, 184, 166, 0.12);
+}
+
+.stat-card.green {
+  border-left-color: rgba(34, 197, 94, 0.5);
+}
+
+.stat-card.green:hover {
+  background: rgba(34, 197, 94, 0.06);
+}
+
+.stat-card.amber {
+  border-left-color: rgba(245, 158, 11, 0.5);
+}
+
+.stat-card.amber:hover {
+  background: rgba(245, 158, 11, 0.06);
+}
+
+.stat-icon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.stat-val {
+  font-size: clamp(1rem, 3vw, 1.4rem);
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+}
+
+.stat-lbl {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 4px;
+}
+
+/* ── GLASS SECTIONS ── */
+.glass-section {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 18px;
+  padding: 24px;
+  backdrop-filter: blur(8px);
+}
+
+.glass-section::before {
+  content: '';
+  display: block;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(20, 184, 166, 0.3), transparent);
+  margin-bottom: 20px;
+  border-radius: 50%;
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.sec-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-bottom: 2px;
+}
+
+.sec-sub {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ── TABLE ── */
+.table-wrap {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+thead tr {
+  background: rgba(20, 184, 166, 0.06);
+}
+
+th {
+  padding: 11px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  white-space: nowrap;
+}
+
+td {
+  padding: 11px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.85);
+  vertical-align: middle;
+}
+
+tbody tr:hover {
+  background: rgba(20, 184, 166, 0.04);
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.idx {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 12px;
 }
 
 .no-data {
   text-align: center;
-  color: #aaa;
-  padding: 20px;
+  padding: 24px;
+  color: rgba(255, 255, 255, 0.3);
 }
 
-.payment-alert {
-  background-color: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffeeba;
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-weight: 500;
-  margin: 10px 0;
-}
-/* Badge styles */
-.badge {
+/* pills */
+.status-pill {
   display: inline-block;
-  width: 10px;
-  height: 10px;
-  background: red;
-  border-radius: 50%;
-  margin-left: 8px;
-}
-/* button for delete styles */
-.btn-delete {
-  background: #e74c3c;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.btn-delete:hover {
-  background: #c0392b;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(192, 57, 43, 0.25);
-}
-/* payment status styles */
-.paid {
-  color: #16a34a;
-  background: #dcfce7;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.unpaid {
-  color: #dc2626;
-  background: #fee2e2;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-}
-/* Update Phone Number button styles */
-
-.btn-update {
-  margin-top: 8px;
-  padding: 6px 12px;
-  background: linear-gradient(135deg, #14b8a6, #0f766e);
-  color: white;
-  border: none;
+  padding: 3px 10px;
   border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.status-pill.paid {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.status-pill.unpaid,
+.status-pill.pending {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.status-pill.occupied,
+.status-pill.Occupied {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.status-pill.available,
+.status-pill.Available {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.status-pill.maintenance,
+.status-pill.Maintenance {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* buttons */
+.btn-teal {
+  padding: 9px 20px;
+  border-radius: 50px;
+  border: none;
+  background: linear-gradient(135deg, #0f766e, #14b8a6);
+  color: #fff;
   font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: 0.3s;
+  font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-/* hover animation */
-.btn-update:hover {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 6px 15px rgba(20, 184, 166, 0.4);
+.btn-teal:hover {
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 10px 28px rgba(20, 184, 166, 0.4);
 }
 
-/* click animation */
-.btn-update:active {
-  transform: scale(0.95);
+.btn-teal:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
-/* ----- END --- */
-
-/* Modal fade background */
-.modal-fade-enter-active,
-.modal-fade-leave-active {
-  transition: all 0.25s ease;
+.btn-sm {
+  padding: 5px 12px;
+  border-radius: 7px;
+  border: none;
+  background: rgba(20, 184, 166, 0.12);
+  color: #14b8a6;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid rgba(20, 184, 166, 0.25);
+  transition: 0.2s;
+  font-family: inherit;
 }
 
-/* Start & end state */
-.modal-fade-enter-from,
-.modal-fade-leave-to {
-  opacity: 0;
+.btn-sm:hover {
+  background: rgba(20, 184, 166, 0.22);
 }
 
-/* Slight zoom effect for modal box */
-.modal-fade-enter-from .modal,
-.modal-fade-leave-to .modal {
-  transform: scale(0.9);
+.btn-sm:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
-.modal-fade-enter-active .modal,
-.modal-fade-leave-active .modal {
-  transition: transform 0.25s ease;
+.btn-ghost {
+  padding: 9px 20px;
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+  font-family: inherit;
 }
 
-/* User Profile classes */
-.profile-container {
-  display: flex;
-  gap: 20px;
-  margin-top: 20px;
-  align-items: center;
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
 }
 
-.profile-avatar {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: #f1f1f1;
+.btn-del {
+  padding: 5px 12px;
+  border-radius: 7px;
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  cursor: pointer;
+  transition: 0.2s;
+  font-family: inherit;
+}
+
+.btn-del:hover {
+  background: rgba(239, 68, 68, 0.22);
+  transform: translateY(-1px);
+}
+
+/* gallery */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+.gallery-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  aspect-ratio: 4/3;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32px;
+  font-size: 2rem;
+  transition: 0.3s;
+}
+
+.gallery-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(20, 184, 166, 0.3);
+  background: rgba(20, 184, 166, 0.05);
+}
+
+.gallery-placeholder {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 1rem;
+}
+
+/* rules list */
+.rules-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rules-list li {
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  border-left: 3px solid rgba(20, 184, 166, 0.4);
+  transition: 0.2s;
+}
+
+.rules-list li:hover {
+  background: rgba(20, 184, 166, 0.05);
+  color: #fff;
+}
+
+/* ════════════════════════════════════════
+   MODALS
+════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 8, 16, 0.8);
+  backdrop-filter: blur(12px) saturate(1.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.glass-modal {
+  background: rgba(10, 20, 35, 0.92);
+  border: 1px solid rgba(20, 184, 166, 0.2);
+  border-radius: 20px;
+  padding: 28px 26px;
+  width: 100%;
+  max-width: 780px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  backdrop-filter: blur(24px);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 60px rgba(20, 184, 166, 0.07);
+}
+
+.glass-modal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(20, 184, 166, 0.5), transparent);
+}
+
+.glass-modal.large {
+  max-width: 1000px;
+}
+
+.modal-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modal-top h3 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.close-x {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+  flex-shrink: 0;
+}
+
+.close-x:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.modal-desc {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 18px;
+}
+
+.mfield {
+  min-width: 0;
+}
+
+.mfield label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 7px;
+}
+
+.mfield input,
+.mfield textarea,
+.mfield select {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 13px;
+  font-family: inherit;
+  transition: border-color 0.2s, background 0.2s;
+  outline: none;
+}
+
+.mfield input::placeholder,
+.mfield textarea::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.mfield input:focus,
+.mfield textarea:focus,
+.mfield select:focus {
+  border-color: #14b8a6;
+  background: rgba(20, 184, 166, 0.06);
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
+}
+
+.mfield textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+.mfield select option {
+  background: #0a1428;
+  color: #fff;
+}
+
+.form-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 560px) {
+  .form-2col {
+    grid-template-columns: 1fr;
+  }
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.modal-table-wrap {
+  margin-top: 24px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+  max-height: 280px;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.table-subtitle {
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: rgba(20, 184, 166, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.divider {
+  margin: 20px 0;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.section-subtitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #14b8a6;
+  margin-bottom: 12px;
+}
+
+.payment-alert {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 12px;
+  margin: 10px 0;
+}
+
+/* profile */
+.profile-box {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(20, 184, 166, 0.15);
+  border: 2px solid rgba(20, 184, 166, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  flex-shrink: 0;
 }
 
 .profile-details {
   flex: 1;
 }
 
-.profile-item {
-  margin-bottom: 15px;
+.mfield p {
+  font-size: 15px;
+  color: #fff;
+  margin: 0;
+  font-weight: 600;
 }
 
-.profile-item label {
-  font-weight: bold;
-  display: block;
-  color: #555;
+/* announcements */
+.announcements-list {
+  max-height: 60vh;
+  overflow-y: auto;
 }
 
-.profile-item p {
-  margin: 5px 0 0;
-  font-size: 16px;
+.message-card {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: 0.2s;
 }
 
-.no-data-class-statement {
-  text-align: center; /* text-center */
-  padding-top: 1.5rem; /* py-6 */
-  padding-bottom: 1.5rem; /* py-6 */
-  color: #6b7280; /* text-gray-500 */
-}
-/* Success message color */
-.success-alert {
-  background: #d1fae5;
-  color: #065f46;
-  padding: 10px;
-  border-radius: 6px;
-  margin-bottom: 15px;
-  font-weight: 500;
+.message-card:hover {
+  background: rgba(20, 184, 166, 0.05);
+  border-color: rgba(20, 184, 166, 0.2);
 }
 
-/* Error message color */
-.error-alert {
-  background: #fee2e2;
-  color: #dc2626;
-  padding: 10px;
-  border-radius: 6px;
-  margin-bottom: 15px;
-  font-weight: 500;
-}
-
-/* menu button styles */
-.menu-btn {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 24px;
-  margin-bottom: 20px;
-  cursor: pointer;
-}
-/* Rooms table inside a modal styles */
-
-.room-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: Arial, sans-serif;
-  margin-top: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.room-table thead {
-  background-color: #0f766e;
-  color: white;
-}
-
-.room-table thead th {
-  padding: 12px 15px;
-  text-align: left;
-}
-
-.room-table tbody td {
-  padding: 10px 15px;
-  border-bottom: 1px solid #ddd;
-}
-
-.room-table tbody tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-.room-table tbody tr:hover {
-  background-color: #eef4fc;
-}
-
-.room-table td.occupied {
-  color: #e74c3c;
-  font-weight: bold;
-}
-
-.room-table td.available {
-  color: #27ae60;
-  font-weight: bold;
-}
-
-.room-table td.maintenance {
-  color: #f39c12;
-  font-weight: bold;
-}
-
-.room-table td.unknown {
-  color: #7f8c8d;
-  font-style: italic;
-}
-
-/* Modal Styles */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+.message-header {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+  justify-content: space-between;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 8px;
 }
 
-.modal {
-  background: white;
-  padding: 30px;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 500px;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group label {
-  display: block;
-  font-weight: bold;
-  margin-bottom: 5px;
-  color: black;
-}
-
-.form-group input,
-.form-group textarea,
-.form-group select {
-  width: 100%;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.btn-primary {
-  background: #0f766e;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.btn-primary:hover {
-  background: #022c22;
-}
-
-.btn-secondary {
-  background: #ccc;
-  color: #333;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.dashboard {
-  display: flex;
-  min-height: 100vh;
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-.table-wrapper {
-  max-height: 300px; /* Fixed height */
-  overflow-y: auto; /* Vertical scroll if content exceeds height */
-  margin-top: 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 10px; /* Optional padding */
-  background: #fff; /* Optional background */
-}
-
-.table-wrapper table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table-wrapper th,
-.table-wrapper td {
-  padding: 8px 12px;
-  border-bottom: 1px solid #eee;
-  text-align: left;
-}
-
-.table-wrapper thead th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-}
-
-/* Optional: row hover effect */
-.table-wrapper tbody tr:hover {
-  background-color: #f1f1f1;
-}
-/* translation buttons */
-.language-toggle {
-  margin: 10px 0;
-  display: flex;
-  gap: 5px;
-  justify-content: flex-end;
-}
-
-.language-toggle button {
-  padding: 5px 12px;
-  background: transparent;
-  border: 1px solid #888;
-  color: black; /* 👈 key change */
-  cursor: pointer;
-  border-radius: 20px;
-  font-weight: bold;
-  transition: 0.25s ease;
-}
-
-.language-toggle button:hover {
-  background: rgba(0, 0, 0, 0.05); /* light hover */
-  transform: scale(1.05);
-}
-
-.language-toggle button.active {
-  background: rgba(0, 123, 255, 0.15);
-  border-color: #007bff;
-  color: #007bff; /* active stays blue */
-}
-
-.dashboard {
-  display: flex;
-  min-height: 100vh;
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-/* Sidebar */
-.sidebar {
-  width: 240px;
-  background: #022c22;
-  color: white;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.3s ease;
-}
-
-/* overlay */
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 999;
-}
-
-.logo {
-  margin-bottom: 30px;
+.message-title {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 6px;
   color: #14b8a6;
 }
 
-.nav-item {
-  display: block;
-  padding: 12px;
-  margin-bottom: 8px;
-  color: white;
-  text-decoration: none;
-  border-radius: 6px;
-  transition: 0.3s;
+.message-body {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.5;
 }
 
-.nav-item:hover,
-.nav-item.active {
-  background: #0f766e;
+/* alerts */
+.success-alert {
+  background: rgba(20, 184, 166, 0.1);
+  border: 1px solid rgba(20, 184, 166, 0.3);
+  color: #5dcaa5;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
 }
 
-#logout {
-  margin-top: auto;
-  background: #14b8a6;
-  padding: 10px;
-  text-align: center;
-  border-radius: 20px;
-  color: white;
-  text-decoration: none;
-  cursor: pointer;
+.error-alert {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
 }
 
-/* Main Content */
-.content {
-  flex: 1;
-  padding: 30px;
-  background: #f1f5f9;
+/* ════════════════════════════════════════
+   TRANSITIONS
+════════════════════════════════════════ */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.25s ease;
 }
 
-/* Topbar */
-.topbar h1 {
-  color: #0f766e;
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
 }
 
-.topbar h2 {
-  color: #0f766e;
+.modal-fade-enter-active .glass-modal,
+.modal-fade-leave-active .glass-modal {
+  transition: transform 0.25s ease;
 }
 
-.topbar p {
-  margin-bottom: 20px;
-  color: #333;
+.modal-fade-enter-from .glass-modal {
+  transform: scale(0.92) translateY(20px);
 }
 
-/* Stats */
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
+.modal-fade-leave-to .glass-modal {
+  transform: scale(0.95) translateY(10px);
 }
 
-.card {
-  background: white;
-  padding: 20px;
-  border-left: 6px solid #14b8a6;
-  border-radius: 8px;
-  transition: 0.3s;
-}
-.card:hover {
-  transform: translateY(-5px);
-}
-.number {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #022c22;
+.alert-pop-enter-active {
+  animation: alertPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Table */
-.table-section {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 30px;
-  overflow-x: auto;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-th,
-td {
-  padding: 12px;
-  border-bottom: 1px solid #ddd;
-}
-.paid {
-  color: green;
-  font-weight: bold;
-}
-.pending {
-  color: orange;
-  font-weight: bold;
+.alert-pop-leave-active {
+  transition: opacity 0.2s ease;
 }
 
-.btn-primary {
-  background: #0f766e;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-.btn-primary:hover {
-  background: #022c22;
-}
-.btn-primary:disabled {
-  background: #ccc;
-  cursor: not-allowed;
+.alert-pop-leave-to {
+  opacity: 0;
 }
 
-/* Gallery */
-.gallery-section {
-  margin-bottom: 30px;
-}
-.gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 20px;
-}
-.gallery-card img {
-  width: 100%;
-  border-radius: 8px;
+@keyframes alertPop {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
-/* Rules */
-.rules-section {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-}
-.rules-section ul {
-  list-style-type: disc;
-  padding-left: 20px;
-}
-
-/* Alerts */
-.alert {
-  color: red;
-  font-weight: bold;
-  margin-top: 10px;
-}
-
-/* Responsive */
+/* ════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════ */
 @media (max-width: 768px) {
-  .dashboard {
-    flex-direction: column;
-  }
-  .stats {
-    grid-template-columns: 1fr;
-  }
-  .gallery {
-    grid-template-columns: 1fr;
-  }
-
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
     transform: translateX(-100%);
-    z-index: 1000;
+    z-index: 200;
   }
-
-  .sidebar.open {
+  .dash-shell.sidebar-open .sidebar {
     transform: translateX(0);
   }
-
   .menu-btn {
-    display: block;
-    background: none;
-    border: none;
-    color: black;
-    font-size: 24px;
-    margin-bottom: 15px;
-    cursor: pointer;
-    margin-left: 90%;
+    display: flex !important;
   }
-
-  .modal {
-    width: 95%;
-    padding: 15px;
-    max-height: 90vh;
-
-    /* THIS is the key fix */
-    overflow-y: auto;
+  .hero-banner {
+    height: 180px;
   }
-
-  .modal-overlay {
-    align-items: flex-start; /* prevents top/bottom cut on small screens */
-    padding: 10px;
+  .main-body {
+    padding: 16px;
+    gap: 16px;
+  }
+  .topbar-right {
+    display: none;
+  }
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .glass-modal.large {
+    max-width: 98vw;
+  }
+  .profile-box {
+    flex-direction: column;
   }
 }
 
 @media (min-width: 769px) {
   .menu-btn {
-    display: none;
+    display: none !important;
   }
 }
 </style>

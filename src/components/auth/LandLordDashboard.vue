@@ -1249,6 +1249,7 @@ function buildCubes() {
                   v-model="paymentMethodForm.airtel_money_number"
                   type="number"
                   placeholder="Airtel Money"
+                  
                 />
               </div>
               <div class="mfield">
