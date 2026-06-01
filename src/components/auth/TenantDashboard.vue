@@ -23,41 +23,31 @@ const announcementStore = useAnnouncementStore()
 
 const { totalRooms, roomsAvailableCount } = storeToRefs(roomStore)
 
-/* ── messages ── */
-const successLatePaymentReasonSubmissionMessage = ref('')
-const successCommentMessage = ref('')
-const successUpdateRoomStatus = ref('')
-const successPasswordResetMessage = ref('')
-
-/* ── logout ── */
+// -------------------- AUTH --------------------
 const logoutUser = () => {
   auth.logout()
   router.push('/login')
 }
 
-/* ── modals ── */
-const activeRoomsModal = ref(null)
-const activePaymentMethod = ref(null)
-const activeProfileModal = ref(null)
-const activeCommentsModal = ref(null)
-const activeAnnouncementModal = ref(null)
-const activePasswordResetModal = ref(null)
-const hasSeenAnnouncements = ref(false)
+// -------------------- LATE PAYMENT FUNCTION --------------------
+const successLatePaymentReasonSubmissionMessage = ref('')
 
-/* ── late payment reason ── */
 async function submitLateReason(payment) {
   if (latePaymentReasonStore.latePaymentReasons.length >= 3) {
     alert('You have reached the maximum of 3 late payment submissions!')
     return
   }
 
-  const reason_text = prompt('Please enter your reason for late payment. Note: Max 3 submissions allowed.')
+  const reason_text = prompt(
+    'Please enter your reason for late payment. Note: Max 3 submissions allowed.',
+  )
 
   if (reason_text) {
     await latePaymentReasonStore.registerLatePaymentReasons({
       payment_id: payment.id,
       reason_text: reason_text,
     })
+
     successLatePaymentReasonSubmissionMessage.value = '✅ Reason Submitted successfully!'
     setTimeout(() => {
       successLatePaymentReasonSubmissionMessage.value = ''
@@ -65,7 +55,34 @@ async function submitLateReason(payment) {
   }
 }
 
-/* ── payment form ── */
+// ----------------------- SIDEBAR RESPONSIVE FUNCTIONS --------------------------------------
+const isSidebarOpen = ref(false)
+
+// ---------- MODAL FUNCTIONS FOR THE ROOM MODAL---------------------
+const activeRoomsModal = ref(null)
+
+function openRoomsModal(modalName) {
+  activeRoomsModal.value = modalName
+  if (modalName === 'rooms') {
+    roomFetching()
+  }
+}
+
+function closeRoomsModal() {
+  activeRoomsModal.value = null
+}
+
+const roomFetching = async () => {
+  await roomStore.fetchRooms()
+  console.log('Fetched Rooms:', roomStore.rooms)
+}
+
+// Payment Method fetching
+const paymentMethodFetching = async () => {
+  await paymentMethodStore.fetchPaymentMethods()
+}
+
+// Payment form data and functions
 const paymentForm = ref({
   room_id: '',
   month: '',
@@ -77,6 +94,7 @@ const paymentForm = ref({
 
 const savePayment = async () => {
   const response = await paymentStore.registerPayment(paymentForm.value)
+
   if (response) {
     alert('✅ Payment registered successfully!')
     paymentForm.value = {
@@ -95,31 +113,43 @@ const savePayment = async () => {
 
 const months = [
   'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
+  'July', 'August', 'September', 'October', 'November', 'December',
 ]
 
-/* ── rooms modal ── */
-const openRoomsModal = (modalName) => {
-  activeRoomsModal.value = modalName
-  if (modalName === 'rooms') {
-    roomFetching()
+// ----------- MODAL FUNCTIONS FOR PAYMENT METHOD MODAL -------------
+const activePaymentMethod = ref(null)
+
+function openPaymentMethodModal(ModalName) {
+  activePaymentMethod.value = ModalName
+  if (ModalName === 'paymentMethod') {
+    paymentMethodFetching()
   }
 }
 
-const closeRoomsModal = () => {
-  activeRoomsModal.value = null
+const closePaymentMethodModal = () => {
+  activePaymentMethod.value = null
 }
 
-const roomFetching = async () => {
-  await roomStore.fetchRooms()
-  await roomStore.updateRoomStatus()
+// -------------------- LANGUAGE TOGGLE --------------------
+const { locale } = useI18n()
+const currentLocale = ref(locale.value)
+
+const setLanguage = (lang) => {
+  locale.value = lang
+  currentLocale.value = lang
 }
 
+async function updatingRoomStatus(id, checked) {
+  return await roomStore.updateRoomStatus(id, checked)
+}
+
+// CONFIRM ROOM SELECTION FUNCTIONS
 const isDisabled = (room) => {
   return room.status === 'Occupied' && room.user_id !== auth.user?.id
 }
 
 const confirmText = 'CONFIRMED'
+const successUpdateRoomStatus = ref('')
 
 const confirmToggle = async (room, checked) => {
   if (room.status === 'Occupied' && room.user_id !== auth.user?.id) {
@@ -131,37 +161,26 @@ const confirmToggle = async (room, checked) => {
 
   if (input?.trim() === confirmText) {
     await updatingRoomStatus(room.id, checked)
+
     successUpdateRoomStatus.value = '✅ Action Completed successfully!'
+
     setTimeout(() => {
       successUpdateRoomStatus.value = ''
     }, 3000)
+
     await roomStore.fetchRooms()
   } else {
     alert('Incorrect text. Action Cancelled')
   }
 }
 
-const updatingRoomStatus = async (id, checked) => {
-  return await roomStore.updateRoomStatus(id, checked)
+// ----------------------------- User Profile Functions -------------------------------------
+const activeProfileModal = ref(null)
+
+const profileFetching = async () => {
+  await auth.fetchUser()
 }
 
-/* ── payment method modal ── */
-const openPaymentMethodModal = (ModalName) => {
-  activePaymentMethod.value = ModalName
-  if (ModalName === 'paymentMethod') {
-    paymentMethodFetching()
-  }
-}
-
-const closePaymentMethodModal = () => {
-  activePaymentMethod.value = null
-}
-
-const paymentMethodFetching = async () => {
-  await paymentMethodStore.fetchPaymentMethods()
-}
-
-/* ── profile modal ── */
 const openProfileModal = (ModalName) => {
   activeProfileModal.value = ModalName
   if (ModalName === 'profile') {
@@ -173,14 +192,14 @@ const closeProfileModal = () => {
   activeProfileModal.value = null
 }
 
-const profileFetching = async () => {
-  await auth.fetchUser()
-}
-
+// -------------------- Update Phone Number Function ------------------------------
 const updatingPhoneNumber = async (user) => {
   const newPhone = prompt('Enter new phone number:')
+
   if (!newPhone || !newPhone.trim()) return
+
   const response = await auth.updatePhoneNumber(user.id, newPhone)
+
   if (response) {
     alert('✅ Phone number updated successfully!')
   } else {
@@ -188,7 +207,15 @@ const updatingPhoneNumber = async (user) => {
   }
 }
 
-/* ── comments modal ── */
+// ------------------------------------------- COMMENTS FUNCTIONS ------------------------------------
+const activeCommentsModal = ref(null)
+const successCommentMessage = ref('')
+
+const commentForm = ref({
+  comment: '',
+  rating: 5,
+})
+
 const openCommentsModal = (ModalName) => {
   activeCommentsModal.value = ModalName
   if (ModalName === 'comments') {
@@ -200,17 +227,13 @@ const closeCommentsModal = () => {
   activeCommentsModal.value = null
 }
 
-const commentForm = ref({
-  comment: '',
-  rating: 5,
-})
-
 const commentFetching = async () => {
   await commentStore.fetchComments()
 }
 
 const saveComment = async () => {
   const response = await commentStore.registerComments(commentForm.value)
+
   if (response) {
     successCommentMessage.value = '✅ Comment added successfully!'
     commentForm.value.comment = ''
@@ -229,11 +252,19 @@ const deleteComment = async (id) => {
   await commentFetching()
 }
 
-/* ── announcements modal ── */
+// ------------------------------ ANNOUNCEMENTS FUNCTIONS ---------------------------------
+const activeAnnouncementModal = ref(null)
+
+const closeAnnouncementsModal = () => {
+  activeAnnouncementModal.value = null
+}
+
 const openAnnouncementModal = async (ModalName) => {
   activeAnnouncementModal.value = ModalName
+
   if (ModalName === 'announcements') {
     await announcementsFetching()
+
     const announcements = announcementStore.announcements
     if (announcements.length > 0) {
       const latest = announcements[0]
@@ -242,23 +273,15 @@ const openAnnouncementModal = async (ModalName) => {
   }
 }
 
-const closeAnnouncementsModal = () => {
-  activeAnnouncementModal.value = null
-}
-
 const announcementsFetching = async () => {
   await announcementStore.fetchAnnouncements()
 }
 
-const hasNewAnnouncements = computed(() => {
-  const announcements = announcementStore.announcements
-  if (!announcements.length) return false
-  const latest = announcements[0]
-  const lastSeenId = localStorage.getItem('lastSeenAnnouncementId')
-  return String(latest.id) !== lastSeenId
-})
+// -------- PASSWORD RESET FUNCTIONS -----------------------------
+const activePasswordResetModal = ref(null)
+const successPasswordResetMessage = ref('')
+const passwordResetForm = ref({ email: '' })
 
-/* ── password reset modal ── */
 const openPasswordResetModal = (ModalName) => {
   activePasswordResetModal.value = ModalName
   if (ModalName === 'passwordReset') {
@@ -272,8 +295,6 @@ const closePasswordResetModal = () => {
   passwordResetForm.value.email = ''
 }
 
-const passwordResetForm = ref({ email: '' })
-
 const sendPasswordResetLink = async () => {
   const response = await auth.requestPasswordReset(passwordResetForm.value.email)
   if (response) {
@@ -282,7 +303,7 @@ const sendPasswordResetLink = async () => {
   }
 }
 
-/* ── utils ── */
+// -------- Date function --------------------------
 const formatDate = (date) => {
   if (!date) return ''
   return new Date(date).toLocaleString('en-GB', {
@@ -294,19 +315,16 @@ const formatDate = (date) => {
   })
 }
 
-/* ── language ── */
-const { locale } = useI18n()
-const currentLocale = ref(locale.value)
+// Has new announcements
+const hasNewAnnouncements = computed(() => {
+  const announcements = announcementStore.announcements
+  if (!announcements.length) return false
+  const latest = announcements[0]
+  const lastSeenId = localStorage.getItem('lastSeenAnnouncementId')
+  return String(latest.id) !== lastSeenId
+})
 
-const setLanguage = (lang) => {
-  locale.value = lang
-  currentLocale.value = lang
-}
-
-/* ── sidebar ── */
-const isSidebarOpen = ref(false)
-
-/* ── house gallery ── */
+// -------------------- HOUSE DATA --------------------
 const house = ref({
   images: ['/assets/room1.jpg', '/assets/room2.jpg', '/assets/common.jpg'],
 })
@@ -317,7 +335,6 @@ onMounted(async () => {
   await paymentStore.fetchPayments()
   await paymentMethodStore.fetchPaymentMethods()
   await announcementStore.fetchAnnouncements()
-  await paymentStore.fetchTenantPayment()
 
   if (announcementStore.announcements.length > 0) {
     activeAnnouncementModal.value = 'announcements'
@@ -553,7 +570,7 @@ onMounted(async () => {
     </main>
 
     <!-- ════════════════════════════════════
-         MODALS
+         MODALS (same structure as your original, just styled)
     ════════════════════════════════════ -->
 
     <!-- ROOMS MODAL -->
@@ -571,7 +588,7 @@ onMounted(async () => {
 
           <div class="modal-table-wrap">
             <h4 class="table-subtitle">{{ $t('existingRooms') }}</h4>
-            <table>
+            <table class="room-table">
               <thead>
                 <tr>
                   <th>#</th>
@@ -854,15 +871,13 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+/* Same styles as the landlord dashboard - kept identical */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
 
 * {
   box-sizing: border-box;
 }
 
-/* ════════════════════════════════════════
-   SHELL
-════════════════════════════════════════ */
 .dash-shell {
   display: flex;
   min-height: 100vh;
@@ -871,9 +886,6 @@ onMounted(async () => {
   color: #fff;
 }
 
-/* ════════════════════════════════════════
-   SIDEBAR
-════════════════════════════════════════ */
 .sidebar {
   width: 230px;
   flex-shrink: 0;
@@ -911,12 +923,13 @@ onMounted(async () => {
   animation: logoPulse 2s ease-in-out infinite;
 }
 
-.logo-dot.red {
-  background: #ef4444;
-  box-shadow: 0 0 10px #ef4444;
+.badge-new {
   width: 8px;
   height: 8px;
-  margin-left: 6px;
+  background: #ef4444;
+  border-radius: 50%;
+  margin-left: 8px;
+  box-shadow: 0 0 6px #ef4444;
 }
 
 @keyframes logoPulse {
@@ -959,18 +972,6 @@ onMounted(async () => {
   padding-left: 10px;
 }
 
-.badge-new {
-  width: 8px;
-  height: 8px;
-  background: #ef4444;
-  border-radius: 50%;
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  box-shadow: 0 0 6px #ef4444;
-}
-
 .ni {
   font-size: 16px;
   flex-shrink: 0;
@@ -1006,9 +1007,6 @@ onMounted(async () => {
   backdrop-filter: blur(4px);
 }
 
-/* ════════════════════════════════════════
-   MAIN
-════════════════════════════════════════ */
 .dash-main {
   flex: 1;
   min-width: 0;
@@ -1016,7 +1014,6 @@ onMounted(async () => {
   flex-direction: column;
 }
 
-/* ── HERO BANNER ── */
 .hero-banner {
   position: relative;
   overflow: hidden;
@@ -1078,14 +1075,6 @@ onMounted(async () => {
   margin-bottom: 8px;
 }
 
-.badge-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #14b8a6;
-  animation: logoPulse 1.6s ease-in-out infinite;
-}
-
 .dash-title {
   font-size: clamp(1.4rem, 3vw, 2rem);
   font-weight: 900;
@@ -1131,7 +1120,6 @@ onMounted(async () => {
   transform: translateY(-1px);
 }
 
-/* ── MAIN BODY ── */
 .main-body {
   padding: 24px;
   display: flex;
@@ -1139,7 +1127,6 @@ onMounted(async () => {
   gap: 24px;
 }
 
-/* ── STATS ── */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -1201,7 +1188,6 @@ onMounted(async () => {
   margin-top: 4px;
 }
 
-/* ── GLASS SECTIONS ── */
 .glass-section {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.07);
@@ -1238,7 +1224,6 @@ onMounted(async () => {
   color: rgba(255, 255, 255, 0.4);
 }
 
-/* ── TABLE ── */
 .table-wrap {
   overflow-x: auto;
   border-radius: 12px;
@@ -1278,10 +1263,6 @@ tbody tr:hover {
   background: rgba(20, 184, 166, 0.04);
 }
 
-tbody tr:last-child td {
-  border-bottom: none;
-}
-
 .idx {
   color: rgba(255, 255, 255, 0.3);
   font-size: 12px;
@@ -1293,7 +1274,6 @@ tbody tr:last-child td {
   color: rgba(255, 255, 255, 0.3);
 }
 
-/* pills */
 .status-pill {
   display: inline-block;
   padding: 3px 10px;
@@ -1338,7 +1318,6 @@ tbody tr:last-child td {
   border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
-/* buttons */
 .btn-teal {
   padding: 9px 20px;
   border-radius: 50px;
@@ -1424,7 +1403,6 @@ tbody tr:last-child td {
   transform: translateY(-1px);
 }
 
-/* gallery */
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -1439,7 +1417,6 @@ tbody tr:last-child td {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
   transition: 0.3s;
 }
 
@@ -1454,7 +1431,6 @@ tbody tr:last-child td {
   font-size: 1rem;
 }
 
-/* rules list */
 .rules-list {
   list-style: none;
   padding: 0;
@@ -1479,9 +1455,6 @@ tbody tr:last-child td {
   color: #fff;
 }
 
-/* ════════════════════════════════════════
-   MODALS
-════════════════════════════════════════ */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -1679,7 +1652,6 @@ tbody tr:last-child td {
   margin: 10px 0;
 }
 
-/* profile */
 .profile-box {
   display: flex;
   gap: 20px;
@@ -1710,7 +1682,6 @@ tbody tr:last-child td {
   font-weight: 600;
 }
 
-/* announcements */
 .announcements-list {
   max-height: 60vh;
   overflow-y: auto;
@@ -1751,7 +1722,6 @@ tbody tr:last-child td {
   line-height: 1.5;
 }
 
-/* alerts */
 .success-alert {
   background: rgba(20, 184, 166, 0.1);
   border: 1px solid rgba(20, 184, 166, 0.3);
@@ -1774,9 +1744,6 @@ tbody tr:last-child td {
   margin-bottom: 16px;
 }
 
-/* ════════════════════════════════════════
-   TRANSITIONS
-════════════════════════════════════════ */
 .modal-fade-enter-active,
 .modal-fade-leave-active {
   transition: opacity 0.25s ease;
@@ -1823,9 +1790,6 @@ tbody tr:last-child td {
   }
 }
 
-/* ════════════════════════════════════════
-   RESPONSIVE
-════════════════════════════════════════ */
 @media (max-width: 768px) {
   .sidebar {
     position: fixed;
