@@ -2210,7 +2210,7 @@ tbody tr:last-child td {
   border-radius: 20px;
   padding: 28px 26px;
   width: 100%;
-  max-width: 480px;
+  max-width: 780px;
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
