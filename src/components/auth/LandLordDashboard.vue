@@ -2229,7 +2229,7 @@ tbody tr:last-child td {
   background: linear-gradient(90deg, transparent, rgba(20, 184, 166, 0.5), transparent);
 }
 .glass-modal.large {
-  max-width: 820px;
+  max-width: 1000px;
 }
 
 .modal-top {
@@ -2343,7 +2343,6 @@ tbody tr:last-child td {
   border: 1px solid rgba(255, 255, 255, 0.07);
   overflow: hidden;
   max-height: 280px;
-  width: 100%;
   overflow-y: auto;
   overflow-x: auto;
 }
