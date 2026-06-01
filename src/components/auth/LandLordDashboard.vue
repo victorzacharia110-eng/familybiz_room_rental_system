@@ -2343,6 +2343,7 @@ tbody tr:last-child td {
   border: 1px solid rgba(255, 255, 255, 0.07);
   overflow: hidden;
   max-height: 280px;
+  max-width: 600px;
   overflow-y: auto;
   overflow-x: auto;
 }
