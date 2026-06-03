@@ -48,12 +48,12 @@
 .footer-container h3 {
   margin-bottom: 8px;
   font-size: 16px;
-  color: #d3cece;
+  color: #141;
 }
 
 .footer-container p {
   margin: 4px 0;
-  color: #d3cece;
+    color: #121;
 }
 
 .footer-bottom {
