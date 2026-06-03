@@ -1249,7 +1249,6 @@ function buildCubes() {
                   v-model="paymentMethodForm.airtel_money_number"
                   type="number"
                   placeholder="Airtel Money"
-                  
                 />
               </div>
               <div class="mfield">
@@ -2280,14 +2279,14 @@ tbody tr:last-child td {
 }
 
 /* Chrome, Safari, Edge */
-.mfield input[type=number]::-webkit-outer-spin-button,
-.mfield input[type=number]::-webkit-inner-spin-button {
+.mfield input[type='number']::-webkit-outer-spin-button,
+.mfield input[type='number']::-webkit-inner-spin-button {
   margin: 0;
   -webkit-appearance: none;
 }
 
 /* Firefox + standard */
-.mfield input[type=number] {
+.mfield input[type='number'] {
   -moz-appearance: textfield;
   appearance: textfield;
 }
