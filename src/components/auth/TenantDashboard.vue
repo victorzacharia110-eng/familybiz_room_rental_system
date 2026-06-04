@@ -50,7 +50,9 @@ async function submitLateReason(payment) {
     return
   }
 
-  const reason_text = prompt('Please enter your reason for late payment. Note: Max 3 submissions allowed.')
+  const reason_text = prompt(
+    'Please enter your reason for late payment. Note: Max 3 submissions allowed.',
+  )
 
   if (reason_text) {
     await latePaymentReasonStore.registerLatePaymentReasons({
@@ -94,8 +96,18 @@ const savePayment = async () => {
 }
 
 const months = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ]
 
 /* ── rooms modal ── */
@@ -419,8 +431,20 @@ onMounted(async () => {
             </div>
             <div class="topbar-right">
               <div class="lang-row">
-                <button class="lbtn" :class="{ on: currentLocale === 'en' }" @click="setLanguage('en')">🇬🇧 EN</button>
-                <button class="lbtn" :class="{ on: currentLocale === 'sw' }" @click="setLanguage('sw')">🇹🇿 SW</button>
+                <button
+                  class="lbtn"
+                  :class="{ on: currentLocale === 'en' }"
+                  @click="setLanguage('en')"
+                >
+                  🇬🇧 EN
+                </button>
+                <button
+                  class="lbtn"
+                  :class="{ on: currentLocale === 'sw' }"
+                  @click="setLanguage('sw')"
+                >
+                  🇹🇿 SW
+                </button>
               </div>
             </div>
           </div>
@@ -567,7 +591,9 @@ onMounted(async () => {
           </div>
 
           <Transition name="alert-pop">
-            <div v-if="successUpdateRoomStatus" class="success-alert">{{ successUpdateRoomStatus }}</div>
+            <div v-if="successUpdateRoomStatus" class="success-alert">
+              {{ successUpdateRoomStatus }}
+            </div>
           </Transition>
 
           <div class="modal-table-wrap">
@@ -586,10 +612,14 @@ onMounted(async () => {
               <tbody>
                 <tr v-for="(room, index) in roomStore.rooms" :key="room?.id">
                   <td class="idx">{{ index + 1 }}</td>
-                  <td><strong>{{ room?.room_number || 'N/A' }}</strong></td>
+                  <td>
+                    <strong>{{ room?.room_number || 'N/A' }}</strong>
+                  </td>
                   <td>{{ room?.type || 'Unknown' }}</td>
                   <td>
-                    <span class="status-pill" :class="room?.status?.toLowerCase()">{{ room?.status || 'Unknown' }}</span>
+                    <span class="status-pill" :class="room?.status?.toLowerCase()">{{
+                      room?.status || 'Unknown'
+                    }}</span>
                   </td>
                   <td>TZS {{ room?.room_price?.toLocaleString() }}</td>
                   <td>
@@ -610,7 +640,11 @@ onMounted(async () => {
 
     <!-- PAYMENT METHOD MODAL -->
     <Transition name="modal-fade">
-      <div v-if="activePaymentMethod === 'paymentMethod'" class="modal-overlay" @click.self="closePaymentMethodModal">
+      <div
+        v-if="activePaymentMethod === 'paymentMethod'"
+        class="modal-overlay"
+        @click.self="closePaymentMethodModal"
+      >
         <div class="glass-modal large">
           <div class="modal-top">
             <h3>{{ $t('paymentMethodManagement') }}</h3>
@@ -676,7 +710,9 @@ onMounted(async () => {
                 <label>{{ $t('month') }}</label>
                 <select v-model="paymentForm.month" required>
                   <option disabled value="">{{ $t('selectMonth') }}</option>
-                  <option v-for="(name, idx) in months" :key="idx" :value="idx + 1">{{ name }}</option>
+                  <option v-for="(name, idx) in months" :key="idx" :value="idx + 1">
+                    {{ name }}
+                  </option>
                 </select>
               </div>
               <div class="mfield">
@@ -698,7 +734,11 @@ onMounted(async () => {
 
     <!-- PROFILE MODAL -->
     <Transition name="modal-fade">
-      <div v-if="activeProfileModal === 'profile'" class="modal-overlay" @click.self="closeProfileModal">
+      <div
+        v-if="activeProfileModal === 'profile'"
+        class="modal-overlay"
+        @click.self="closeProfileModal"
+      >
         <div class="glass-modal">
           <div class="modal-top">
             <h3>{{ $t('userProfile') }}</h3>
@@ -718,7 +758,11 @@ onMounted(async () => {
               <div class="mfield">
                 <label>{{ $t('Phone Number') }}</label>
                 <p>{{ auth.user?.phone_number || 'N/A' }}</p>
-                <button class="btn-teal" style="margin-top: 8px" @click="updatingPhoneNumber(auth.user)">
+                <button
+                  class="btn-teal"
+                  style="margin-top: 8px"
+                  @click="updatingPhoneNumber(auth.user)"
+                >
                   📱 {{ $t('updatePhone') }}
                 </button>
               </div>
@@ -730,7 +774,11 @@ onMounted(async () => {
 
     <!-- COMMENTS MODAL -->
     <Transition name="modal-fade">
-      <div v-if="activeCommentsModal === 'comments'" class="modal-overlay" @click.self="closeCommentsModal">
+      <div
+        v-if="activeCommentsModal === 'comments'"
+        class="modal-overlay"
+        @click.self="closeCommentsModal"
+      >
         <div class="glass-modal large">
           <div class="modal-top">
             <h3>{{ $t('Comments') }}</h3>
@@ -738,13 +786,19 @@ onMounted(async () => {
           </div>
 
           <Transition name="alert-pop">
-            <div v-if="successCommentMessage" class="success-alert">{{ successCommentMessage }}</div>
+            <div v-if="successCommentMessage" class="success-alert">
+              {{ successCommentMessage }}
+            </div>
           </Transition>
 
           <form @submit.prevent="saveComment">
             <div class="mfield">
               <label>{{ $t('Comment') }}</label>
-              <textarea v-model="commentForm.comment" placeholder="Write your comment..." required></textarea>
+              <textarea
+                v-model="commentForm.comment"
+                placeholder="Write your comment..."
+                required
+              ></textarea>
             </div>
             <div class="mfield">
               <label>{{ $t('Rating') }}</label>
@@ -754,7 +808,9 @@ onMounted(async () => {
             </div>
             <div class="modal-actions">
               <button type="submit" class="btn-teal">{{ $t('submit') }}</button>
-              <button type="button" class="btn-ghost" @click="closeCommentsModal">{{ $t('close') }}</button>
+              <button type="button" class="btn-ghost" @click="closeCommentsModal">
+                {{ $t('close') }}
+              </button>
             </div>
           </form>
 
@@ -779,7 +835,9 @@ onMounted(async () => {
                   <td>{{ comment?.rating }} ⭐</td>
                   <td>{{ formatDate(comment.created_at) }}</td>
                   <td>
-                    <button class="btn-del" @click="deleteComment(comment.id)">{{ $t('delete') }}</button>
+                    <button class="btn-del" @click="deleteComment(comment.id)">
+                      {{ $t('delete') }}
+                    </button>
                   </td>
                 </tr>
                 <tr v-if="!commentStore.comments.length">
@@ -794,7 +852,11 @@ onMounted(async () => {
 
     <!-- ANNOUNCEMENTS MODAL -->
     <Transition name="modal-fade">
-      <div v-if="activeAnnouncementModal === 'announcements'" class="modal-overlay" @click.self="closeAnnouncementsModal">
+      <div
+        v-if="activeAnnouncementModal === 'announcements'"
+        class="modal-overlay"
+        @click.self="closeAnnouncementsModal"
+      >
         <div class="glass-modal large">
           <div class="modal-top">
             <h3>{{ $t('announcements') }}</h3>
@@ -805,7 +867,11 @@ onMounted(async () => {
             <div v-if="!announcementStore.announcements.length" class="no-data">
               🚫 {{ $t('noAnnouncements') }}
             </div>
-            <div v-for="(announcement, index) in announcementStore.announcements" :key="announcement.id" class="message-card">
+            <div
+              v-for="(announcement, index) in announcementStore.announcements"
+              :key="announcement.id"
+              class="message-card"
+            >
               <div class="message-header">
                 <span class="message-index">#{{ index + 1 }}</span>
                 <span class="message-date">{{ formatDate(announcement.created_at) }}</span>
@@ -820,7 +886,11 @@ onMounted(async () => {
 
     <!-- PASSWORD RESET MODAL -->
     <Transition name="modal-fade">
-      <div v-if="activePasswordResetModal === 'passwordReset'" class="modal-overlay" @click.self="closePasswordResetModal">
+      <div
+        v-if="activePasswordResetModal === 'passwordReset'"
+        class="modal-overlay"
+        @click.self="closePasswordResetModal"
+      >
         <div class="glass-modal">
           <div class="modal-top">
             <h3>{{ $t('resetPasswordTitle') }}</h3>
@@ -828,7 +898,9 @@ onMounted(async () => {
           </div>
 
           <Transition name="alert-pop">
-            <div v-if="successPasswordResetMessage" class="success-alert">{{ successPasswordResetMessage }}</div>
+            <div v-if="successPasswordResetMessage" class="success-alert">
+              {{ successPasswordResetMessage }}
+            </div>
           </Transition>
           <Transition name="alert-pop">
             <div v-if="auth.error" class="error-alert">{{ auth.error }}</div>
@@ -839,13 +911,20 @@ onMounted(async () => {
           <form @submit.prevent="sendPasswordResetLink">
             <div class="mfield">
               <label>{{ $t('email') }}</label>
-              <input v-model="passwordResetForm.email" type="email" :placeholder="$t('email')" required />
+              <input
+                v-model="passwordResetForm.email"
+                type="email"
+                :placeholder="$t('email')"
+                required
+              />
             </div>
             <div class="modal-actions">
               <button type="submit" class="btn-teal" :disabled="auth.loading">
                 {{ auth.loading ? 'Sending...' : $t('sendResetLink') }}
               </button>
-              <button type="button" class="btn-ghost" @click="closePasswordResetModal">{{ $t('close') }}</button>
+              <button type="button" class="btn-ghost" @click="closePasswordResetModal">
+                {{ $t('close') }}
+              </button>
             </div>
           </form>
         </div>
@@ -922,8 +1001,15 @@ onMounted(async () => {
 }
 
 @keyframes logoPulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(1.5); }
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(1.5);
+  }
 }
 
 .sidebar-nav {
@@ -1486,7 +1572,9 @@ tbody tr:last-child td {
   overflow-y: auto;
   position: relative;
   backdrop-filter: blur(24px);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 60px rgba(20, 184, 166, 0.07);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.6),
+    0 0 60px rgba(20, 184, 166, 0.07);
 }
 
 .glass-modal::before {
@@ -1569,7 +1657,9 @@ tbody tr:last-child td {
   color: #fff;
   font-size: 13px;
   font-family: inherit;
-  transition: border-color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
   outline: none;
 }
 
