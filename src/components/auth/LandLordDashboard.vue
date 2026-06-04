@@ -28,9 +28,11 @@ const commentStore = useCommentStore()
 const { roomsAvailableCount, roomsMaintananceCount, roomsOccupiedCount, totalRooms } =
   storeToRefs(roomStore)
 
+const tenantLoading = ref(true)
 onMounted(async () => {
   await roomStore.fetchRooms()
   await auth.fetchUsers()
+  tenantLoading.value = false
   await auth.fetchUser()
   await paymentStore.fetchPayment()
   await paymentStore.fetchPayments()
@@ -810,7 +812,16 @@ function buildCubes() {
           </Transition>
 
           <div class="table-wrap">
-            <table>
+            <!-- Skeleton -->
+            <div v-if="tenantLoading" class="table-skeleton">
+              <div class="skeleton-row"></div>
+              <div class="skeleton-row"></div>
+              <div class="skeleton-row"></div>
+              <div class="skeleton-row"></div>
+              <div class="skeleton-row"></div>
+            </div>
+
+            <table v-else>
               <thead>
                 <tr>
                   <th>#</th>
@@ -1537,6 +1548,29 @@ function buildCubes() {
 * {
   box-sizing: border-box;
 }
+
+/* ════════════════════════════════════════
+   SKELETON LOADING STYLES
+════════════════════════════════════════ */
+.table-skeleton {
+  padding: 15px;
+}
+
+.skeleton-row {
+  height: 50px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.05) 25%,
+    rgba(255,255,255,0.12) 50%,
+    rgba(255,255,255,0.05) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+}
+
+
 
 /* ════════════════════════════════════════
    SHELL
@@ -2484,6 +2518,19 @@ tbody tr:last-child td {
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
+  }
+}
+
+/* ════════════════════════════════════════
+   SKELETON ANIMATIONS
+════════════════════════════════════════ */
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
   }
 }
 
