@@ -324,11 +324,14 @@ const house = ref({
   images: ['/assets/room1.jpg', '/assets/room2.jpg', '/assets/common.jpg'],
 })
 
+/* ── Skeleton loader switch variable ── */
+const paymentLoading = ref(true)
 onMounted(async () => {
   await auth.fetchUser()
   await roomStore.fetchRooms()
   await roomStore.updateRoomStatus()
   await paymentStore.fetchPayment()
+  paymentLoading.value = false
   await paymentMethodStore.fetchPaymentMethods()
   await announcementStore.fetchAnnouncements()
 
@@ -504,7 +507,12 @@ onMounted(async () => {
           </Transition>
 
           <div class="table-wrap">
-            <table v-if="paymentStore.tenant_payment">
+            <div v-if="paymentLoading" class="payment-skeleton">
+              <div class="skeleton"></div>
+              <div class="skeleton"></div>
+              <div class="skeleton"></div>
+            </div>
+            <table v-else-if="paymentStore.tenant_payment">
               <thead>
                 <tr>
                   <th>{{ $t('Month') }}</th>
@@ -939,6 +947,28 @@ onMounted(async () => {
 * {
   box-sizing: border-box;
 }
+
+/* ════════════════════════════════════════
+   PAYMENT HISTORY SKELETON
+════════════════════════════════════════ */
+.payment-skeleton {
+  padding: 20px;
+}
+
+.skeleton {
+  height: 45px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.05) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+}
+
 
 /* ════════════════════════════════════════
    SHELL
@@ -1930,6 +1960,19 @@ tbody tr:last-child td {
   }
   .profile-box {
     flex-direction: column;
+  }
+}
+
+
+/* ════════════════════════════════════════
+   ANIMATIONS FOR SKELETON LOADING
+════════════════════════════════════════ */
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
   }
 }
 
