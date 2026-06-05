@@ -1562,15 +1562,13 @@ function buildCubes() {
   margin-bottom: 10px;
   background: linear-gradient(
     90deg,
-    rgba(255,255,255,0.05) 25%,
-    rgba(255,255,255,0.12) 50%,
-    rgba(255,255,255,0.05) 75%
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.05) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.2s infinite;
 }
-
-
 
 /* ════════════════════════════════════════
    SHELL
