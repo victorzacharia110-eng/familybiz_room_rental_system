@@ -658,7 +658,7 @@ function buildCubes() {
           :class="{ on: activeCommentsModal === 'comments' }"
           @click.prevent="openCommentsModal('comments')"
         >
-          <span class="ni">💬</span><span>{{ $t('Comments') }}</span>
+          <span class="ni"><i class="fas fa-comment"></i></span><span>{{ $t('Comments') }}</span>
         </a>
         <a
           href="#"
