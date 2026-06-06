@@ -241,7 +241,6 @@ const deletingAnnouncement = async (id) => {
     console.error('Delete error:', error)
     alert('❌ Failed to delete')
   }
-  
 }
 
 /* ── resets ── */
