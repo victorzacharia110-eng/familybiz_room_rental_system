@@ -228,12 +228,17 @@ const deleteComment = async (id) => await commentStore.deleteComment(id)
 
 
 const deletingAnnouncement = async (id) => {
+  console.log('deleteAnnouncement function called', id)
+  console.log('announcementStore:', announcementStore)
+  console.log('deleteAnnouncement method:', announcementStore.deleteAnnouncement)
+  
   if (!confirm('⚠️ Delete this announcement?')) return
   try {
     await announcementStore.deleteAnnouncement(id)
     alert('✅ Deleted!')
     await announcementStore.fetchAnnouncements()
   } catch (error) {
+    console.error('Delete error:', error)
     alert('❌ Failed to delete')
   }
 }
