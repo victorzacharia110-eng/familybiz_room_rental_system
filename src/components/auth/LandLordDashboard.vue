@@ -226,6 +226,14 @@ const deletePayment = async (id) => {
 }
 const deleteComment = async (id) => await commentStore.deleteComment(id)
 
+
+const deletingAnnouncement = async (id) => {
+  if (!confirm('⚠️ Delete this announcement?')) return
+  const res = await announcementStore.deleteAnnouncement(id)
+  alert(res ? '✅ Deleted!' : '❌ Failed')
+  announcementStore.fetchAnnouncements()
+}
+
 /* ── resets ── */
 const resetRoomForm = () => {
   roomForm.value = {
@@ -1420,7 +1428,7 @@ function buildCubes() {
                   </td>
                   <td>{{ a.message }}</td>
                   <td>{{ formatDate(a.created_at) }}</td>
-                  <td><button class="btn-del" @click="deleteAnnouncement(a.id)">Delete</button></td>
+                  <td><button class="btn-del" @click="deletingAnnouncement(a.id)">Delete</button></td>
                 </tr>
               </tbody>
             </table>
