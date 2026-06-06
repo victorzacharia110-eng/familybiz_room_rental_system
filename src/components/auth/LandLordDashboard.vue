@@ -229,9 +229,13 @@ const deleteComment = async (id) => await commentStore.deleteComment(id)
 
 const deletingAnnouncement = async (id) => {
   if (!confirm('⚠️ Delete this announcement?')) return
-  const res = await announcementStore.deleteAnnouncement(id)
-  alert(res ? '✅ Deleted!' : '❌ Failed')
-  announcementStore.fetchAnnouncements()
+  try {
+    await announcementStore.deleteAnnouncement(id)
+    alert('✅ Deleted!')
+    await announcementStore.fetchAnnouncements()
+  } catch (error) {
+    alert('❌ Failed to delete')
+  }
 }
 
 /* ── resets ── */

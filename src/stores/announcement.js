@@ -42,18 +42,17 @@ export const useAnnouncementStore = defineStore('announcement', () => {
     }
   }
 
-  const deleteAnnouncement = async (id) => {
-    try {
-      await api.get('/sanctum/csrf-cookie')
-      await api.delete(`/api/announcements/delete/${id}`)
-
-      //  UPDATE LOCAL STATE AFTER DELETION
-      announcements.value = announcements.value.filter((announcement) => announcement.id !== id)
-    } catch (err) {
-      error.value = err.response?.data?.message || err.message
-      return error.value
-    }
+const deleteAnnouncement = async (id) => {
+  try {
+    await api.get('/sanctum/csrf-cookie')
+    await api.delete(`/api/announcements/delete/${id}`)
+    announcements.value = announcements.value.filter((announcement) => announcement.id !== id)
+    return true  
+  } catch (err) {
+    error.value = err.response?.data?.message || err.message
+    return false  
   }
+}
   return {
     announcements,
     error,
