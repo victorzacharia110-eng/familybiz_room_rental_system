@@ -11,6 +11,7 @@ import TenantDashboard from '../components/auth/TenantDashboard.vue'
 import RoomEdit from '@/components/auth/edits/RoomEdit.vue'
 import PaymentEdit from '@/components/auth/edits/PaymentEdit.vue'
 import PaymentMethodEdit from '@/components/auth/edits/PaymentMethodEdit.vue'
+import AnnouncementEdit from '@/components/auth/edits/AnnouncementEdit.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -68,6 +69,11 @@ const router = createRouter({
     {
       path: '/method/show/:id',
       component: PaymentMethodEdit,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/announcements/show/:id',
+      component: AnnouncementEdit,
       meta: { requiresAuth: true },
     }
   ],
