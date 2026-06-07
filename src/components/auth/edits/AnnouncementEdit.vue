@@ -412,67 +412,6 @@ function onMouseLeave() {
           </div>
         </div>
 
-        <!-- created_at (metadata — read-only display + editable) -->
-        <div class="field">
-          <label>🕒 {{ t('createdAt') || 'Created At' }}</label>
-          <div class="input-wrap">
-            <input v-model="announcementForm.created_at" type="datetime-local" required />
-          </div>
-        </div>
-
-        <!-- meta: visible to (audience scope) -->
-        <div class="field">
-          <label>👥 {{ t('audience') || 'Audience' }}</label>
-          <div class="input-wrap">
-            <select v-model="announcementForm.audience">
-              <option value="all">All Tenants</option>
-              <option value="floor_1">Floor 1</option>
-              <option value="floor_2">Floor 2</option>
-              <option value="floor_3">Floor 3</option>
-              <option value="specific">Specific Room</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- meta: priority -->
-        <div class="field">
-          <label>🚦 {{ t('priority') || 'Priority' }}</label>
-          <div class="input-wrap">
-            <select v-model="announcementForm.priority">
-              <option value="low">Low</option>
-              <option value="normal">Normal</option>
-              <option value="high">High</option>
-              <option value="urgent">🔴 Urgent</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- meta: status / visibility -->
-        <div class="field">
-          <label>📊 {{ t('status') || 'Status' }}</label>
-          <div class="input-wrap">
-            <select v-model="announcementForm.status">
-              <option value="active">Active</option>
-              <option value="draft">Draft</option>
-              <option value="archived">Archived</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- meta: pinned toggle -->
-        <div class="field field-check">
-          <label class="check-label">
-            <span
-              class="check-box"
-              :class="{ checked: announcementForm.pinned }"
-              @click="announcementForm.pinned = !announcementForm.pinned"
-            >
-              <span v-if="announcementForm.pinned">✓</span>
-            </span>
-            📌 {{ t('pinned') || 'Pin this announcement to the top' }}
-          </label>
-        </div>
-
         <!-- submit -->
         <button type="submit" class="btn-submit" :disabled="announcementStore.loading">
           <span v-if="!announcementStore.loading">💾 {{ t('saveChanges') || 'Save Changes' }}</span>
