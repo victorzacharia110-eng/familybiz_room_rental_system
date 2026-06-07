@@ -193,5 +193,6 @@
   "propertyImages": "Property Images",
   "communityGuidelines": "Community Guidelines",
   "editAnnouncement": "Edit Announcement",
-  "editAnnouncementSubtitle": "Update your announcement details below"
+  "editAnnouncementSubtitle": "Update your announcement details below",
+  "updatingAnnouncement": "Updating Announcement..."
 }

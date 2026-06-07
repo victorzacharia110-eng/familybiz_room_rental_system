@@ -102,7 +102,7 @@
   "Confirm Password": "Thibitisha Nenosiri",
   "Registering...": "Inasajili...",
   "Already Have an Account": "Tayari una akaunti?",
-  "editRoomSubtitle": "Sasisha taarifa za chumba hapa chini",
+  "editRoomSubtitle": "Sahihisha taarifa za chumba hapa chini",
   "homeWelcomeTitle": "Karibu kwenye FamilyBiz System",
   "homeLocationDescription": "Vyumba vya bei nafuu na vya starehe katika Gongo la Mboto – Majohe Bwera, Dar es Salaam",
   "homeHeroDescription": "Tunatoa vyumba safi, salama na vinavyotunzwa vizuri kwa wanafunzi, wafanyakazi na familia wanaotafuta sehemu ya kuishi kwa amani. Eneo hili lina huduma muhimu na usafiri rahisi.",
@@ -190,16 +190,16 @@
 
   "transportInstructions": "Kutoka Gongo la Mboto panda bodaboda au bajaj hadi stendi ya Majohe Bwera. Ukifika uliza njia ya kwenda msikitini, kisha uliza vyumba vya kupanga vilivyo karibu.",
   "editPayment": "Hariri Malipo",
-  "editPaymentSubtitle": "Sasisha taarifa za malipo hapa chini",
+  "editPaymentSubtitle": "Sahihisha taarifa za malipo hapa chini",
   "loadingForm": "Fomu inapakia...",
   "unpaid": "Haijalipwa",
   "dueDate": "Tarehe ya Mwisho",
   "saveChanges": "Hifadhi Mabadiliko",
-  "updatingPayment": "Malipo yanasasishwa...",
+  "updatingPayment": "Malipo yanasahihishwa...",
   "back": "Rudi",
   "editPaymentMethod": "Hariri Njia ya Malipo",
-  "editPaymentMethodSubtitle": "Sasisha taarifa za njia yako ya malipo",
-  "UpdatingRoom": "Chumba kinasasishwa...",
+  "editPaymentMethodSubtitle": "Sahihisha taarifa za njia yako ya malipo",
+  "UpdatingRoom": "Chumba kinasahihishwa...",
   "homeStatsTitle": "Muhtasari wa Takwimu",
   "tenantDashboard": "Dashibodi ya Mpangaji",
   "yourPaymentHistory": "Historia Ya Malipo Yako",
@@ -207,5 +207,6 @@
   "propertyImages": "Picha za Majengo",
   "communityGuidelines": "Miongozo ya Jamii",
   "editAnnouncement": "Hariri Tangazo",
-  "editAnnouncementSubtitle": "Sasisha maelezo ya tangazo lako hapa chini"
+  "editAnnouncementSubtitle": "Sahihisha maelezo ya tangazo lako hapa chini",
+  "updatingAnnouncement": "Inasahihisha Tangazo..."
 }
