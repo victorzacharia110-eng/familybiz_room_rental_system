@@ -187,9 +187,11 @@
   "nbcAccount": "NCB Account",
   "UpdatingRoom": "Updating Room...",
   "homeStatsTitle": "Overview Statistics",
-  "tenantDashboard":"Tenant Dashboard",
-  "yourPaymentHistory":"Your Payment History",
-  "manageYourRental":"Manage Your Rental",
-  "propertyImages":"Property Images",
-  "communityGuidelines":"Community Guidelines"
+  "tenantDashboard": "Tenant Dashboard",
+  "yourPaymentHistory": "Your Payment History",
+  "manageYourRental": "Manage Your Rental",
+  "propertyImages": "Property Images",
+  "communityGuidelines": "Community Guidelines",
+  "editAnnouncement": "Edit Announcement",
+  "editAnnouncementSubtitle": "Update your announcement details below"
 }
