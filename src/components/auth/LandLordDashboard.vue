@@ -1437,6 +1437,11 @@ function buildCubes() {
                   </td>
                   <td>{{ a.message }}</td>
                   <td>{{ formatDate(a.created_at) }}</td>
+                  <td>
+                    <router-link :to="`/announcements/show/${a.id}`" class="btn-edit">
+                      Edit
+                    </router-link>
+                  </td>
                   <td><button class="btn-del" @click="deletingAnnouncement(a.id)">Delete</button></td>
                 </tr>
               </tbody>

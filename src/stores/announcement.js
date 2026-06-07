@@ -53,6 +53,19 @@ const deleteAnnouncement = async (id) => {
     return false  
   }
 }
+
+const loadAnnouncementForEdit = async (id) => {
+  try {
+    await api.get('/sanctum/csrf-cookie')
+    const response = await api.get(`/api/announcements/show/${id}`)
+    return response.data.announcement
+  } catch (err) {
+    error.value = err.response?.data?.message || err.message
+    return null
+  }
+}
+
+
   return {
     announcements,
     error,
@@ -60,5 +73,6 @@ const deleteAnnouncement = async (id) => {
     fetchAnnouncements,
     registerAnnouncement,
     deleteAnnouncement,
+    loadAnnouncementForEdit
   }
 })
