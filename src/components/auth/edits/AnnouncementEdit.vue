@@ -801,7 +801,6 @@ label {
   position: relative;
 }
 .input-wrap input,
-.input-wrap select,
 .input-wrap textarea {
   width: 100%;
   padding: 11px 14px;
@@ -829,7 +828,6 @@ label {
   color: rgba(255, 255, 255, 0.3);
 }
 .input-wrap input:focus,
-.input-wrap select:focus,
 .input-wrap textarea:focus {
   border-color: #14b8a6;
   background: rgba(20, 184, 166, 0.07);
@@ -839,56 +837,7 @@ label {
   filter: invert(1) opacity(0.5);
   cursor: pointer;
 }
-.input-wrap select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2314b8a6' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-  padding-right: 36px;
-}
-.input-wrap select option {
-  background: #0a1428;
-  color: #fff;
-}
 
-/* ── checkbox field ── */
-.field-check {
-  margin-bottom: 20px;
-}
-.check-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  font-size: 13px !important;
-  font-weight: 500 !important;
-  color: rgba(255, 255, 255, 0.7) !important;
-  text-transform: none !important;
-  letter-spacing: 0 !important;
-  margin-bottom: 0 !important;
-  user-select: none;
-}
-.check-box {
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
-  border: 1px solid rgba(20, 184, 166, 0.4);
-  background: rgba(20, 184, 166, 0.05);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  color: #14b8a6;
-  flex-shrink: 0;
-  transition:
-    background 0.2s,
-    border-color 0.2s,
-    box-shadow 0.2s;
-}
-.check-box.checked {
-  background: rgba(20, 184, 166, 0.2);
-  border-color: #14b8a6;
-  box-shadow: 0 0 8px rgba(20, 184, 166, 0.3);
-}
 
 /* submit */
 .btn-submit {
