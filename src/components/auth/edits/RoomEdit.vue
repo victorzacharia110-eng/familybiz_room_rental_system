@@ -4,6 +4,35 @@ import { useRouter, useRoute } from 'vue-router'
 import { useRoomStore } from '@/stores/room'
 import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import {
+  faDoorOpen,
+  faHashtag,
+  faHome,
+  faChartSimple,
+  faMoneyBill,
+  faSave,
+  faArrowLeft,
+  faCheckCircle,
+  faExclamationTriangle,
+  faSpinner,
+  faInfoCircle,
+} from '@fortawesome/free-solid-svg-icons'
+
+library.add(
+  faDoorOpen,
+  faHashtag,
+  faHome,
+  faChartSimple,
+  faMoneyBill,
+  faSave,
+  faArrowLeft,
+  faCheckCircle,
+  faExclamationTriangle,
+  faSpinner,
+  faInfoCircle,
+)
 
 const { locale, t } = useI18n()
 const currentLocale = ref(locale.value)
@@ -38,7 +67,7 @@ const submit = async () => {
     saveSuccess.value = true
     setTimeout(() => router.push('/landlord'), 1200)
   } else {
-    saveError.value = roomStore.error || '❌ Failed to update room.'
+    saveError.value = roomStore.error || 'Failed to update room.'
   }
 }
 
@@ -333,27 +362,31 @@ function onMouseLeave() {
         </button>
       </div>
 
-      <h2 class="card-title">🚪 {{ t('edit') }} {{ t('room') }}</h2>
+      <h2 class="card-title">
+        <font-awesome-icon icon="door-open" /> {{ t('edit') }} {{ t('room') }}
+      </h2>
       <p class="card-sub">{{ t('editRoomSubtitle') || 'Update room information below' }}</p>
 
       <Transition name="shake-fade">
-        <div v-if="saveSuccess" class="alert success-alert">✅ Room updated! Redirecting...</div>
+        <div v-if="saveSuccess" class="alert success-alert">
+          <font-awesome-icon icon="check-circle" /> Room updated! Redirecting...
+        </div>
       </Transition>
       <Transition name="shake-fade">
         <div v-if="saveError" class="alert error-alert">
-          <span>⚠️</span><span>{{ saveError }}</span>
+          <font-awesome-icon icon="exclamation-triangle" /><span>{{ saveError }}</span>
         </div>
       </Transition>
       <Transition name="shake-fade">
         <div v-if="roomStore.loading && !saveSuccess" class="alert info-alert">
-          <span class="mini-spin"></span>
+          <font-awesome-icon icon="spinner" spin class="mini-spin-icon" />
           <span>{{ t('UpdatingRoom') || 'Updating room...' }}</span>
         </div>
       </Transition>
 
       <form @submit.prevent="submit" novalidate>
         <div class="field" style="animation-delay: 0.2s">
-          <label>🔢 {{ t('roomNumber') }}</label>
+          <label><font-awesome-icon icon="hashtag" /> {{ t('roomNumber') }}</label>
           <div class="input-wrap">
             <input
               v-model="roomForm.room_number"
@@ -365,7 +398,7 @@ function onMouseLeave() {
         </div>
 
         <div class="field" style="animation-delay: 0.28s">
-          <label>🏠 {{ t('roomType') }}</label>
+          <label><font-awesome-icon icon="home" /> {{ t('roomType') }}</label>
           <div class="input-wrap">
             <select v-model="roomForm.type" required>
               <option value="">{{ t('type') }}</option>
@@ -377,7 +410,7 @@ function onMouseLeave() {
         </div>
 
         <div class="field" style="animation-delay: 0.36s">
-          <label>📊 {{ t('status') }}</label>
+          <label><font-awesome-icon icon="chart-simple" /> {{ t('status') }}</label>
           <div class="input-wrap">
             <select v-model="roomForm.status" required>
               <option value="">{{ t('status') }}</option>
@@ -389,7 +422,10 @@ function onMouseLeave() {
         </div>
 
         <div class="field" style="animation-delay: 0.44s" v-if="roomForm.room_price !== undefined">
-          <label>💰 {{ t('roomPrice') || 'Room Price (TZS)' }}</label>
+          <label
+            ><font-awesome-icon icon="money-bill" />
+            {{ t('roomPrice') || 'Room Price (TZS)' }}</label
+          >
           <div class="input-wrap">
             <input v-model="roomForm.room_price" type="number" placeholder="0" min="0" />
           </div>
@@ -401,14 +437,14 @@ function onMouseLeave() {
           :disabled="roomStore.loading"
           style="animation-delay: 0.52s"
         >
-          <span v-if="!roomStore.loading">💾 {{ t('save') }}</span>
-          <span v-else class="btn-spinner"></span>
+          <span v-if="!roomStore.loading"> <font-awesome-icon icon="save" /> {{ t('save') }} </span>
+          <font-awesome-icon v-else icon="spinner" spin class="btn-spinner-icon" />
         </button>
       </form>
 
-      <router-link to="/landlord" class="back-home"
-        >← {{ t('landlordDashboard') || 'Back to Dashboard' }}</router-link
-      >
+      <router-link to="/landlord" class="back-home">
+        <font-awesome-icon icon="arrow-left" /> {{ t('landlordDashboard') || 'Back to Dashboard' }}
+      </router-link>
     </div>
   </div>
 </template>
@@ -648,6 +684,9 @@ function onMouseLeave() {
   margin-bottom: 4px;
   animation: titleDrop 0.8s cubic-bezier(0.34, 1.4, 0.64, 1) both 0.15s;
 }
+.card-title svg {
+  margin-right: 8px;
+}
 @keyframes titleDrop {
   from {
     opacity: 0;
@@ -701,26 +740,16 @@ function onMouseLeave() {
   border: 1px solid rgba(20, 184, 166, 0.2);
   color: #5dcaa5;
 }
-
-.mini-spin {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(20, 184, 166, 0.3);
-  border-top-color: #14b8a6;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+.alert svg {
   flex-shrink: 0;
 }
-.btn-spinner {
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
-  border-radius: 50%;
+
+.mini-spin-icon {
   animation: spin 0.8s linear infinite;
-  vertical-align: middle;
+}
+.btn-spinner-icon {
+  font-size: 18px;
+  animation: spin 0.8s linear infinite;
 }
 @keyframes spin {
   to {
@@ -740,6 +769,10 @@ label {
   margin-bottom: 7px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
+}
+label svg {
+  margin-right: 4px;
+  font-size: 11px;
 }
 .input-wrap {
   position: relative;
@@ -799,6 +832,10 @@ label {
     box-shadow 0.3s;
   margin-top: 6px;
   animation: fadeUp 0.6s ease both;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 .btn-submit::before {
   content: '';
@@ -822,8 +859,11 @@ label {
 }
 
 .back-home {
-  display: block;
-  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+  width: 100%;
   margin-top: 16px;
   font-size: 13px;
   color: rgba(255, 255, 255, 0.4);
@@ -833,6 +873,9 @@ label {
 }
 .back-home:hover {
   color: #14b8a6;
+}
+.back-home svg {
+  font-size: 11px;
 }
 
 .shake-fade-enter-active {

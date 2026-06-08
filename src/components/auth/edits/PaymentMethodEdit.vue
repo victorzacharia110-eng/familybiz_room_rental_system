@@ -4,6 +4,39 @@ import { useRoute, useRouter } from 'vue-router'
 import { usePaymentMethodStore } from '@/stores/paymentMethod'
 import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import {
+  faCreditCard,
+  faSave,
+  faArrowLeft,
+  faCheckCircle,
+  faExclamationTriangle,
+  faSpinner,
+  faInfoCircle,
+  faSatelliteDish,
+  faMobileAlt,
+  faHeart,
+  faCircle,
+  faLandmark,
+  faBuilding,
+} from '@fortawesome/free-solid-svg-icons'
+
+library.add(
+  faCreditCard,
+  faSave,
+  faArrowLeft,
+  faCheckCircle,
+  faExclamationTriangle,
+  faSpinner,
+  faInfoCircle,
+  faSatelliteDish,
+  faMobileAlt,
+  faHeart,
+  faCircle,
+  faLandmark,
+  faBuilding,
+)
 
 const { locale, t } = useI18n()
 const currentLocale = ref(locale.value)
@@ -37,7 +70,7 @@ const submit = async () => {
     saveSuccess.value = true
     setTimeout(() => router.push('/landlord'), 1200)
   } else {
-    saveError.value = paymentMethodStore.error || '❌ Failed to update payment method.'
+    saveError.value = paymentMethodStore.error || 'Failed to update payment method.'
   }
 }
 
@@ -170,7 +203,6 @@ function initCanvas() {
     cx.fillStyle = 'rgba(2,8,16,1)'
     cx.fillRect(0, 0, W, H)
 
-    // stars
     stars.forEach((s) => {
       s.z += s.vz
       if (s.z < -0.9) s.z = 0.9
@@ -193,7 +225,6 @@ function initCanvas() {
       cx.fill()
     })
 
-    // torus
     const ta = t * 0.22
     torus.forEach((pt) => {
       let p = { x: pt.x, y: pt.y, z: pt.z }
@@ -208,7 +239,6 @@ function initCanvas() {
       cx.fill()
     })
 
-    // wireframe cubes
     cubesMath.forEach((cb) => {
       cb.rx += cb.vrx
       cb.ry += cb.vry
@@ -243,7 +273,6 @@ function initCanvas() {
       })
     })
 
-    // grid floor
     cx.strokeStyle = 'rgba(20,184,166,.1)'
     cx.lineWidth = 0.7
     for (let r = 0; r <= 12; r++) {
@@ -320,15 +349,15 @@ function onMouseLeave() {
     cardRef.value.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) translateZ(0px)'
 }
 
-/* field definitions — keeps template clean */
+/* field definitions — with Font Awesome icons */
 const fields = [
-  { key: 'airtel_money_number', label: 'airtelMoneyNumber', icon: '📡' },
-  { key: 'm_pesa_number', label: 'mPesaNumber', icon: '📲' },
-  { key: 'mixx_by_yas_number', label: 'mixxByYasNumber', icon: '💜' },
-  { key: 'halopesa_number', label: 'halopesaNumber', icon: '🟠' },
-  { key: 'nmb_account_number', label: 'nmbAccountNumber', icon: '🏦' },
-  { key: 'crdb_account_number', label: 'crdbAccountNumber', icon: '🏛️' },
-  { key: 'nbc_account_number', label: 'nbcAccountNumber', icon: '🏢' },
+  { key: 'airtel_money_number', label: 'airtelMoneyNumber', icon: ['satellite-dish', 'fa-solid'] },
+  { key: 'm_pesa_number', label: 'mPesaNumber', icon: ['mobile-alt', 'fa-solid'] },
+  { key: 'mixx_by_yas_number', label: 'mixxByYasNumber', icon: ['heart', 'fa-solid'] },
+  { key: 'halopesa_number', label: 'halopesaNumber', icon: ['circle', 'fa-solid'] },
+  { key: 'nmb_account_number', label: 'nmbAccountNumber', icon: ['landmark', 'fa-solid'] },
+  { key: 'crdb_account_number', label: 'crdbAccountNumber', icon: ['landmark', 'fa-solid'] },
+  { key: 'nbc_account_number', label: 'nbcAccountNumber', icon: ['building', 'fa-solid'] },
 ]
 </script>
 
@@ -369,30 +398,32 @@ const fields = [
       </div>
 
       <!-- heading -->
-      <h2 class="card-title">💳 {{ t('editPaymentMethod') }}</h2>
+      <h2 class="card-title">
+        <font-awesome-icon icon="credit-card" /> {{ t('editPaymentMethod') }}
+      </h2>
       <p class="card-sub">{{ t('editPaymentMethodSubtitle') }}</p>
 
       <!-- alerts -->
       <Transition name="shake-fade">
         <div v-if="saveSuccess" class="alert success-alert">
-          ✅ Payment method updated! Redirecting...
+          <font-awesome-icon icon="check-circle" /> Payment method updated! Redirecting...
         </div>
       </Transition>
       <Transition name="shake-fade">
         <div v-if="saveError" class="alert error-alert">
-          <span>⚠️</span><span>{{ saveError }}</span>
+          <font-awesome-icon icon="exclamation-triangle" /><span>{{ saveError }}</span>
         </div>
       </Transition>
       <Transition name="shake-fade">
         <div v-if="loading" class="alert info-alert">
-          <span class="mini-spin"></span>
+          <font-awesome-icon icon="spinner" spin class="mini-spin-icon" />
           <span>{{ t('updatingPayment') || 'Updating...' }}</span>
         </div>
       </Transition>
 
       <!-- loading state -->
       <div v-if="!paymentMethodForm" class="loading-msg">
-        <span class="mini-spin"></span>
+        <font-awesome-icon icon="spinner" spin />
         <span>{{ t('loadingForm') || 'Loading form...' }}</span>
       </div>
 
@@ -404,7 +435,7 @@ const fields = [
           class="field"
           :style="{ animationDelay: `${0.18 + idx * 0.07}s` }"
         >
-          <label>{{ field.icon }} {{ t(field.label) }}</label>
+          <label> <font-awesome-icon :icon="field.icon[0]" /> {{ t(field.label) }} </label>
           <div class="input-wrap">
             <input
               v-model="paymentMethodForm[field.key]"
@@ -416,13 +447,13 @@ const fields = [
 
         <!-- submit -->
         <button type="submit" class="btn-submit" :disabled="loading">
-          <span v-if="!loading">💾 {{ t('saveChanges') }}</span>
-          <span v-else class="btn-spinner"></span>
+          <span v-if="!loading"> <font-awesome-icon icon="save" /> {{ t('saveChanges') }} </span>
+          <font-awesome-icon v-else icon="spinner" spin class="btn-spinner-icon" />
         </button>
       </form>
 
       <router-link to="/landlord" class="back-home">
-        ← {{ t('back') || 'Back to Dashboard' }}
+        <font-awesome-icon icon="arrow-left" /> {{ t('back') || 'Back to Dashboard' }}
       </router-link>
     </div>
   </div>
@@ -676,6 +707,9 @@ const fields = [
   margin-bottom: 4px;
   animation: titleDrop 0.8s cubic-bezier(0.34, 1.4, 0.64, 1) both 0.15s;
 }
+.card-title svg {
+  margin-right: 8px;
+}
 @keyframes titleDrop {
   from {
     opacity: 0;
@@ -731,6 +765,9 @@ const fields = [
   border: 1px solid rgba(20, 184, 166, 0.2);
   color: #5dcaa5;
 }
+.alert svg {
+  flex-shrink: 0;
+}
 
 /* loading */
 .loading-msg {
@@ -745,25 +782,12 @@ const fields = [
 }
 
 /* spinners */
-.mini-spin {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(20, 184, 166, 0.3);
-  border-top-color: #14b8a6;
-  border-radius: 50%;
+.mini-spin-icon {
   animation: spin 0.8s linear infinite;
-  flex-shrink: 0;
 }
-.btn-spinner {
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
-  border-radius: 50%;
+.btn-spinner-icon {
+  font-size: 18px;
   animation: spin 0.8s linear infinite;
-  vertical-align: middle;
 }
 @keyframes spin {
   to {
@@ -786,6 +810,10 @@ label {
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
+label svg {
+  margin-right: 4px;
+  font-size: 11px;
+}
 
 .input-wrap {
   position: relative;
@@ -804,7 +832,6 @@ label {
     background 0.25s,
     box-shadow 0.25s;
   outline: none;
-  /* hide number arrows */
   appearance: textfield;
 }
 .input-wrap input::-webkit-outer-spin-button,
@@ -840,6 +867,10 @@ label {
     box-shadow 0.3s;
   margin-top: 6px;
   animation: fadeUp 0.6s ease both 0.75s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 .btn-submit::before {
   content: '';
@@ -864,8 +895,11 @@ label {
 
 /* back */
 .back-home {
-  display: block;
-  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+  width: 100%;
   margin-top: 16px;
   font-size: 13px;
   color: rgba(255, 255, 255, 0.4);
@@ -875,6 +909,9 @@ label {
 }
 .back-home:hover {
   color: #14b8a6;
+}
+.back-home svg {
+  font-size: 11px;
 }
 
 /* ── transitions ── */

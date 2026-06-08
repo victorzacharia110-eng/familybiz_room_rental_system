@@ -5,9 +5,12 @@ import router from './router'
 import i18n from './i18n'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import './assets/base.css'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
 
 
 const app = createApp(App)
+app.component('font-awesome-icon', FontAwesomeIcon)
 
 // creating pinia instance
 const pinia = createPinia()

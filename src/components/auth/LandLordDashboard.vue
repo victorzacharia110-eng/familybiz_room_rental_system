@@ -13,6 +13,77 @@ import { useRuleStore } from '@/stores/rules'
 import { useCommentStore } from '@/stores/comment'
 import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import {
+  faChartBar,
+  faBullhorn,
+  faComments,
+  faUser,
+  faLock,
+  faDoorOpen,
+  faMoneyBill,
+  faCreditCard,
+  faCheckCircle,
+  faWrench,
+  faBuilding,
+  faHouse,
+  faTriangleExclamation,
+  faThumbtack,
+  faFloppyDisk,
+  faBars,
+  faBan,
+  faStar,
+  faCamera,
+  faMobileAlt,
+  faRightFromBracket,
+  faPencil,
+  faTrash,
+  faPlus,
+  faEye,
+  faXmark,
+  faCircle,
+  faSpinner,
+  faEnvelope,
+  faBell,
+  faShield,
+  faKey,
+} from '@fortawesome/free-solid-svg-icons'
+
+library.add(
+  faChartBar,
+  faBullhorn,
+  faComments,
+  faUser,
+  faLock,
+  faDoorOpen,
+  faMoneyBill,
+  faCreditCard,
+  faCheckCircle,
+  faWrench,
+  faBuilding,
+  faHouse,
+  faTriangleExclamation,
+  faThumbtack,
+  faFloppyDisk,
+  faBars,
+  faBan,
+  faStar,
+  faCamera,
+  faMobileAlt,
+  faRightFromBracket,
+  faPencil,
+  faTrash,
+  faPlus,
+  faEye,
+  faXmark,
+  faCircle,
+  faSpinner,
+  faEnvelope,
+  faBell,
+  faShield,
+  faKey,
+)
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -39,7 +110,6 @@ onMounted(async () => {
   await paymentMethodStore.fetchPaymentMethods()
   await criticalRemarkStore.fetchCriticalRemarks()
   await latePaymentReasonStore.fetchLatePaymentReasons()
-
   initCanvas()
   buildCubes()
 })
@@ -48,7 +118,6 @@ onUnmounted(() => {
   cancelAnimationFrame(rafId)
 })
 
-/* ── messages ── */
 const successMessage = ref('')
 const successPaymentMessage = ref('')
 const successPaymentMethodMessage = ref('')
@@ -59,20 +128,17 @@ const successAnnouncementMessage = ref('')
 const successCommentMessage = ref('')
 const successPasswordResetMessage = ref('')
 
-/* ── logout ── */
 const logoutUser = async () => {
   await auth.logout()
   router.push('/login')
 }
 
-/* ── income ── */
 const monthlyIncome = computed(() =>
   paymentStore.payments
     ?.filter((p) => p.status === 'paid')
     .reduce((s, p) => s + Number(p.amount || 0), 0),
 )
 
-/* ── modals ── */
 const showModal = ref(false)
 const activePaymentsModal = ref(null)
 const activePaymentMethodModal = ref(null)
@@ -117,7 +183,7 @@ async function addRemark(tenant) {
       active: true,
     })
     if (res) {
-      successAddingRemarkMessage.value = '✅ Remark created successfully!'
+      successAddingRemarkMessage.value = 'Remark created successfully!'
       setTimeout(() => {
         successAddingRemarkMessage.value = ''
       }, 3000)
@@ -125,7 +191,6 @@ async function addRemark(tenant) {
   }
 }
 
-/* ── forms ── */
 const roomForm = ref({
   room_number: '',
   room_price: 0,
@@ -156,94 +221,83 @@ const announcementForm = ref({ title: '', message: '' })
 const commentForm = ref({ comment: '', rating: 5 })
 const passwordResetForm = ref({ email: '' })
 
-/* ── fetchers ── */
 const paymentMethodFetching = async () => await paymentMethodStore.fetchPaymentMethods()
 const paymentFetching = async () => await paymentStore.fetchPayments()
 const roomFetching = async () => await roomStore.fetchRooms()
 
-/* ── savers ── */
 const savePayment = async () => {
   const res = await paymentStore.registerPayment(paymentForm.value)
   if (res) {
-    successPaymentMessage.value = '✅ Payment created successfully!'
+    successPaymentMessage.value = 'Payment created successfully!'
     resetPaymentForm()
   }
 }
 const savePaymentMethod = async () => {
   const res = await paymentMethodStore.registerPaymentMethods(paymentMethodForm.value)
   if (res) {
-    successPaymentMethodMessage.value = '✅ Payment method created!'
+    successPaymentMethodMessage.value = 'Payment method created!'
     resetPaymentMethodForm()
   }
 }
 const savingRules = async () => {
   const res = await ruleStore.registerRules(ruleForm.value)
   if (res) {
-    successCreationRuleMessage.value = '✅ Rule created!'
+    successCreationRuleMessage.value = 'Rule created!'
     resetRulesForm()
   }
 }
 const saveRoom = async () => {
   const res = await roomStore.registerRoom(roomForm.value)
   if (res) {
-    successMessage.value = '✅ Room created!'
+    successMessage.value = 'Room created!'
     resetRoomForm()
   }
 }
 const saveAnnouncement = async () => {
   const res = await announcementStore.registerAnnouncement(announcementForm.value)
   if (res) {
-    successAnnouncementMessage.value = '✅ Announcement created!'
+    successAnnouncementMessage.value = 'Announcement created!'
     resetAnnouncementForm()
   }
 }
 const saveComment = async () => {
   const res = await commentStore.registerComments(commentForm.value)
   if (res) {
-    successCommentMessage.value = '✅ Comment added!'
+    successCommentMessage.value = 'Comment added!'
     commentForm.value.comment = ''
     commentForm.value.rating = 5
   }
 }
 
-/* ── deleters ── */
 const deleteRoom = async (id) => {
-  if (!confirm('⚠️ Delete this room permanently?')) return
+  if (!confirm('Delete this room permanently?')) return
   const res = await roomStore.deleteRoom(id)
-  alert(res ? '✅ Room deleted!' : '❌ Failed to delete room')
+  alert(res ? 'Room deleted!' : 'Failed to delete room')
 }
 const deletingPaymentMethod = async (id) => {
-  if (!confirm('⚠️ Delete this payment method?')) return
+  if (!confirm('Delete this payment method?')) return
   const res = await paymentMethodStore.deletePaymentMethod(id)
-  alert(res ? '✅ Deleted!' : '❌ Failed')
+  alert(res ? 'Deleted!' : 'Failed')
   paymentMethodFetching()
 }
 const deletePayment = async (id) => {
-  if (!confirm('⚠️ Delete this payment?')) return
+  if (!confirm('Delete this payment?')) return
   const res = await paymentStore.deletePayment(id)
-  alert(res ? '✅ Deleted!' : '❌ Failed')
+  alert(res ? 'Deleted!' : 'Failed')
   paymentFetching()
 }
 const deleteComment = async (id) => await commentStore.deleteComment(id)
-
-
 const deletingAnnouncement = async (id) => {
-  console.log('deleteAnnouncement function called', id)
-  console.log('announcementStore:', announcementStore)
-  console.log('deleteAnnouncement method:', announcementStore.deleteAnnouncement)
-  
-  if (!confirm('⚠️ Delete this announcement?')) return
+  if (!confirm('Delete this announcement?')) return
   try {
     await announcementStore.deleteAnnouncement(id)
-    alert('✅ Deleted!')
+    alert('Deleted!')
     await announcementStore.fetchAnnouncements()
   } catch (error) {
-    console.error('Delete error:', error)
-    alert('❌ Failed to delete')
+    alert('Failed to delete')
   }
 }
 
-/* ── resets ── */
 const resetRoomForm = () => {
   roomForm.value = {
     room_number: '',
@@ -283,7 +337,6 @@ const resetAnnouncementForm = () => {
   announcementForm.value = { title: '', message: '' }
 }
 
-/* ── modal openers / closers ── */
 const openPaymentsModal = (n) => {
   activePaymentsModal.value = n
   if (n === 'payments') paymentFetching()
@@ -346,7 +399,7 @@ const closePasswordResetModal = () => {
 const sendPasswordResetLink = async () => {
   const res = await auth.requestPasswordReset(passwordResetForm.value.email)
   if (res) {
-    successPasswordResetMessage.value = '✅ Reset link sent!'
+    successPasswordResetMessage.value = 'Reset link sent!'
     setTimeout(() => closePasswordResetModal(), 3000)
   }
 }
@@ -361,10 +414,9 @@ const updatingPhoneNumber = async (user) => {
   const p = prompt('Enter new phone number:')
   if (!p?.trim()) return
   const res = await auth.updatePhoneNumber(user.id, p)
-  alert(res ? '✅ Phone updated!' : auth.error || '❌ Failed')
+  alert(res ? 'Phone updated!' : auth.error || 'Failed')
 }
 
-/* ── language ── */
 const { locale } = useI18n()
 const currentLocale = ref(locale.value)
 const setLanguage = (lang) => {
@@ -372,10 +424,8 @@ const setLanguage = (lang) => {
   currentLocale.value = lang
 }
 
-/* ── sidebar ── */
 const isSidebarOpen = ref(false)
 
-/* ── utils ── */
 const formatDate = (d) =>
   d
     ? new Date(d).toLocaleString('en-GB', {
@@ -386,6 +436,7 @@ const formatDate = (d) =>
         minute: '2-digit',
       })
     : ''
+
 const months = [
   'January',
   'February',
@@ -402,9 +453,7 @@ const months = [
 ]
 const paymentStatus = (t) => (t.room?.latest_payment?.status === 'paid' ? 'paid' : 'unpaid')
 
-/* ════════════════════════════════════════
-   3D BACKGROUND CANVAS (same engine as other pages)
-════════════════════════════════════════ */
+/* ════════ 3D CANVAS ════════ */
 const canvasRef = ref(null)
 const cubesRef = ref(null)
 let rafId = null
@@ -443,6 +492,11 @@ function initCanvas() {
     const c = Math.cos(a),
       s = Math.sin(a)
     return { x: p.x * c - p.z * s, y: p.y, z: p.x * s + p.z * c }
+  }
+  const rotZ = (p, a) => {
+    const c = Math.cos(a),
+      s = Math.sin(a)
+    return { x: p.x * c - p.y * s, y: p.x * s + p.y * c, z: p.z }
   }
   const proj = (x, y, z) => {
     const dz = z + 5.5
@@ -503,11 +557,6 @@ function initCanvas() {
       oy: cy2,
       oz: cz,
     }
-  }
-  const rotZ = (p, a) => {
-    const c = Math.cos(a),
-      s = Math.sin(a)
-    return { x: p.x * c - p.y * s, y: p.x * s + p.y * c, z: p.z }
   }
   const cubesMath = Array.from({ length: 8 }, () =>
     mkCube(
@@ -627,21 +676,20 @@ function buildCubes() {
       hw = size / 2
     const cube = document.createElement('div')
     cube.className = 'css-cube'
-    cube.style.cssText = `left:${Math.random() * 90}%;top:${Math.random() * 90}%;width:${size}px;height:${size}px;animation-duration:${6 + Math.random() * 8}s;animation-delay:-${Math.random() * 6}s`
-    const tfs = [
-      `translateZ(${hw}px)`,
-      `translateZ(-${hw}px) rotateY(180deg)`,
-      `translateX(${hw}px) rotateY(90deg)`,
-      `translateX(-${hw}px) rotateY(-90deg)`,
-      `translateY(-${hw}px) rotateX(90deg)`,
-      `translateY(${hw}px) rotateX(-90deg)`,
-    ]
-    tfs.forEach((tf) => {
-      const f = document.createElement('div')
-      f.className = 'css-cube-face'
-      f.style.cssText = `width:${size}px;height:${size}px;position:absolute;transform:${tf};border:1px solid rgba(20,184,166,${0.12 + Math.random() * 0.2});background:rgba(20,184,166,.02)`
-      cube.appendChild(f)
-    })
+    cube.style.cssText =
+      `left:${Math.random() * 90}%;top:${Math.random() * 90}%;width:${size}px;height:${size}px;animation-duration:${6 + Math.random() * 8}s;animation-delay:-${Math.random() * 6}s`[
+        (`translateZ(${hw}px)`,
+        `translateZ(-${hw}px) rotateY(180deg)`,
+        `translateX(${hw}px) rotateY(90deg)`,
+        `translateX(-${hw}px) rotateY(-90deg)`,
+        `translateY(-${hw}px) rotateX(90deg)`,
+        `translateY(${hw}px) rotateX(-90deg)`)
+      ].forEach((tf) => {
+        const f = document.createElement('div')
+        f.className = 'css-cube-face'
+        f.style.cssText = `width:${size}px;height:${size}px;position:absolute;transform:${tf};border:1px solid rgba(20,184,166,${0.12 + Math.random() * 0.2});background:rgba(20,184,166,.02)`
+        cube.appendChild(f)
+      })
     container.appendChild(cube)
   }
 }
@@ -658,16 +706,15 @@ function buildCubes() {
 
       <nav class="sidebar-nav">
         <router-link to="/landlord" class="nav-item active">
-          <span class="ni">📊</span><span>{{ $t('dashboard') }}</span>
+          <font-awesome-icon icon="chart-bar" class="ni" /><span>{{ $t('dashboard') }}</span>
         </router-link>
-
         <a
           href="#"
           class="nav-item"
           :class="{ on: activeAnnouncementModal === 'announcements' }"
           @click.prevent="openAnnouncementModal('announcements')"
         >
-          <span class="ni">📢</span><span>{{ $t('Announcements') }}</span>
+          <font-awesome-icon icon="bullhorn" class="ni" /><span>{{ $t('Announcements') }}</span>
         </a>
         <a
           href="#"
@@ -675,7 +722,7 @@ function buildCubes() {
           :class="{ on: activeCommentsModal === 'comments' }"
           @click.prevent="openCommentsModal('comments')"
         >
-          <span class="ni">💬</span><span>{{ $t('Comments') }}</span>
+          <font-awesome-icon icon="comments" class="ni" /><span>{{ $t('Comments') }}</span>
         </a>
         <a
           href="#"
@@ -683,7 +730,7 @@ function buildCubes() {
           :class="{ on: activeProfileModal === 'profile' }"
           @click.prevent="openProfileModal('profile')"
         >
-          <span class="ni">👤</span><span>{{ $t('Profile') }}</span>
+          <font-awesome-icon icon="user" class="ni" /><span>{{ $t('Profile') }}</span>
         </a>
         <a
           href="#"
@@ -691,7 +738,7 @@ function buildCubes() {
           :class="{ on: activePasswordResetModal === 'passwordReset' }"
           @click.prevent="openPasswordResetModal('passwordReset')"
         >
-          <span class="ni">🔒</span><span>{{ $t('resetPassword') }}</span>
+          <font-awesome-icon icon="lock" class="ni" /><span>{{ $t('resetPassword') }}</span>
         </a>
         <a
           href="#"
@@ -699,7 +746,7 @@ function buildCubes() {
           :class="{ on: activeRoomsModal === 'rooms' }"
           @click.prevent="openRoomsModal('rooms')"
         >
-          <span class="ni">🚪</span><span>{{ $t('rooms') }}</span>
+          <font-awesome-icon icon="door-open" class="ni" /><span>{{ $t('rooms') }}</span>
         </a>
         <a
           href="#"
@@ -707,7 +754,7 @@ function buildCubes() {
           :class="{ on: activePaymentsModal === 'payments' }"
           @click.prevent="openPaymentsModal('payments')"
         >
-          <span class="ni">💰</span><span>{{ $t('payments') }}</span>
+          <font-awesome-icon icon="money-bill" class="ni" /><span>{{ $t('payments') }}</span>
         </a>
         <a
           href="#"
@@ -715,19 +762,19 @@ function buildCubes() {
           :class="{ on: activePaymentMethodModal === 'paymentMethod' }"
           @click.prevent="openPaymentMethodModal('paymentMethod')"
         >
-          <span class="ni">💳</span><span>{{ $t('paymentMethods') }}</span>
+          <font-awesome-icon icon="credit-card" class="ni" /><span>{{ $t('paymentMethods') }}</span>
         </a>
       </nav>
 
-      <button class="sidebar-logout" @click="logoutUser"><span>🚪</span> {{ $t('logout') }}</button>
+      <button class="sidebar-logout" @click="logoutUser">
+        <font-awesome-icon icon="right-from-bracket" /> {{ $t('logout') }}
+      </button>
     </aside>
 
-    <!-- sidebar overlay (mobile) -->
     <div class="sidebar-overlay" v-if="isSidebarOpen" @click="isSidebarOpen = false"></div>
 
     <!-- ══════ MAIN ══════ -->
     <main class="dash-main">
-      <!-- ── hero canvas banner ── -->
       <div class="hero-banner">
         <canvas ref="canvasRef" class="hero-canvas"></canvas>
         <div class="hero-cubes" ref="cubesRef"></div>
@@ -737,7 +784,9 @@ function buildCubes() {
           <div class="hr hr2"></div>
         </div>
         <div class="hero-text">
-          <button class="menu-btn" @click="isSidebarOpen = !isSidebarOpen">☰</button>
+          <button class="menu-btn" @click="isSidebarOpen = !isSidebarOpen">
+            <font-awesome-icon icon="bars" />
+          </button>
           <div class="topbar-inner">
             <div>
               <div class="dash-badge"><span class="badge-dot"></span>Live Dashboard</div>
@@ -769,40 +818,39 @@ function buildCubes() {
         </div>
       </div>
 
-      <!-- ── content wrapper ── -->
       <div class="main-body">
-        <!-- ── STATS ── -->
+        <!-- STATS -->
         <section class="stats-grid">
           <div class="stat-card">
-            <div class="stat-icon">🏢</div>
+            <div class="stat-icon"><font-awesome-icon icon="building" /></div>
             <div>
               <div class="stat-val">{{ totalRooms }}</div>
               <div class="stat-lbl">{{ $t('Total Rooms') }}</div>
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon">🏠</div>
+            <div class="stat-icon"><font-awesome-icon icon="house" /></div>
             <div>
               <div class="stat-val">{{ roomsOccupiedCount }}</div>
               <div class="stat-lbl">{{ $t('Occupied') }}</div>
             </div>
           </div>
           <div class="stat-card green">
-            <div class="stat-icon">✅</div>
+            <div class="stat-icon"><font-awesome-icon icon="check-circle" /></div>
             <div>
               <div class="stat-val">{{ roomsAvailableCount }}</div>
               <div class="stat-lbl">{{ $t('Available') }}</div>
             </div>
           </div>
           <div class="stat-card amber">
-            <div class="stat-icon">🔧</div>
+            <div class="stat-icon"><font-awesome-icon icon="wrench" /></div>
             <div>
               <div class="stat-val">{{ roomsMaintananceCount }}</div>
               <div class="stat-lbl">{{ $t('Maintanance') }}</div>
             </div>
           </div>
           <div class="stat-card teal-card">
-            <div class="stat-icon">💰</div>
+            <div class="stat-icon"><font-awesome-icon icon="money-bill" /></div>
             <div>
               <div class="stat-val income">TZS {{ Number(monthlyIncome).toLocaleString() }}</div>
               <div class="stat-lbl">{{ $t('Monthly Income') }}</div>
@@ -810,7 +858,7 @@ function buildCubes() {
           </div>
         </section>
 
-        <!-- ── TENANTS TABLE ── -->
+        <!-- TENANTS TABLE -->
         <section class="glass-section">
           <div class="section-head">
             <div>
@@ -824,12 +872,11 @@ function buildCubes() {
 
           <Transition name="alert-pop">
             <div v-if="successAddingRemarkMessage" class="success-alert">
-              {{ successAddingRemarkMessage }}
+              <font-awesome-icon icon="check-circle" /> {{ successAddingRemarkMessage }}
             </div>
           </Transition>
 
           <div class="table-wrap">
-            <!-- Skeleton -->
             <div v-if="tenantLoading" class="table-skeleton">
               <div class="skeleton-row"></div>
               <div class="skeleton-row"></div>
@@ -837,7 +884,6 @@ function buildCubes() {
               <div class="skeleton-row"></div>
               <div class="skeleton-row"></div>
             </div>
-
             <table v-else>
               <thead>
                 <tr>
@@ -882,7 +928,7 @@ function buildCubes() {
                         {{ lp.reason_text }}
                       </li>
                     </ul>
-                    <span v-else class="muted">🚫 None</span>
+                    <span v-else class="muted"><font-awesome-icon icon="ban" /> None</span>
                   </td>
                   <td>
                     <button
@@ -899,14 +945,16 @@ function buildCubes() {
           </div>
         </section>
 
-        <!-- ── RULES ── -->
+        <!-- RULES -->
         <section class="glass-section">
           <div class="section-head">
             <div>
               <h2 class="sec-title">{{ $t('tenantRulesPolicies') }}</h2>
               <p class="sec-sub">Community guidelines and policies</p>
             </div>
-            <button class="btn-teal" @click="openModal">{{ $t('addNewRule') }}</button>
+            <button class="btn-teal" @click="openModal">
+              <font-awesome-icon icon="plus" /> {{ $t('addNewRule') }}
+            </button>
           </div>
           <ul class="rules-list">
             <li>{{ $t('maintainCleanliness') }}</li>
@@ -921,23 +969,21 @@ function buildCubes() {
       </div>
     </main>
 
-    <!-- ════════════════════════════════════
-         MODALS
-    ════════════════════════════════════ -->
+    <!-- ══════ MODALS ══════ -->
 
     <!-- ADD RULE -->
     <Transition name="modal-fade">
       <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
         <div class="glass-modal">
           <div class="modal-top">
-            <h3>{{ $t('addNewRule') }}</h3>
-            <button class="close-x" @click="closeModal">✕</button>
+            <h3><font-awesome-icon icon="shield" /> {{ $t('addNewRule') }}</h3>
+            <button class="close-x" @click="closeModal"><font-awesome-icon icon="xmark" /></button>
           </div>
-          <Transition name="alert-pop"
-            ><div v-if="successCreationRuleMessage" class="success-alert">
-              {{ successCreationRuleMessage }}
-            </div></Transition
-          >
+          <Transition name="alert-pop">
+            <div v-if="successCreationRuleMessage" class="success-alert">
+              <font-awesome-icon icon="check-circle" /> {{ successCreationRuleMessage }}
+            </div>
+          </Transition>
           <form @submit.prevent="savingRules">
             <div class="mfield">
               <label>{{ $t('title') }}</label
@@ -959,8 +1005,10 @@ function buildCubes() {
               </select>
             </div>
             <div class="modal-actions">
-              <button type="submit" class="btn-teal">{{ $t('save') }}</button
-              ><button type="button" class="btn-ghost" @click="closeModal">
+              <button type="submit" class="btn-teal">
+                <font-awesome-icon icon="floppy-disk" /> {{ $t('save') }}
+              </button>
+              <button type="button" class="btn-ghost" @click="closeModal">
                 {{ $t('cancel') }}
               </button>
             </div>
@@ -978,11 +1026,13 @@ function buildCubes() {
       >
         <div class="glass-modal">
           <div class="modal-top">
-            <h3>{{ $t('userProfile') }}</h3>
-            <button class="close-x" @click="closeProfileModal">✕</button>
+            <h3><font-awesome-icon icon="user" /> {{ $t('userProfile') }}</h3>
+            <button class="close-x" @click="closeProfileModal">
+              <font-awesome-icon icon="xmark" />
+            </button>
           </div>
           <div class="profile-box">
-            <div class="profile-avatar">👤</div>
+            <div class="profile-avatar"><font-awesome-icon icon="user" /></div>
             <div class="profile-details">
               <div class="mfield">
                 <label>{{ $t('Last Name') }}</label>
@@ -1000,7 +1050,7 @@ function buildCubes() {
                   style="margin-top: 8px"
                   @click="updatingPhoneNumber(auth.user)"
                 >
-                  📱 {{ $t('updatePhone') }}
+                  <font-awesome-icon icon="mobile-alt" /> {{ $t('updatePhone') }}
                 </button>
               </div>
             </div>
@@ -1014,12 +1064,16 @@ function buildCubes() {
       <div v-if="activeRoomsModal === 'rooms'" class="modal-overlay" @click.self="closeRoomsModal">
         <div class="glass-modal large">
           <div class="modal-top">
-            <h3>{{ $t('roomManagement') }}</h3>
-            <button class="close-x" @click="closeRoomsModal">✕</button>
+            <h3><font-awesome-icon icon="door-open" /> {{ $t('roomManagement') }}</h3>
+            <button class="close-x" @click="closeRoomsModal">
+              <font-awesome-icon icon="xmark" />
+            </button>
           </div>
-          <Transition name="alert-pop"
-            ><div v-if="successMessage" class="success-alert">{{ successMessage }}</div></Transition
-          >
+          <Transition name="alert-pop">
+            <div v-if="successMessage" class="success-alert">
+              <font-awesome-icon icon="check-circle" /> {{ successMessage }}
+            </div>
+          </Transition>
           <form @submit.prevent="saveRoom">
             <div class="form-2col">
               <div class="mfield">
@@ -1057,15 +1111,17 @@ function buildCubes() {
                 hidden
               />
               <button type="button" class="btn-ghost" @click="$refs.fileInput.click()">
-                📷 {{ $t('selectImage') }}
+                <font-awesome-icon icon="camera" /> {{ $t('selectImage') }}
               </button>
             </div>
             <div v-if="roomForm.preview" class="img-preview">
               <img :src="roomForm.preview" alt="Room" />
             </div>
             <div class="modal-actions">
-              <button type="submit" class="btn-teal">{{ $t('addRoom') }}</button
-              ><button type="button" class="btn-ghost" @click="closeRoomsModal">
+              <button type="submit" class="btn-teal">
+                <font-awesome-icon icon="plus" /> {{ $t('addRoom') }}
+              </button>
+              <button type="button" class="btn-ghost" @click="closeRoomsModal">
                 {{ $t('close') }}
               </button>
             </div>
@@ -1091,14 +1147,14 @@ function buildCubes() {
                     }}</span>
                   </td>
                   <td>
-                    <span class="row-actions"
-                      ><router-link v-if="room.id" :to="`/room/show/${room.id}`" class="btn-edit">{{
-                        $t('edit')
-                      }}</router-link
-                      ><button class="btn-del" @click="deleteRoom(room.id)">
-                        {{ $t('delete') }}
-                      </button></span
-                    >
+                    <span class="row-actions">
+                      <router-link v-if="room.id" :to="`/room/show/${room.id}`" class="btn-edit"
+                        ><font-awesome-icon icon="pencil" /> {{ $t('edit') }}</router-link
+                      >
+                      <button class="btn-del" @click="deleteRoom(room.id)">
+                        <font-awesome-icon icon="trash" /> {{ $t('delete') }}
+                      </button>
+                    </span>
                   </td>
                 </tr>
               </tbody>
@@ -1117,8 +1173,10 @@ function buildCubes() {
       >
         <div class="glass-modal large">
           <div class="modal-top">
-            <h3>{{ $t('Remarks') }}</h3>
-            <button class="close-x" @click="closeRemarksModal">✕</button>
+            <h3><font-awesome-icon icon="triangle-exclamation" /> {{ $t('Remarks') }}</h3>
+            <button class="close-x" @click="closeRemarksModal">
+              <font-awesome-icon icon="xmark" />
+            </button>
           </div>
           <div class="modal-table-wrap">
             <table>
@@ -1132,7 +1190,7 @@ function buildCubes() {
               </thead>
               <tbody>
                 <tr v-if="!myRemarks.length">
-                  <td colspan="4" class="no-data">🚫 No Remarks</td>
+                  <td colspan="4" class="no-data"><font-awesome-icon icon="ban" /> No Remarks</td>
                 </tr>
                 <tr v-else v-for="(remark, i) in myRemarks" :key="remark.id">
                   <td class="idx">{{ i + 1 }}</td>
@@ -1158,14 +1216,16 @@ function buildCubes() {
       >
         <div class="glass-modal large">
           <div class="modal-top">
-            <h3>{{ $t('paymentManagement') }}</h3>
-            <button class="close-x" @click="closePaymentsModal">✕</button>
+            <h3><font-awesome-icon icon="money-bill" /> {{ $t('paymentManagement') }}</h3>
+            <button class="close-x" @click="closePaymentsModal">
+              <font-awesome-icon icon="xmark" />
+            </button>
           </div>
-          <Transition name="alert-pop"
-            ><div v-if="successPaymentMessage" class="success-alert">
-              {{ successPaymentMessage }}
-            </div></Transition
-          >
+          <Transition name="alert-pop">
+            <div v-if="successPaymentMessage" class="success-alert">
+              <font-awesome-icon icon="check-circle" /> {{ successPaymentMessage }}
+            </div>
+          </Transition>
           <form @submit.prevent="savePayment">
             <div class="form-2col">
               <div class="mfield">
@@ -1210,8 +1270,10 @@ function buildCubes() {
               </div>
             </div>
             <div class="modal-actions">
-              <button type="submit" class="btn-teal">Save Payment</button
-              ><button type="button" class="btn-ghost" @click="closePaymentsModal">Close</button>
+              <button type="submit" class="btn-teal">
+                <font-awesome-icon icon="floppy-disk" /> Save Payment
+              </button>
+              <button type="button" class="btn-ghost" @click="closePaymentsModal">Close</button>
             </div>
           </form>
           <div class="modal-table-wrap">
@@ -1239,10 +1301,14 @@ function buildCubes() {
                   </td>
                   <td>{{ formatDate(p.due_date) }}</td>
                   <td>
-                    <span class="row-actions"
-                      ><router-link :to="`/payment/show/${p.id}`" class="btn-edit">Edit</router-link
-                      ><button class="btn-del" @click="deletePayment(p.id)">Delete</button></span
-                    >
+                    <span class="row-actions">
+                      <router-link :to="`/payment/show/${p.id}`" class="btn-edit"
+                        ><font-awesome-icon icon="pencil" /> Edit</router-link
+                      >
+                      <button class="btn-del" @click="deletePayment(p.id)">
+                        <font-awesome-icon icon="trash" /> Delete
+                      </button>
+                    </span>
                   </td>
                 </tr>
               </tbody>
@@ -1261,14 +1327,16 @@ function buildCubes() {
       >
         <div class="glass-modal large">
           <div class="modal-top">
-            <h3>{{ $t('paymentMethodManagement') }}</h3>
-            <button class="close-x" @click="closePaymentMethodModal">✕</button>
+            <h3><font-awesome-icon icon="credit-card" /> {{ $t('paymentMethodManagement') }}</h3>
+            <button class="close-x" @click="closePaymentMethodModal">
+              <font-awesome-icon icon="xmark" />
+            </button>
           </div>
-          <Transition name="alert-pop"
-            ><div v-if="successPaymentMethodMessage" class="success-alert">
-              {{ successPaymentMethodMessage }}
-            </div></Transition
-          >
+          <Transition name="alert-pop">
+            <div v-if="successPaymentMethodMessage" class="success-alert">
+              <font-awesome-icon icon="check-circle" /> {{ successPaymentMethodMessage }}
+            </div>
+          </Transition>
           <form @submit.prevent="savePaymentMethod">
             <div class="form-2col">
               <div class="mfield">
@@ -1329,8 +1397,10 @@ function buildCubes() {
               </div>
             </div>
             <div class="modal-actions">
-              <button type="submit" class="btn-teal">{{ $t('addPaymentMethod') }}</button
-              ><button type="button" class="btn-ghost" @click="closePaymentMethodModal">
+              <button type="submit" class="btn-teal">
+                <font-awesome-icon icon="plus" /> {{ $t('addPaymentMethod') }}
+              </button>
+              <button type="button" class="btn-ghost" @click="closePaymentMethodModal">
                 {{ $t('close') }}
               </button>
             </div>
@@ -1362,14 +1432,14 @@ function buildCubes() {
                   <td>{{ pm?.crdb_account_number || '—' }}</td>
                   <td>{{ pm?.nbc_account_number || '—' }}</td>
                   <td>
-                    <span class="row-actions"
-                      ><router-link v-if="pm?.id" :to="`/method/show/${pm?.id}`" class="btn-edit">{{
-                        $t('edit')
-                      }}</router-link
-                      ><button class="btn-del" @click="deletingPaymentMethod(pm.id)">
-                        {{ $t('delete') }}
-                      </button></span
-                    >
+                    <span class="row-actions">
+                      <router-link v-if="pm?.id" :to="`/method/show/${pm?.id}`" class="btn-edit"
+                        ><font-awesome-icon icon="pencil" /> {{ $t('edit') }}</router-link
+                      >
+                      <button class="btn-del" @click="deletingPaymentMethod(pm.id)">
+                        <font-awesome-icon icon="trash" /> {{ $t('delete') }}
+                      </button>
+                    </span>
                   </td>
                 </tr>
               </tbody>
@@ -1388,14 +1458,16 @@ function buildCubes() {
       >
         <div class="glass-modal large">
           <div class="modal-top">
-            <h3>{{ $t('announcements') }}</h3>
-            <button class="close-x" @click="closeAnnouncementsModal">✕</button>
+            <h3><font-awesome-icon icon="bullhorn" /> {{ $t('announcements') }}</h3>
+            <button class="close-x" @click="closeAnnouncementsModal">
+              <font-awesome-icon icon="xmark" />
+            </button>
           </div>
-          <Transition name="alert-pop"
-            ><div v-if="successAnnouncementMessage" class="success-alert">
-              {{ successAnnouncementMessage }}
-            </div></Transition
-          >
+          <Transition name="alert-pop">
+            <div v-if="successAnnouncementMessage" class="success-alert">
+              <font-awesome-icon icon="check-circle" /> {{ successAnnouncementMessage }}
+            </div>
+          </Transition>
           <form @submit.prevent="saveAnnouncement">
             <div class="mfield">
               <label>{{ $t('title') }}</label
@@ -1410,8 +1482,10 @@ function buildCubes() {
               ></textarea>
             </div>
             <div class="modal-actions">
-              <button type="submit" class="btn-teal">Save</button
-              ><button type="button" class="btn-ghost" @click="closeAnnouncementsModal">
+              <button type="submit" class="btn-teal">
+                <font-awesome-icon icon="floppy-disk" /> Save
+              </button>
+              <button type="button" class="btn-ghost" @click="closeAnnouncementsModal">
                 Close
               </button>
             </div>
@@ -1424,12 +1498,15 @@ function buildCubes() {
                   <th>Title</th>
                   <th>Message</th>
                   <th>Date</th>
-                  <th>Action</th>
+                  <th>Edit</th>
+                  <th>Delete</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-if="!announcementStore.announcements.length">
-                  <td colspan="4" class="no-data">🚫 No Announcements</td>
+                  <td colspan="5" class="no-data">
+                    <font-awesome-icon icon="ban" /> No Announcements
+                  </td>
                 </tr>
                 <tr v-else v-for="a in announcementStore.announcements" :key="a.id">
                   <td>
@@ -1439,10 +1516,14 @@ function buildCubes() {
                   <td>{{ formatDate(a.created_at) }}</td>
                   <td>
                     <router-link :to="`/announcements/show/${a.id}`" class="btn-edit">
-                      Edit
+                      <font-awesome-icon icon="pencil" /> Edit
                     </router-link>
                   </td>
-                  <td><button class="btn-del" @click="deletingAnnouncement(a.id)">Delete</button></td>
+                  <td>
+                    <button class="btn-del" @click="deletingAnnouncement(a.id)">
+                      <font-awesome-icon icon="trash" /> Delete
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -1460,14 +1541,16 @@ function buildCubes() {
       >
         <div class="glass-modal large">
           <div class="modal-top">
-            <h3>{{ $t('Comments') }}</h3>
-            <button class="close-x" @click="closeCommentsModal">✕</button>
+            <h3><font-awesome-icon icon="comments" /> {{ $t('Comments') }}</h3>
+            <button class="close-x" @click="closeCommentsModal">
+              <font-awesome-icon icon="xmark" />
+            </button>
           </div>
-          <Transition name="alert-pop"
-            ><div v-if="successCommentMessage" class="success-alert">
-              {{ successCommentMessage }}
-            </div></Transition
-          >
+          <Transition name="alert-pop">
+            <div v-if="successCommentMessage" class="success-alert">
+              <font-awesome-icon icon="check-circle" /> {{ successCommentMessage }}
+            </div>
+          </Transition>
           <form @submit.prevent="saveComment">
             <div class="mfield">
               <label>{{ $t('Comment') }}</label
@@ -1484,8 +1567,10 @@ function buildCubes() {
               </select>
             </div>
             <div class="modal-actions">
-              <button type="submit" class="btn-teal">Submit</button
-              ><button type="button" class="btn-ghost" @click="closeCommentsModal">Close</button>
+              <button type="submit" class="btn-teal">
+                <font-awesome-icon icon="floppy-disk" /> Submit
+              </button>
+              <button type="button" class="btn-ghost" @click="closeCommentsModal">Close</button>
             </div>
           </form>
           <div class="modal-table-wrap">
@@ -1502,14 +1587,18 @@ function buildCubes() {
               </thead>
               <tbody>
                 <tr v-if="!commentStore.comments.length">
-                  <td colspan="5" class="no-data">🚫 No Comments</td>
+                  <td colspan="5" class="no-data"><font-awesome-icon icon="ban" /> No Comments</td>
                 </tr>
                 <tr v-else v-for="c in commentStore.comments" :key="c.id">
                   <td>{{ c.user?.last_name || 'N/A' }}</td>
                   <td>{{ c.comment }}</td>
-                  <td>{{ c.rating }} ⭐</td>
+                  <td>{{ c.rating }} <font-awesome-icon icon="star" class="star-icon" /></td>
                   <td>{{ formatDate(c.created_at) }}</td>
-                  <td><button class="btn-del" @click="deleteComment(c.id)">Delete</button></td>
+                  <td>
+                    <button class="btn-del" @click="deleteComment(c.id)">
+                      <font-awesome-icon icon="trash" /> Delete
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -1527,17 +1616,21 @@ function buildCubes() {
       >
         <div class="glass-modal">
           <div class="modal-top">
-            <h3>{{ $t('resetPasswordTitle') }}</h3>
-            <button class="close-x" @click="closePasswordResetModal">✕</button>
+            <h3><font-awesome-icon icon="key" /> {{ $t('resetPasswordTitle') }}</h3>
+            <button class="close-x" @click="closePasswordResetModal">
+              <font-awesome-icon icon="xmark" />
+            </button>
           </div>
-          <Transition name="alert-pop"
-            ><div v-if="successPasswordResetMessage" class="success-alert">
-              {{ successPasswordResetMessage }}
-            </div></Transition
-          >
-          <Transition name="alert-pop"
-            ><div v-if="auth.error" class="error-alert">{{ auth.error }}</div></Transition
-          >
+          <Transition name="alert-pop">
+            <div v-if="successPasswordResetMessage" class="success-alert">
+              <font-awesome-icon icon="check-circle" /> {{ successPasswordResetMessage }}
+            </div>
+          </Transition>
+          <Transition name="alert-pop">
+            <div v-if="auth.error" class="error-alert">
+              <font-awesome-icon icon="triangle-exclamation" /> {{ auth.error }}
+            </div>
+          </Transition>
           <p class="modal-desc">{{ $t('resetPasswordDescription') }}</p>
           <form @submit.prevent="sendPasswordResetLink">
             <div class="mfield">
@@ -1551,6 +1644,10 @@ function buildCubes() {
             </div>
             <div class="modal-actions">
               <button type="submit" class="btn-teal" :disabled="auth.loading">
+                <font-awesome-icon
+                  :icon="auth.loading ? 'spinner' : 'envelope'"
+                  :spin="auth.loading"
+                />
                 {{ auth.loading ? 'Sending...' : $t('sendResetLink') }}
               </button>
               <button type="button" class="btn-ghost" @click="closePasswordResetModal">
@@ -1571,13 +1668,9 @@ function buildCubes() {
   box-sizing: border-box;
 }
 
-/* ════════════════════════════════════════
-   SKELETON LOADING STYLES
-════════════════════════════════════════ */
 .table-skeleton {
   padding: 15px;
 }
-
 .skeleton-row {
   height: 50px;
   border-radius: 8px;
@@ -1592,9 +1685,6 @@ function buildCubes() {
   animation: shimmer 1.2s infinite;
 }
 
-/* ════════════════════════════════════════
-   SHELL
-════════════════════════════════════════ */
 .dash-shell {
   display: flex;
   min-height: 100vh;
@@ -1603,9 +1693,6 @@ function buildCubes() {
   color: #fff;
 }
 
-/* ════════════════════════════════════════
-   SIDEBAR
-════════════════════════════════════════ */
 .sidebar {
   width: 230px;
   flex-shrink: 0;
@@ -1621,7 +1708,6 @@ function buildCubes() {
   transition: transform 0.3s ease;
   backdrop-filter: blur(12px);
 }
-
 .sidebar-logo {
   display: flex;
   align-items: center;
@@ -1659,7 +1745,6 @@ function buildCubes() {
   gap: 4px;
   flex: 1;
 }
-
 .nav-item {
   display: flex;
   align-items: center;
@@ -1686,8 +1771,10 @@ function buildCubes() {
   padding-left: 10px;
 }
 .ni {
-  font-size: 16px;
+  font-size: 15px;
   flex-shrink: 0;
+  width: 18px;
+  text-align: center;
 }
 
 .sidebar-logout {
@@ -1710,7 +1797,6 @@ function buildCubes() {
   background: rgba(239, 68, 68, 0.2);
   transform: translateY(-2px);
 }
-
 .sidebar-overlay {
   position: fixed;
   inset: 0;
@@ -1719,9 +1805,6 @@ function buildCubes() {
   backdrop-filter: blur(4px);
 }
 
-/* ════════════════════════════════════════
-   MAIN
-════════════════════════════════════════ */
 .dash-main {
   flex: 1;
   min-width: 0;
@@ -1729,7 +1812,6 @@ function buildCubes() {
   flex-direction: column;
 }
 
-/* ── HERO BANNER ── */
 .hero-banner {
   position: relative;
   overflow: hidden;
@@ -1912,7 +1994,6 @@ function buildCubes() {
   transform: translateY(-1px);
 }
 
-/* ── MAIN BODY ── */
 .main-body {
   padding: 24px;
   display: flex;
@@ -1920,7 +2001,6 @@ function buildCubes() {
   gap: 24px;
 }
 
-/* ── STATS ── */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -1959,8 +2039,11 @@ function buildCubes() {
   border-left-color: #14b8a6;
 }
 .stat-icon {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   flex-shrink: 0;
+  color: #14b8a6;
+  width: 36px;
+  text-align: center;
 }
 .stat-val {
   font-size: clamp(1.4rem, 3vw, 2rem);
@@ -1979,7 +2062,6 @@ function buildCubes() {
   margin-top: 4px;
 }
 
-/* ── GLASS SECTIONS ── */
 .glass-section {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.07);
@@ -2012,7 +2094,6 @@ function buildCubes() {
   color: rgba(255, 255, 255, 0.4);
 }
 
-/* ── TABLE ── */
 .table-wrap {
   overflow-x: scroll;
   border-radius: 12px;
@@ -2067,7 +2148,6 @@ tbody tr:last-child td {
   color: rgba(255, 255, 255, 0.3);
 }
 
-/* pills */
 .status-pill {
   display: inline-block;
   padding: 3px 10px;
@@ -2114,22 +2194,26 @@ tbody tr:last-child td {
   border-radius: 6px;
   font-size: 11px;
 }
-
 .late-list {
   padding-left: 14px;
   margin: 0;
   font-size: 12px;
   color: rgba(255, 255, 255, 0.6);
 }
+.star-icon {
+  color: #fbbf24;
+  font-size: 12px;
+}
 
-/* row actions */
 .row-actions {
   display: flex;
   gap: 6px;
   align-items: center;
 }
 .btn-edit {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   padding: 5px 12px;
   border-radius: 7px;
   background: rgba(20, 184, 166, 0.15);
@@ -2145,6 +2229,9 @@ tbody tr:last-child td {
   transform: translateY(-1px);
 }
 .btn-del {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   padding: 5px 12px;
   border-radius: 7px;
   background: rgba(239, 68, 68, 0.12);
@@ -2161,8 +2248,10 @@ tbody tr:last-child td {
   transform: translateY(-1px);
 }
 
-/* shared buttons */
 .btn-teal {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   padding: 9px 20px;
   border-radius: 50px;
   border: none;
@@ -2189,13 +2278,12 @@ tbody tr:last-child td {
 .btn-sm {
   padding: 5px 12px;
   border-radius: 7px;
-  border: none;
+  border: 1px solid rgba(20, 184, 166, 0.25);
   background: rgba(20, 184, 166, 0.12);
   color: #14b8a6;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  border: 1px solid rgba(20, 184, 166, 0.25);
   transition: 0.2s;
   font-family: inherit;
 }
@@ -2208,6 +2296,9 @@ tbody tr:last-child td {
 }
 
 .btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   padding: 9px 20px;
   border-radius: 50px;
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -2224,7 +2315,6 @@ tbody tr:last-child td {
   color: #fff;
 }
 
-/* rules list */
 .rules-list {
   list-style: none;
   padding: 0;
@@ -2247,9 +2337,6 @@ tbody tr:last-child td {
   color: #fff;
 }
 
-/* ════════════════════════════════════════
-   MODALS
-════════════════════════════════════════ */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -2289,7 +2376,6 @@ tbody tr:last-child td {
 .glass-modal.large {
   max-width: 1000px;
 }
-
 .modal-top {
   display: flex;
   justify-content: space-between;
@@ -2300,6 +2386,9 @@ tbody tr:last-child td {
   font-size: 1.1rem;
   font-weight: 800;
   color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .close-x {
   width: 30px;
@@ -2321,7 +2410,6 @@ tbody tr:last-child td {
   color: #f87171;
   border-color: rgba(239, 68, 68, 0.3);
 }
-
 .modal-desc {
   font-size: 13px;
   color: rgba(255, 255, 255, 0.5);
@@ -2330,16 +2418,13 @@ tbody tr:last-child td {
 
 .mfield {
   min-width: 0;
+  margin-bottom: 14px;
 }
-
-/* Chrome, Safari, Edge */
 .mfield input[type='number']::-webkit-outer-spin-button,
 .mfield input[type='number']::-webkit-inner-spin-button {
   margin: 0;
   -webkit-appearance: none;
 }
-
-/* Firefox + standard */
 .mfield input[type='number'] {
   -moz-appearance: textfield;
   appearance: textfield;
@@ -2388,6 +2473,12 @@ tbody tr:last-child td {
   background: #0a1428;
   color: #fff;
 }
+.mfield p {
+  font-size: 15px;
+  color: #fff;
+  margin: 0;
+  font-weight: 600;
+}
 
 .form-2col {
   display: grid;
@@ -2408,7 +2499,6 @@ tbody tr:last-child td {
   margin-top: 20px;
   flex-wrap: wrap;
 }
-
 .modal-table-wrap {
   margin-top: 24px;
   border-radius: 12px;
@@ -2429,7 +2519,6 @@ tbody tr:last-child td {
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-/* profile */
 .profile-box {
   display: flex;
   gap: 20px;
@@ -2445,19 +2534,13 @@ tbody tr:last-child td {
   align-items: center;
   justify-content: center;
   font-size: 28px;
+  color: #14b8a6;
   flex-shrink: 0;
 }
 .profile-details {
   flex: 1;
 }
-.mfield p {
-  font-size: 15px;
-  color: #fff;
-  margin: 0;
-  font-weight: 600;
-}
 
-/* img preview */
 .img-preview {
   border-radius: 12px;
   overflow: hidden;
@@ -2471,7 +2554,6 @@ tbody tr:last-child td {
   display: block;
 }
 
-/* alerts */
 .success-alert {
   display: flex;
   align-items: center;
@@ -2499,9 +2581,6 @@ tbody tr:last-child td {
   margin-bottom: 16px;
 }
 
-/* ════════════════════════════════════════
-   TRANSITIONS
-════════════════════════════════════════ */
 .modal-fade-enter-active,
 .modal-fade-leave-active {
   transition: opacity 0.25s ease;
@@ -2540,11 +2619,6 @@ tbody tr:last-child td {
     transform: scale(1) translateY(0);
   }
 }
-
-/* ════════════════════════════════════════
-   SKELETON ANIMATIONS
-════════════════════════════════════════ */
-
 @keyframes shimmer {
   0% {
     background-position: 200% 0;
@@ -2554,9 +2628,6 @@ tbody tr:last-child td {
   }
 }
 
-/* ════════════════════════════════════════
-   RESPONSIVE
-════════════════════════════════════════ */
 @media (max-width: 768px) {
   .sidebar {
     position: fixed;
@@ -2592,7 +2663,6 @@ tbody tr:last-child td {
     flex-direction: column;
   }
 }
-
 @media (min-width: 769px) {
   .menu-btn {
     display: none !important;

@@ -11,6 +11,59 @@ import { useCommentStore } from '@/stores/comment'
 import { useAnnouncementStore } from '@/stores/announcement'
 import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import {
+  faChartBar,
+  faBullhorn,
+  faComments,
+  faUser,
+  faLock,
+  faDoorOpen,
+  faCreditCard,
+  faRightFromBracket,
+  faBars,
+  faBuilding,
+  faCheckCircle,
+  faHouse,
+  faMoneyBill,
+  faXmark,
+  faMobileAlt,
+  faTrash,
+  faFloppyDisk,
+  faBan,
+  faStar,
+  faTriangleExclamation,
+  faKey,
+  faSpinner,
+  faEnvelope,
+} from '@fortawesome/free-solid-svg-icons'
+
+library.add(
+  faChartBar,
+  faBullhorn,
+  faComments,
+  faUser,
+  faLock,
+  faDoorOpen,
+  faCreditCard,
+  faRightFromBracket,
+  faBars,
+  faBuilding,
+  faCheckCircle,
+  faHouse,
+  faMoneyBill,
+  faXmark,
+  faMobileAlt,
+  faTrash,
+  faFloppyDisk,
+  faBan,
+  faStar,
+  faTriangleExclamation,
+  faKey,
+  faSpinner,
+  faEnvelope,
+)
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -23,19 +76,16 @@ const announcementStore = useAnnouncementStore()
 
 const { totalRooms, roomsAvailableCount } = storeToRefs(roomStore)
 
-/* ── messages ── */
 const successLatePaymentReasonSubmissionMessage = ref('')
 const successCommentMessage = ref('')
 const successUpdateRoomStatus = ref('')
 const successPasswordResetMessage = ref('')
 
-/* ── logout ── */
 const logoutUser = () => {
   auth.logout()
   router.push('/login')
 }
 
-/* ── modals ── */
 const activeRoomsModal = ref(null)
 const activePaymentMethod = ref(null)
 const activeProfileModal = ref(null)
@@ -43,23 +93,17 @@ const activeCommentsModal = ref(null)
 const activeAnnouncementModal = ref(null)
 const activePasswordResetModal = ref(null)
 
-/* ── late payment reason ── */
 async function submitLateReason(payment) {
   if (latePaymentReasonStore.latePaymentReasons?.length >= 3) {
     alert('You have reached the maximum of 3 late payment submissions!')
     return
   }
-
   const reason_text = prompt(
     'Please enter your reason for late payment. Note: Max 3 submissions allowed.',
   )
-
   if (reason_text) {
-    await latePaymentReasonStore.registerLatePaymentReasons({
-      payment_id: payment.id,
-      reason_text: reason_text,
-    })
-    successLatePaymentReasonSubmissionMessage.value = '✅ Reason Submitted successfully!'
+    await latePaymentReasonStore.registerLatePaymentReasons({ payment_id: payment.id, reason_text })
+    successLatePaymentReasonSubmissionMessage.value = 'Reason submitted successfully!'
     setTimeout(() => {
       successLatePaymentReasonSubmissionMessage.value = ''
     }, 3000)
@@ -67,7 +111,6 @@ async function submitLateReason(payment) {
   }
 }
 
-/* ── payment form ── */
 const paymentForm = ref({
   room_id: '',
   month: '',
@@ -80,7 +123,7 @@ const paymentForm = ref({
 const savePayment = async () => {
   const response = await paymentStore.registerPayment(paymentForm.value)
   if (response) {
-    alert('✅ Payment registered successfully!')
+    alert('Payment registered successfully!')
     paymentForm.value = {
       room_id: '',
       month: '',
@@ -91,7 +134,7 @@ const savePayment = async () => {
     }
     await paymentStore.fetchPayments()
   } else {
-    alert('❌ Failed to register payment')
+    alert('Failed to register payment')
   }
 }
 
@@ -110,40 +153,28 @@ const months = [
   'December',
 ]
 
-/* ── rooms modal ── */
 const openRoomsModal = (modalName) => {
   activeRoomsModal.value = modalName
-  if (modalName === 'rooms') {
-    roomFetching()
-  }
+  if (modalName === 'rooms') roomFetching()
 }
-
 const closeRoomsModal = () => {
   activeRoomsModal.value = null
 }
-
 const roomFetching = async () => {
   await roomStore.fetchRooms()
   await roomStore.updateRoomStatus()
 }
-
-const isDisabled = (room) => {
-  return room.status === 'Occupied' && room.user_id !== auth.user?.id
-}
-
+const isDisabled = (room) => room.status === 'Occupied' && room.user_id !== auth.user?.id
 const confirmText = 'CONFIRMED'
-
 const confirmToggle = async (room, checked) => {
   if (room.status === 'Occupied' && room.user_id !== auth.user?.id) {
     alert('This room is already occupied by another user')
     return
   }
-
   const input = prompt(`Type "${confirmText}" to confirm`)
-
   if (input?.trim() === confirmText) {
     await updatingRoomStatus(room.id, checked)
-    successUpdateRoomStatus.value = '✅ Action Completed successfully!'
+    successUpdateRoomStatus.value = 'Action completed successfully!'
     setTimeout(() => {
       successUpdateRoomStatus.value = ''
     }, 3000)
@@ -152,80 +183,48 @@ const confirmToggle = async (room, checked) => {
     alert('Incorrect text. Action Cancelled')
   }
 }
+const updatingRoomStatus = async (id, checked) => await roomStore.updateRoomStatus(id, checked)
 
-const updatingRoomStatus = async (id, checked) => {
-  return await roomStore.updateRoomStatus(id, checked)
-}
-
-/* ── payment method modal ── */
 const openPaymentMethodModal = (ModalName) => {
   activePaymentMethod.value = ModalName
-  if (ModalName === 'paymentMethod') {
-    paymentMethodFetching()
-  }
+  if (ModalName === 'paymentMethod') paymentMethodFetching()
 }
-
 const closePaymentMethodModal = () => {
   activePaymentMethod.value = null
 }
+const paymentMethodFetching = async () => await paymentMethodStore.fetchPaymentMethods()
 
-const paymentMethodFetching = async () => {
-  await paymentMethodStore.fetchPaymentMethods()
-}
-
-/* ── profile modal ── */
 const openProfileModal = (ModalName) => {
   activeProfileModal.value = ModalName
-  if (ModalName === 'profile') {
-    profileFetching()
-  }
+  if (ModalName === 'profile') profileFetching()
 }
-
 const closeProfileModal = () => {
   activeProfileModal.value = null
 }
-
-const profileFetching = async () => {
-  await auth.fetchUser()
-}
-
+const profileFetching = async () => await auth.fetchUser()
 const updatingPhoneNumber = async (user) => {
   const newPhone = prompt('Enter new phone number:')
   if (!newPhone || !newPhone.trim()) return
   const response = await auth.updatePhoneNumber(user.id, newPhone)
   if (response) {
-    alert('✅ Phone number updated successfully!')
+    alert('Phone number updated successfully!')
     await auth.fetchUser()
-  } else {
-    alert(auth.error || '❌ Failed to update phone number')
-  }
+  } else alert(auth.error || 'Failed to update phone number')
 }
 
-/* ── comments modal ── */
 const openCommentsModal = (ModalName) => {
   activeCommentsModal.value = ModalName
-  if (ModalName === 'comments') {
-    commentFetching()
-  }
+  if (ModalName === 'comments') commentFetching()
 }
-
 const closeCommentsModal = () => {
   activeCommentsModal.value = null
 }
-
-const commentForm = ref({
-  comment: '',
-  rating: 5,
-})
-
-const commentFetching = async () => {
-  await commentStore.fetchComments()
-}
-
+const commentForm = ref({ comment: '', rating: 5 })
+const commentFetching = async () => await commentStore.fetchComments()
 const saveComment = async () => {
   const response = await commentStore.registerComments(commentForm.value)
   if (response) {
-    successCommentMessage.value = '✅ Comment added successfully!'
+    successCommentMessage.value = 'Comment added successfully!'
     commentForm.value.comment = ''
     commentForm.value.rating = 5
     setTimeout(() => {
@@ -234,97 +233,71 @@ const saveComment = async () => {
     await commentFetching()
   }
 }
-
 const deleteComment = async (id) => {
-  if (!confirm('⚠️ Delete this comment permanently?')) return
+  if (!confirm('Delete this comment permanently?')) return
   const res = await commentStore.deleteComment(id)
-  alert(res ? '✅ Comment deleted!' : '❌ Failed to delete comment')
+  alert(res ? 'Comment deleted!' : 'Failed to delete comment')
   await commentFetching()
 }
 
-/* ── announcements modal ── */
 const openAnnouncementModal = async (ModalName) => {
   activeAnnouncementModal.value = ModalName
   if (ModalName === 'announcements') {
     await announcementsFetching()
     const announcements = announcementStore.announcements
-    if (announcements.length > 0) {
-      const latest = announcements[0]
-      localStorage.setItem('lastSeenAnnouncementId', latest.id)
-    }
+    if (announcements.length > 0)
+      localStorage.setItem('lastSeenAnnouncementId', announcements[0].id)
   }
 }
-
 const closeAnnouncementsModal = () => {
   activeAnnouncementModal.value = null
 }
-
-const announcementsFetching = async () => {
-  await announcementStore.fetchAnnouncements()
-}
-
+const announcementsFetching = async () => await announcementStore.fetchAnnouncements()
 const hasNewAnnouncements = computed(() => {
   const announcements = announcementStore.announcements
   if (!announcements.length) return false
-  const latest = announcements[0]
-  const lastSeenId = localStorage.getItem('lastSeenAnnouncementId')
-  return String(latest.id) !== lastSeenId
+  return String(announcements[0].id) !== localStorage.getItem('lastSeenAnnouncementId')
 })
 
-/* ── password reset modal ── */
 const openPasswordResetModal = (ModalName) => {
   activePasswordResetModal.value = ModalName
-  if (ModalName === 'passwordReset') {
-    passwordResetForm.value.email = auth.user?.email || ''
-  }
+  if (ModalName === 'passwordReset') passwordResetForm.value.email = auth.user?.email || ''
 }
-
 const closePasswordResetModal = () => {
   activePasswordResetModal.value = null
   successPasswordResetMessage.value = ''
   passwordResetForm.value.email = ''
 }
-
 const passwordResetForm = ref({ email: '' })
-
 const sendPasswordResetLink = async () => {
   const response = await auth.requestPasswordReset(passwordResetForm.value.email)
   if (response) {
-    successPasswordResetMessage.value = '✅ Reset link sent!'
+    successPasswordResetMessage.value = 'Reset link sent!'
     setTimeout(() => closePasswordResetModal(), 3000)
   }
 }
 
-/* ── utils ── */
-const formatDate = (date) => {
-  if (!date) return ''
-  return new Date(date).toLocaleString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
+const formatDate = (date) =>
+  date
+    ? new Date(date).toLocaleString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : ''
 
-/* ── language ── */
 const { locale } = useI18n()
 const currentLocale = ref(locale.value)
-
 const setLanguage = (lang) => {
   locale.value = lang
   currentLocale.value = lang
 }
 
-/* ── sidebar ── */
 const isSidebarOpen = ref(false)
+const house = ref({ images: ['/assets/room1.jpg', '/assets/room2.jpg', '/assets/common.jpg'] })
 
-/* ── house gallery ── */
-const house = ref({
-  images: ['/assets/room1.jpg', '/assets/room2.jpg', '/assets/common.jpg'],
-})
-
-/* ── Skeleton loader switch variable ── */
 const paymentLoading = ref(true)
 onMounted(async () => {
   await auth.fetchUser()
@@ -334,10 +307,7 @@ onMounted(async () => {
   paymentLoading.value = false
   await paymentMethodStore.fetchPaymentMethods()
   await announcementStore.fetchAnnouncements()
-
-  if (announcementStore.announcements.length > 0) {
-    activeAnnouncementModal.value = 'announcements'
-  }
+  if (announcementStore.announcements.length > 0) activeAnnouncementModal.value = 'announcements'
 })
 </script>
 
@@ -352,77 +322,73 @@ onMounted(async () => {
 
       <nav class="sidebar-nav">
         <router-link to="/tenant" class="nav-item active">
-          <span class="ni">📊</span><span>{{ $t('dashboard') }}</span>
+          <font-awesome-icon icon="chart-bar" class="ni" /><span>{{ $t('dashboard') }}</span>
         </router-link>
-
         <a
           href="#"
           class="nav-item"
           :class="{ on: activeAnnouncementModal === 'announcements' }"
           @click.prevent="openAnnouncementModal('announcements')"
         >
-          <span class="ni">📢</span><span>{{ $t('Announcements') }}</span>
+          <font-awesome-icon icon="bullhorn" class="ni" /><span>{{ $t('Announcements') }}</span>
           <span v-if="hasNewAnnouncements" class="badge-new"></span>
         </a>
-
         <a
           href="#"
           class="nav-item"
           :class="{ on: activeCommentsModal === 'comments' }"
           @click.prevent="openCommentsModal('comments')"
         >
-          <span class="ni">💬</span><span>{{ $t('Comments') }}</span>
+          <font-awesome-icon icon="comments" class="ni" /><span>{{ $t('Comments') }}</span>
         </a>
-
         <a
           href="#"
           class="nav-item"
           :class="{ on: activeProfileModal === 'profile' }"
           @click.prevent="openProfileModal('profile')"
         >
-          <span class="ni">👤</span><span>{{ $t('profile') }}</span>
+          <font-awesome-icon icon="user" class="ni" /><span>{{ $t('profile') }}</span>
         </a>
-
         <a
           href="#"
           class="nav-item"
           :class="{ on: activePasswordResetModal === 'passwordReset' }"
           @click.prevent="openPasswordResetModal('passwordReset')"
         >
-          <span class="ni">🔒</span><span>{{ $t('resetPassword') }}</span>
+          <font-awesome-icon icon="lock" class="ni" /><span>{{ $t('resetPassword') }}</span>
         </a>
-
         <a
           href="#"
           class="nav-item"
           :class="{ on: activeRoomsModal === 'rooms' }"
           @click.prevent="openRoomsModal('rooms')"
         >
-          <span class="ni">🚪</span><span>{{ $t('viewRooms') }}</span>
+          <font-awesome-icon icon="door-open" class="ni" /><span>{{ $t('viewRooms') }}</span>
         </a>
-
         <a
           href="#"
           class="nav-item"
           :class="{ on: activePaymentMethod === 'paymentMethod' }"
           @click.prevent="openPaymentMethodModal('paymentMethod')"
         >
-          <span class="ni">💳</span><span>{{ $t('paymentMethods') }}</span>
+          <font-awesome-icon icon="credit-card" class="ni" /><span>{{ $t('paymentMethods') }}</span>
         </a>
       </nav>
 
-      <button class="sidebar-logout" @click="logoutUser"><span>🚪</span> {{ $t('logout') }}</button>
+      <button class="sidebar-logout" @click="logoutUser">
+        <font-awesome-icon icon="right-from-bracket" /> {{ $t('logout') }}
+      </button>
     </aside>
 
-    <!-- sidebar overlay (mobile) -->
     <div class="sidebar-overlay" v-if="isSidebarOpen" @click="isSidebarOpen = false"></div>
 
     <!-- ══════ MAIN ══════ -->
     <main class="dash-main">
-      <!-- ── hero banner ── -->
       <div class="hero-banner">
         <div class="hero-text">
-          <button class="menu-btn" @click="isSidebarOpen = !isSidebarOpen">☰</button>
+          <button class="menu-btn" @click="isSidebarOpen = !isSidebarOpen">
+            <font-awesome-icon icon="bars" />
+          </button>
           <div class="topbar-inner">
             <div>
               <div class="dash-badge"><span class="badge-dot"></span>Tenant Portal</div>
@@ -454,26 +420,25 @@ onMounted(async () => {
         </div>
       </div>
 
-      <!-- ── content wrapper ── -->
       <div class="main-body">
-        <!-- ── STATS ── -->
+        <!-- STATS -->
         <section class="stats-grid">
           <div class="stat-card">
-            <div class="stat-icon">🏢</div>
+            <div class="stat-icon"><font-awesome-icon icon="building" /></div>
             <div>
               <div class="stat-val">{{ totalRooms }}</div>
               <div class="stat-lbl">{{ $t('totalRooms') }}</div>
             </div>
           </div>
           <div class="stat-card green">
-            <div class="stat-icon">✅</div>
+            <div class="stat-icon"><font-awesome-icon icon="check-circle" /></div>
             <div>
               <div class="stat-val">{{ roomsAvailableCount }}</div>
               <div class="stat-lbl">{{ $t('availableRooms') }}</div>
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon">🏠</div>
+            <div class="stat-icon"><font-awesome-icon icon="house" /></div>
             <div>
               <div class="stat-val">
                 <span v-if="auth.user?.room">{{ auth.user.room.room_number }}</span>
@@ -483,7 +448,7 @@ onMounted(async () => {
             </div>
           </div>
           <div class="stat-card amber">
-            <div class="stat-icon">💰</div>
+            <div class="stat-icon"><font-awesome-icon icon="money-bill" /></div>
             <div>
               <div class="stat-val">{{ paymentStore.count_tenant_unpaid_payment || 0 }}</div>
               <div class="stat-lbl">{{ $t('paymentsDue') }}</div>
@@ -491,7 +456,7 @@ onMounted(async () => {
           </div>
         </section>
 
-        <!-- ── PAYMENT HISTORY ── -->
+        <!-- PAYMENT HISTORY -->
         <section class="glass-section">
           <div class="section-head">
             <div>
@@ -499,13 +464,12 @@ onMounted(async () => {
               <p class="sec-sub">{{ $t('yourPaymentHistory') }}</p>
             </div>
           </div>
-
           <Transition name="alert-pop">
             <div v-if="successLatePaymentReasonSubmissionMessage" class="success-alert">
+              <font-awesome-icon icon="check-circle" />
               {{ successLatePaymentReasonSubmissionMessage }}
             </div>
           </Transition>
-
           <div class="table-wrap">
             <div v-if="paymentLoading" class="payment-skeleton">
               <div class="skeleton"></div>
@@ -527,7 +491,10 @@ onMounted(async () => {
                   <td>{{ paymentStore.tenant_payment.due_date_formatted }}</td>
                   <td>
                     <span class="status-pill" :class="paymentStore.tenant_payment.status">
-                      <span v-if="paymentStore.tenant_payment.status === 'paid'">✅ </span>
+                      <font-awesome-icon
+                        v-if="paymentStore.tenant_payment.status === 'paid'"
+                        icon="check-circle"
+                      />
                       {{ paymentStore.tenant_payment.status }}
                     </span>
                   </td>
@@ -544,12 +511,12 @@ onMounted(async () => {
               </tbody>
             </table>
             <div v-else class="no-data">
-              {{ $t('noPaymentData') }}
+              <font-awesome-icon icon="ban" /> {{ $t('noPaymentData') }}
             </div>
           </div>
         </section>
 
-        <!-- ── HOUSE GALLERY ── -->
+        <!-- HOUSE GALLERY -->
         <section class="glass-section">
           <div class="section-head">
             <div>
@@ -559,12 +526,14 @@ onMounted(async () => {
           </div>
           <div class="gallery-grid">
             <div v-for="(img, idx) in house.images" :key="idx" class="gallery-card">
-              <div class="gallery-placeholder">🏠 Room {{ idx + 1 }}</div>
+              <div class="gallery-placeholder">
+                <font-awesome-icon icon="house" class="gallery-icon" /> Room {{ idx + 1 }}
+              </div>
             </div>
           </div>
         </section>
 
-        <!-- ── RULES ── -->
+        <!-- RULES -->
         <section class="glass-section">
           <div class="section-head">
             <div>
@@ -585,25 +554,23 @@ onMounted(async () => {
       </div>
     </main>
 
-    <!-- ════════════════════════════════════
-         MODALS
-    ════════════════════════════════════ -->
+    <!-- ══════ MODALS ══════ -->
 
     <!-- ROOMS MODAL -->
     <Transition name="modal-fade">
       <div v-if="activeRoomsModal === 'rooms'" class="modal-overlay" @click.self="closeRoomsModal">
         <div class="glass-modal large">
           <div class="modal-top">
-            <h3>{{ $t('viewRooms') }}</h3>
-            <button class="close-x" @click="closeRoomsModal">✕</button>
+            <h3><font-awesome-icon icon="door-open" /> {{ $t('viewRooms') }}</h3>
+            <button class="close-x" @click="closeRoomsModal">
+              <font-awesome-icon icon="xmark" />
+            </button>
           </div>
-
           <Transition name="alert-pop">
             <div v-if="successUpdateRoomStatus" class="success-alert">
-              {{ successUpdateRoomStatus }}
+              <font-awesome-icon icon="check-circle" /> {{ successUpdateRoomStatus }}
             </div>
           </Transition>
-
           <div class="modal-table-wrap">
             <h4 class="table-subtitle">{{ $t('existingRooms') }}</h4>
             <table>
@@ -655,15 +622,18 @@ onMounted(async () => {
       >
         <div class="glass-modal large">
           <div class="modal-top">
-            <h3>{{ $t('paymentMethodManagement') }}</h3>
-            <button class="close-x" @click="closePaymentMethodModal">✕</button>
+            <h3><font-awesome-icon icon="credit-card" /> {{ $t('paymentMethodManagement') }}</h3>
+            <button class="close-x" @click="closePaymentMethodModal">
+              <font-awesome-icon icon="xmark" />
+            </button>
           </div>
-
           <div class="payment-alert">
             {{ $t('method1Warning') }}<br />
-            <span style="color: #f87171">⚠️ {{ $t('method1ApprovalWarning') }}</span>
+            <span style="color: #f87171"
+              ><font-awesome-icon icon="triangle-exclamation" />
+              {{ $t('method1ApprovalWarning') }}</span
+            >
           </div>
-
           <div class="modal-table-wrap">
             <h4 class="table-subtitle">{{ $t('existingPaymentMethods') }}</h4>
             <table>
@@ -693,12 +663,9 @@ onMounted(async () => {
               </tbody>
             </table>
           </div>
-
           <hr class="divider" />
-
           <h4 class="section-subtitle">{{ $t('method2Title') }}</h4>
           <div class="payment-alert">{{ $t('method2Warning') }}</div>
-
           <form @submit.prevent="savePayment">
             <div class="form-2col">
               <div class="mfield">
@@ -711,8 +678,8 @@ onMounted(async () => {
                 </select>
               </div>
               <div class="mfield">
-                <label>{{ $t('Amount') }}</label>
-                <input v-model="paymentForm.amount" type="number" required placeholder="0" />
+                <label>{{ $t('Amount') }}</label
+                ><input v-model="paymentForm.amount" type="number" required placeholder="0" />
               </div>
               <div class="mfield">
                 <label>{{ $t('month') }}</label>
@@ -724,16 +691,18 @@ onMounted(async () => {
                 </select>
               </div>
               <div class="mfield">
-                <label>{{ $t('Year') }}</label>
-                <input v-model="paymentForm.year" type="number" required placeholder="2025" />
+                <label>{{ $t('Year') }}</label
+                ><input v-model="paymentForm.year" type="number" required placeholder="2025" />
               </div>
               <div class="mfield">
-                <label>{{ $t('Due Date') }}</label>
-                <input v-model="paymentForm.due_date" type="date" required />
+                <label>{{ $t('Due Date') }}</label
+                ><input v-model="paymentForm.due_date" type="date" required />
               </div>
             </div>
             <div class="modal-actions">
-              <button type="submit" class="btn-teal">{{ $t('Make Payment') }}</button>
+              <button type="submit" class="btn-teal">
+                <font-awesome-icon icon="floppy-disk" /> {{ $t('Make Payment') }}
+              </button>
             </div>
           </form>
         </div>
@@ -749,11 +718,13 @@ onMounted(async () => {
       >
         <div class="glass-modal">
           <div class="modal-top">
-            <h3>{{ $t('userProfile') }}</h3>
-            <button class="close-x" @click="closeProfileModal">✕</button>
+            <h3><font-awesome-icon icon="user" /> {{ $t('userProfile') }}</h3>
+            <button class="close-x" @click="closeProfileModal">
+              <font-awesome-icon icon="xmark" />
+            </button>
           </div>
           <div class="profile-box">
-            <div class="profile-avatar">👤</div>
+            <div class="profile-avatar"><font-awesome-icon icon="user" /></div>
             <div class="profile-details">
               <div class="mfield">
                 <label>{{ $t('Last Name') }}</label>
@@ -771,7 +742,7 @@ onMounted(async () => {
                   style="margin-top: 8px"
                   @click="updatingPhoneNumber(auth.user)"
                 >
-                  📱 {{ $t('updatePhone') }}
+                  <font-awesome-icon icon="mobile-alt" /> {{ $t('updatePhone') }}
                 </button>
               </div>
             </div>
@@ -789,20 +760,20 @@ onMounted(async () => {
       >
         <div class="glass-modal large">
           <div class="modal-top">
-            <h3>{{ $t('Comments') }}</h3>
-            <button class="close-x" @click="closeCommentsModal">✕</button>
+            <h3><font-awesome-icon icon="comments" /> {{ $t('Comments') }}</h3>
+            <button class="close-x" @click="closeCommentsModal">
+              <font-awesome-icon icon="xmark" />
+            </button>
           </div>
-
           <Transition name="alert-pop">
             <div v-if="successCommentMessage" class="success-alert">
-              {{ successCommentMessage }}
+              <font-awesome-icon icon="check-circle" /> {{ successCommentMessage }}
             </div>
           </Transition>
-
           <form @submit.prevent="saveComment">
             <div class="mfield">
-              <label>{{ $t('Comment') }}</label>
-              <textarea
+              <label>{{ $t('Comment') }}</label
+              ><textarea
                 v-model="commentForm.comment"
                 placeholder="Write your comment..."
                 required
@@ -815,13 +786,14 @@ onMounted(async () => {
               </select>
             </div>
             <div class="modal-actions">
-              <button type="submit" class="btn-teal">{{ $t('submit') }}</button>
+              <button type="submit" class="btn-teal">
+                <font-awesome-icon icon="floppy-disk" /> {{ $t('submit') }}
+              </button>
               <button type="button" class="btn-ghost" @click="closeCommentsModal">
                 {{ $t('close') }}
               </button>
             </div>
           </form>
-
           <div class="modal-table-wrap">
             <h4 class="table-subtitle">{{ $t('All Comments') }}</h4>
             <table>
@@ -840,16 +812,16 @@ onMounted(async () => {
                   <td class="idx">{{ index + 1 }}</td>
                   <td>{{ comment.user?.last_name || 'N/A' }}</td>
                   <td>{{ comment?.comment }}</td>
-                  <td>{{ comment?.rating }} ⭐</td>
+                  <td>{{ comment?.rating }} <font-awesome-icon icon="star" class="star-icon" /></td>
                   <td>{{ formatDate(comment.created_at) }}</td>
                   <td>
                     <button class="btn-del" @click="deleteComment(comment.id)">
-                      {{ $t('delete') }}
+                      <font-awesome-icon icon="trash" /> {{ $t('delete') }}
                     </button>
                   </td>
                 </tr>
                 <tr v-if="!commentStore.comments.length">
-                  <td colspan="6" class="no-data">🚫 No Comments</td>
+                  <td colspan="6" class="no-data"><font-awesome-icon icon="ban" /> No Comments</td>
                 </tr>
               </tbody>
             </table>
@@ -867,13 +839,14 @@ onMounted(async () => {
       >
         <div class="glass-modal large">
           <div class="modal-top">
-            <h3>{{ $t('announcements') }}</h3>
-            <button class="close-x" @click="closeAnnouncementsModal">✕</button>
+            <h3><font-awesome-icon icon="bullhorn" /> {{ $t('announcements') }}</h3>
+            <button class="close-x" @click="closeAnnouncementsModal">
+              <font-awesome-icon icon="xmark" />
+            </button>
           </div>
-
           <div class="announcements-list">
             <div v-if="!announcementStore.announcements.length" class="no-data">
-              🚫 {{ $t('noAnnouncements') }}
+              <font-awesome-icon icon="ban" /> {{ $t('noAnnouncements') }}
             </div>
             <div
               v-for="(announcement, index) in announcementStore.announcements"
@@ -901,25 +874,26 @@ onMounted(async () => {
       >
         <div class="glass-modal">
           <div class="modal-top">
-            <h3>{{ $t('resetPasswordTitle') }}</h3>
-            <button class="close-x" @click="closePasswordResetModal">✕</button>
+            <h3><font-awesome-icon icon="key" /> {{ $t('resetPasswordTitle') }}</h3>
+            <button class="close-x" @click="closePasswordResetModal">
+              <font-awesome-icon icon="xmark" />
+            </button>
           </div>
-
           <Transition name="alert-pop">
             <div v-if="successPasswordResetMessage" class="success-alert">
-              {{ successPasswordResetMessage }}
+              <font-awesome-icon icon="check-circle" /> {{ successPasswordResetMessage }}
             </div>
           </Transition>
           <Transition name="alert-pop">
-            <div v-if="auth.error" class="error-alert">{{ auth.error }}</div>
+            <div v-if="auth.error" class="error-alert">
+              <font-awesome-icon icon="triangle-exclamation" /> {{ auth.error }}
+            </div>
           </Transition>
-
           <p class="modal-desc">{{ $t('resetPasswordDescription') }}</p>
-
           <form @submit.prevent="sendPasswordResetLink">
             <div class="mfield">
-              <label>{{ $t('email') }}</label>
-              <input
+              <label>{{ $t('email') }}</label
+              ><input
                 v-model="passwordResetForm.email"
                 type="email"
                 :placeholder="$t('email')"
@@ -928,6 +902,10 @@ onMounted(async () => {
             </div>
             <div class="modal-actions">
               <button type="submit" class="btn-teal" :disabled="auth.loading">
+                <font-awesome-icon
+                  :icon="auth.loading ? 'spinner' : 'envelope'"
+                  :spin="auth.loading"
+                />
                 {{ auth.loading ? 'Sending...' : $t('sendResetLink') }}
               </button>
               <button type="button" class="btn-ghost" @click="closePasswordResetModal">
@@ -948,13 +926,9 @@ onMounted(async () => {
   box-sizing: border-box;
 }
 
-/* ════════════════════════════════════════
-   PAYMENT HISTORY SKELETON
-════════════════════════════════════════ */
 .payment-skeleton {
   padding: 20px;
 }
-
 .skeleton {
   height: 45px;
   margin-bottom: 12px;
@@ -969,10 +943,6 @@ onMounted(async () => {
   animation: shimmer 1.2s infinite;
 }
 
-
-/* ════════════════════════════════════════
-   SHELL
-════════════════════════════════════════ */
 .dash-shell {
   display: flex;
   min-height: 100vh;
@@ -981,9 +951,6 @@ onMounted(async () => {
   color: #fff;
 }
 
-/* ════════════════════════════════════════
-   SIDEBAR
-════════════════════════════════════════ */
 .sidebar {
   width: 230px;
   flex-shrink: 0;
@@ -999,7 +966,6 @@ onMounted(async () => {
   transition: transform 0.3s ease;
   backdrop-filter: blur(12px);
 }
-
 .sidebar-logo {
   display: flex;
   align-items: center;
@@ -1011,7 +977,6 @@ onMounted(async () => {
   padding: 0 4px;
   letter-spacing: 0.04em;
 }
-
 .logo-dot {
   width: 10px;
   height: 10px;
@@ -1020,7 +985,6 @@ onMounted(async () => {
   box-shadow: 0 0 10px #14b8a6;
   animation: logoPulse 2s ease-in-out infinite;
 }
-
 .badge-new {
   width: 8px;
   height: 8px;
@@ -1029,7 +993,6 @@ onMounted(async () => {
   margin-left: 8px;
   box-shadow: 0 0 6px #ef4444;
 }
-
 @keyframes logoPulse {
   0%,
   100% {
@@ -1048,7 +1011,6 @@ onMounted(async () => {
   gap: 4px;
   flex: 1;
 }
-
 .nav-item {
   display: flex;
   align-items: center;
@@ -1067,7 +1029,6 @@ onMounted(async () => {
   text-align: left;
   position: relative;
 }
-
 .nav-item:hover,
 .nav-item.on,
 .nav-item.active {
@@ -1076,10 +1037,11 @@ onMounted(async () => {
   border-left: 2px solid #14b8a6;
   padding-left: 10px;
 }
-
 .ni {
-  font-size: 16px;
+  font-size: 15px;
   flex-shrink: 0;
+  width: 18px;
+  text-align: center;
 }
 
 .sidebar-logout {
@@ -1098,12 +1060,10 @@ onMounted(async () => {
   font-family: inherit;
   margin-top: 16px;
 }
-
 .sidebar-logout:hover {
   background: rgba(239, 68, 68, 0.2);
   transform: translateY(-2px);
 }
-
 .sidebar-overlay {
   position: fixed;
   inset: 0;
@@ -1112,9 +1072,6 @@ onMounted(async () => {
   backdrop-filter: blur(4px);
 }
 
-/* ════════════════════════════════════════
-   MAIN
-════════════════════════════════════════ */
 .dash-main {
   flex: 1;
   min-width: 0;
@@ -1122,7 +1079,6 @@ onMounted(async () => {
   flex-direction: column;
 }
 
-/* ── HERO BANNER ── */
 .hero-banner {
   position: relative;
   overflow: hidden;
@@ -1130,7 +1086,6 @@ onMounted(async () => {
   flex-shrink: 0;
   background: linear-gradient(135deg, #0a1428 0%, #020810 100%);
 }
-
 .hero-text {
   position: absolute;
   inset: 0;
@@ -1139,7 +1094,6 @@ onMounted(async () => {
   flex-direction: column;
   padding: 16px 24px;
 }
-
 .menu-btn {
   background: rgba(20, 184, 166, 0.15);
   border: 1px solid rgba(20, 184, 166, 0.3);
@@ -1156,18 +1110,15 @@ onMounted(async () => {
   margin-bottom: 12px;
   flex-shrink: 0;
 }
-
 .menu-btn:hover {
   background: rgba(20, 184, 166, 0.25);
 }
-
 .topbar-inner {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   flex: 1;
 }
-
 .dash-badge {
   display: inline-flex;
   align-items: center;
@@ -1183,31 +1134,33 @@ onMounted(async () => {
   text-transform: uppercase;
   margin-bottom: 8px;
 }
-
+.badge-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #14b8a6;
+  animation: logoPulse 1.6s ease-in-out infinite;
+}
 .dash-title {
   font-size: clamp(1.4rem, 3vw, 2rem);
   font-weight: 900;
   line-height: 1.1;
   margin-bottom: 4px;
 }
-
 .dash-sub {
   font-size: 13px;
   color: rgba(255, 255, 255, 0.55);
 }
-
 .topbar-right {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 8px;
 }
-
 .lang-row {
   display: flex;
   gap: 6px;
 }
-
 .lbtn {
   padding: 5px 14px;
   border-radius: 20px;
@@ -1220,7 +1173,6 @@ onMounted(async () => {
   font-family: inherit;
   transition: 0.2s;
 }
-
 .lbtn.on,
 .lbtn:hover {
   background: #0f766e;
@@ -1229,7 +1181,6 @@ onMounted(async () => {
   transform: translateY(-1px);
 }
 
-/* ── MAIN BODY ── */
 .main-body {
   padding: 24px;
   display: flex;
@@ -1237,13 +1188,11 @@ onMounted(async () => {
   gap: 24px;
 }
 
-/* ── STATS ── */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 16px;
 }
-
 .stat-card {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1255,42 +1204,37 @@ onMounted(async () => {
   transition: 0.3s;
   border-left: 3px solid rgba(20, 184, 166, 0.4);
 }
-
 .stat-card:hover {
   transform: translateY(-5px) rotateX(4deg);
   background: rgba(20, 184, 166, 0.07);
   border-color: rgba(20, 184, 166, 0.35);
   box-shadow: 0 12px 35px rgba(20, 184, 166, 0.12);
 }
-
 .stat-card.green {
   border-left-color: rgba(34, 197, 94, 0.5);
 }
-
 .stat-card.green:hover {
   background: rgba(34, 197, 94, 0.06);
 }
-
 .stat-card.amber {
   border-left-color: rgba(245, 158, 11, 0.5);
 }
-
 .stat-card.amber:hover {
   background: rgba(245, 158, 11, 0.06);
 }
-
 .stat-icon {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   flex-shrink: 0;
+  color: #14b8a6;
+  width: 36px;
+  text-align: center;
 }
-
 .stat-val {
   font-size: clamp(1rem, 3vw, 1.4rem);
   font-weight: 900;
   color: #fff;
   line-height: 1;
 }
-
 .stat-lbl {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.45);
@@ -1299,7 +1243,6 @@ onMounted(async () => {
   margin-top: 4px;
 }
 
-/* ── GLASS SECTIONS ── */
 .glass-section {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.07);
@@ -1307,7 +1250,6 @@ onMounted(async () => {
   padding: 24px;
   backdrop-filter: blur(8px);
 }
-
 .glass-section::before {
   content: '';
   display: block;
@@ -1316,7 +1258,6 @@ onMounted(async () => {
   margin-bottom: 20px;
   border-radius: 50%;
 }
-
 .section-head {
   display: flex;
   justify-content: space-between;
@@ -1324,35 +1265,29 @@ onMounted(async () => {
   gap: 16px;
   margin-bottom: 20px;
 }
-
 .sec-title {
   font-size: 1.1rem;
   font-weight: 800;
   margin-bottom: 2px;
 }
-
 .sec-sub {
   font-size: 12px;
   color: rgba(255, 255, 255, 0.4);
 }
 
-/* ── TABLE ── */
 .table-wrap {
   overflow-x: auto;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.07);
 }
-
 table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
 }
-
 thead tr {
   background: rgba(20, 184, 166, 0.06);
 }
-
 th {
   padding: 11px 14px;
   font-size: 11px;
@@ -1364,36 +1299,32 @@ th {
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   white-space: nowrap;
 }
-
 td {
   padding: 11px 14px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   color: rgba(255, 255, 255, 0.85);
   vertical-align: middle;
 }
-
 tbody tr:hover {
   background: rgba(20, 184, 166, 0.04);
 }
-
 tbody tr:last-child td {
   border-bottom: none;
 }
-
 .idx {
   color: rgba(255, 255, 255, 0.3);
   font-size: 12px;
 }
-
 .no-data {
   text-align: center;
   padding: 24px;
   color: rgba(255, 255, 255, 0.3);
 }
 
-/* pills */
 .status-pill {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   padding: 3px 10px;
   border-radius: 20px;
   font-size: 11px;
@@ -1401,34 +1332,29 @@ tbody tr:last-child td {
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
-
 .status-pill.paid {
   background: rgba(34, 197, 94, 0.15);
   color: #4ade80;
   border: 1px solid rgba(34, 197, 94, 0.3);
 }
-
 .status-pill.unpaid,
 .status-pill.pending {
   background: rgba(239, 68, 68, 0.15);
   color: #f87171;
   border: 1px solid rgba(239, 68, 68, 0.3);
 }
-
 .status-pill.occupied,
 .status-pill.Occupied {
   background: rgba(245, 158, 11, 0.15);
   color: #fbbf24;
   border: 1px solid rgba(245, 158, 11, 0.3);
 }
-
 .status-pill.available,
 .status-pill.Available {
   background: rgba(34, 197, 94, 0.15);
   color: #4ade80;
   border: 1px solid rgba(34, 197, 94, 0.3);
 }
-
 .status-pill.maintenance,
 .status-pill.Maintenance {
   background: rgba(239, 68, 68, 0.15);
@@ -1436,8 +1362,10 @@ tbody tr:last-child td {
   border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
-/* buttons */
 .btn-teal {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   padding: 9px 20px;
   border-radius: 50px;
   border: none;
@@ -1451,42 +1379,38 @@ tbody tr:last-child td {
   white-space: nowrap;
   flex-shrink: 0;
 }
-
 .btn-teal:hover {
   transform: translateY(-3px) scale(1.04);
   box-shadow: 0 10px 28px rgba(20, 184, 166, 0.4);
 }
-
 .btn-teal:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
 }
-
 .btn-sm {
   padding: 5px 12px;
   border-radius: 7px;
-  border: none;
+  border: 1px solid rgba(20, 184, 166, 0.25);
   background: rgba(20, 184, 166, 0.12);
   color: #14b8a6;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  border: 1px solid rgba(20, 184, 166, 0.25);
   transition: 0.2s;
   font-family: inherit;
 }
-
 .btn-sm:hover {
   background: rgba(20, 184, 166, 0.22);
 }
-
 .btn-sm:disabled {
   opacity: 0.35;
   cursor: not-allowed;
 }
-
 .btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   padding: 9px 20px;
   border-radius: 50px;
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -1498,13 +1422,14 @@ tbody tr:last-child td {
   transition: 0.2s;
   font-family: inherit;
 }
-
 .btn-ghost:hover {
   background: rgba(255, 255, 255, 0.08);
   color: #fff;
 }
-
 .btn-del {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   padding: 5px 12px;
   border-radius: 7px;
   background: rgba(239, 68, 68, 0.12);
@@ -1516,19 +1441,21 @@ tbody tr:last-child td {
   transition: 0.2s;
   font-family: inherit;
 }
-
 .btn-del:hover {
   background: rgba(239, 68, 68, 0.22);
   transform: translateY(-1px);
 }
 
-/* gallery */
+.star-icon {
+  color: #fbbf24;
+  font-size: 11px;
+}
+
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 16px;
 }
-
 .gallery-card {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 12px;
@@ -1539,19 +1466,23 @@ tbody tr:last-child td {
   justify-content: center;
   transition: 0.3s;
 }
-
 .gallery-card:hover {
   transform: translateY(-5px);
   border-color: rgba(20, 184, 166, 0.3);
   background: rgba(20, 184, 166, 0.05);
 }
-
 .gallery-placeholder {
   color: rgba(255, 255, 255, 0.4);
   font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.gallery-icon {
+  color: rgba(20, 184, 166, 0.6);
+  font-size: 1.2rem;
 }
 
-/* rules list */
 .rules-list {
   list-style: none;
   padding: 0;
@@ -1559,7 +1490,6 @@ tbody tr:last-child td {
   flex-direction: column;
   gap: 10px;
 }
-
 .rules-list li {
   padding: 12px 16px;
   border-radius: 10px;
@@ -1570,15 +1500,11 @@ tbody tr:last-child td {
   border-left: 3px solid rgba(20, 184, 166, 0.4);
   transition: 0.2s;
 }
-
 .rules-list li:hover {
   background: rgba(20, 184, 166, 0.05);
   color: #fff;
 }
 
-/* ════════════════════════════════════════
-   MODALS
-════════════════════════════════════════ */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -1590,7 +1516,6 @@ tbody tr:last-child td {
   z-index: 2000;
   padding: 20px;
 }
-
 .glass-modal {
   background: rgba(10, 20, 35, 0.92);
   border: 1px solid rgba(20, 184, 166, 0.2);
@@ -1606,7 +1531,6 @@ tbody tr:last-child td {
     0 30px 80px rgba(0, 0, 0, 0.6),
     0 0 60px rgba(20, 184, 166, 0.07);
 }
-
 .glass-modal::before {
   content: '';
   position: absolute;
@@ -1616,24 +1540,23 @@ tbody tr:last-child td {
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(20, 184, 166, 0.5), transparent);
 }
-
 .glass-modal.large {
   max-width: 1000px;
 }
-
 .modal-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
-
 .modal-top h3 {
   font-size: 1.1rem;
   font-weight: 800;
   color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-
 .close-x {
   width: 30px;
   height: 30px;
@@ -1649,13 +1572,11 @@ tbody tr:last-child td {
   transition: 0.2s;
   flex-shrink: 0;
 }
-
 .close-x:hover {
   background: rgba(239, 68, 68, 0.15);
   color: #f87171;
   border-color: rgba(239, 68, 68, 0.3);
 }
-
 .modal-desc {
   font-size: 13px;
   color: rgba(255, 255, 255, 0.5);
@@ -1664,8 +1585,8 @@ tbody tr:last-child td {
 
 .mfield {
   min-width: 0;
+  margin-bottom: 14px;
 }
-
 .mfield label {
   display: block;
   font-size: 11px;
@@ -1675,7 +1596,6 @@ tbody tr:last-child td {
   text-transform: uppercase;
   margin-bottom: 7px;
 }
-
 .mfield input,
 .mfield textarea,
 .mfield select {
@@ -1692,12 +1612,10 @@ tbody tr:last-child td {
     background 0.2s;
   outline: none;
 }
-
 .mfield input::placeholder,
 .mfield textarea::placeholder {
   color: rgba(255, 255, 255, 0.25);
 }
-
 .mfield input:focus,
 .mfield textarea:focus,
 .mfield select:focus {
@@ -1705,15 +1623,19 @@ tbody tr:last-child td {
   background: rgba(20, 184, 166, 0.06);
   box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
 }
-
 .mfield textarea {
   resize: vertical;
   min-height: 90px;
 }
-
 .mfield select option {
   background: #0a1428;
   color: #fff;
+}
+.mfield p {
+  font-size: 15px;
+  color: #fff;
+  margin: 0;
+  font-weight: 600;
 }
 
 .form-2col {
@@ -1722,7 +1644,6 @@ tbody tr:last-child td {
   gap: 16px;
   align-items: start;
 }
-
 @media (max-width: 560px) {
   .form-2col {
     grid-template-columns: 1fr;
@@ -1736,7 +1657,6 @@ tbody tr:last-child td {
   margin-top: 20px;
   flex-wrap: wrap;
 }
-
 .modal-table-wrap {
   margin-top: 24px;
   border-radius: 12px;
@@ -1746,7 +1666,6 @@ tbody tr:last-child td {
   overflow-y: auto;
   overflow-x: auto;
 }
-
 .table-subtitle {
   padding: 10px 14px;
   font-size: 12px;
@@ -1762,14 +1681,12 @@ tbody tr:last-child td {
   margin: 20px 0;
   border-color: rgba(255, 255, 255, 0.1);
 }
-
 .section-subtitle {
   font-size: 1rem;
   font-weight: 700;
   color: #14b8a6;
   margin-bottom: 12px;
 }
-
 .payment-alert {
   background: rgba(245, 158, 11, 0.1);
   border: 1px solid rgba(245, 158, 11, 0.3);
@@ -1780,13 +1697,11 @@ tbody tr:last-child td {
   margin: 10px 0;
 }
 
-/* profile */
 .profile-box {
   display: flex;
   gap: 20px;
   align-items: flex-start;
 }
-
 .profile-avatar {
   width: 72px;
   height: 72px;
@@ -1797,26 +1712,17 @@ tbody tr:last-child td {
   align-items: center;
   justify-content: center;
   font-size: 28px;
+  color: #14b8a6;
   flex-shrink: 0;
 }
-
 .profile-details {
   flex: 1;
 }
 
-.mfield p {
-  font-size: 15px;
-  color: #fff;
-  margin: 0;
-  font-weight: 600;
-}
-
-/* announcements */
 .announcements-list {
   max-height: 60vh;
   overflow-y: auto;
 }
-
 .message-card {
   background: rgba(255, 255, 255, 0.04);
   border-radius: 12px;
@@ -1825,12 +1731,10 @@ tbody tr:last-child td {
   border: 1px solid rgba(255, 255, 255, 0.06);
   transition: 0.2s;
 }
-
 .message-card:hover {
   background: rgba(20, 184, 166, 0.05);
   border-color: rgba(20, 184, 166, 0.2);
 }
-
 .message-header {
   display: flex;
   justify-content: space-between;
@@ -1838,22 +1742,22 @@ tbody tr:last-child td {
   color: rgba(255, 255, 255, 0.4);
   margin-bottom: 8px;
 }
-
 .message-title {
   font-weight: 700;
   font-size: 15px;
   margin-bottom: 6px;
   color: #14b8a6;
 }
-
 .message-body {
   font-size: 13px;
   color: rgba(255, 255, 255, 0.7);
   line-height: 1.5;
 }
 
-/* alerts */
 .success-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   background: rgba(20, 184, 166, 0.1);
   border: 1px solid rgba(20, 184, 166, 0.3);
   color: #5dcaa5;
@@ -1863,8 +1767,10 @@ tbody tr:last-child td {
   font-weight: 500;
   margin-bottom: 16px;
 }
-
 .error-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
   color: #fca5a5;
@@ -1875,28 +1781,21 @@ tbody tr:last-child td {
   margin-bottom: 16px;
 }
 
-/* ════════════════════════════════════════
-   TRANSITIONS
-════════════════════════════════════════ */
 .modal-fade-enter-active,
 .modal-fade-leave-active {
   transition: opacity 0.25s ease;
 }
-
 .modal-fade-enter-from,
 .modal-fade-leave-to {
   opacity: 0;
 }
-
 .modal-fade-enter-active .glass-modal,
 .modal-fade-leave-active .glass-modal {
   transition: transform 0.25s ease;
 }
-
 .modal-fade-enter-from .glass-modal {
   transform: scale(0.92) translateY(20px);
 }
-
 .modal-fade-leave-to .glass-modal {
   transform: scale(0.95) translateY(10px);
 }
@@ -1904,15 +1803,12 @@ tbody tr:last-child td {
 .alert-pop-enter-active {
   animation: alertPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-
 .alert-pop-leave-active {
   transition: opacity 0.2s ease;
 }
-
 .alert-pop-leave-to {
   opacity: 0;
 }
-
 @keyframes alertPop {
   from {
     opacity: 0;
@@ -1923,10 +1819,15 @@ tbody tr:last-child td {
     transform: scale(1) translateY(0);
   }
 }
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
 
-/* ════════════════════════════════════════
-   RESPONSIVE
-════════════════════════════════════════ */
 @media (max-width: 768px) {
   .sidebar {
     position: fixed;
@@ -1962,20 +1863,6 @@ tbody tr:last-child td {
     flex-direction: column;
   }
 }
-
-
-/* ════════════════════════════════════════
-   ANIMATIONS FOR SKELETON LOADING
-════════════════════════════════════════ */
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
-}
-
 @media (min-width: 769px) {
   .menu-btn {
     display: none !important;

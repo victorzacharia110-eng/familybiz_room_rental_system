@@ -3,6 +3,18 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useI18n } from 'vue-i18n'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import {
+  faEnvelope,
+  faLock,
+  faCheckCircle,
+  faExclamationTriangle,
+  faArrowLeft,
+  faSpinner,
+} from '@fortawesome/free-solid-svg-icons'
+
+library.add(faEnvelope, faLock, faCheckCircle, faExclamationTriangle, faArrowLeft, faSpinner)
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -346,7 +358,9 @@ onUnmounted(() => cancelAnimationFrame(rafId))
       </div>
 
       <!-- icon -->
-      <div class="lock-icon">🔐</div>
+      <div class="lock-icon">
+        <font-awesome-icon icon="lock" />
+      </div>
 
       <!-- heading -->
       <h2 class="card-title">{{ $t('resetPasswordTitle') || 'Reset Password' }}</h2>
@@ -357,19 +371,19 @@ onUnmounted(() => cancelAnimationFrame(rafId))
       <!-- alerts -->
       <Transition name="shake-fade">
         <div v-if="successMessage" class="alert success-alert">
-          <span>✅</span><span>{{ successMessage }}</span>
+          <font-awesome-icon icon="check-circle" /><span>{{ successMessage }}</span>
         </div>
       </Transition>
       <Transition name="shake-fade">
         <div v-if="errorMessage" class="alert error-alert">
-          <span>⚠️</span><span>{{ errorMessage }}</span>
+          <font-awesome-icon icon="exclamation-triangle" /><span>{{ errorMessage }}</span>
         </div>
       </Transition>
 
       <!-- FORM -->
       <form @submit.prevent="submit" novalidate>
         <div class="field">
-          <label>✉️ {{ $t('Email') }}</label>
+          <label><font-awesome-icon icon="envelope" /> {{ $t('Email') }}</label>
           <div class="input-wrap">
             <input
               v-model="form.email"
@@ -382,9 +396,11 @@ onUnmounted(() => cancelAnimationFrame(rafId))
         </div>
 
         <button type="submit" class="btn-submit" :disabled="auth.loading">
-          <span v-if="!auth.loading">📧 {{ $t('sendResetLink') || 'Send Reset Link' }}</span>
+          <span v-if="!auth.loading">
+            <font-awesome-icon icon="envelope" /> {{ $t('sendResetLink') || 'Send Reset Link' }}
+          </span>
           <span v-else class="btn-loading">
-            <span class="btn-spinner"></span>
+            <font-awesome-icon icon="spinner" spin class="btn-spinner-icon" />
             <span>Sending...</span>
           </span>
         </button>
@@ -399,9 +415,9 @@ onUnmounted(() => cancelAnimationFrame(rafId))
       </Transition>
 
       <div class="auth-links">
-        <router-link to="/login" class="link-back"
-          >← {{ $t('Login') || 'Back to Login' }}</router-link
-        >
+        <router-link to="/login" class="link-back">
+          <font-awesome-icon icon="arrow-left" /> {{ $t('Login') || 'Back to Login' }}
+        </router-link>
       </div>
     </div>
   </div>
@@ -648,6 +664,7 @@ onUnmounted(() => cancelAnimationFrame(rafId))
   font-size: 2.8rem;
   margin-bottom: 12px;
   animation: iconBounce 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both 0.25s;
+  color: #14b8a6;
 }
 @keyframes iconBounce {
   from {
@@ -719,6 +736,9 @@ onUnmounted(() => cancelAnimationFrame(rafId))
   border: 1px solid rgba(220, 38, 38, 0.35);
   color: #fca5a5;
 }
+.alert svg {
+  flex-shrink: 0;
+}
 
 /* field */
 .field {
@@ -733,6 +753,10 @@ label {
   margin-bottom: 8px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
+}
+label svg {
+  margin-right: 4px;
+  font-size: 11px;
 }
 .input-wrap {
   position: relative;
@@ -812,13 +836,8 @@ label {
 }
 
 /* spinners */
-.btn-spinner {
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
-  border-radius: 50%;
+.btn-spinner-icon {
+  font-size: 18px;
   animation: spin 0.8s linear infinite;
 }
 .mini-spin {
@@ -862,9 +881,15 @@ label {
   text-decoration: none;
   transition: color 0.2s;
   font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 .link-back:hover {
   color: #14b8a6;
+}
+.link-back svg {
+  font-size: 11px;
 }
 
 /* transitions */
