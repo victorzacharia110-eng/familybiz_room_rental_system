@@ -11,9 +11,25 @@ import {
   faPhone,
   faHouse,
   faMapLocationDot,
+  faCompass,
+  faTaxi,
+  faEnvelope,
+  faMapPin,
 } from '@fortawesome/free-solid-svg-icons'
 
-library.add(faLocationDot, faShield, faDroplet, faMoneyBill, faPhone, faHouse, faMapLocationDot)
+library.add(
+  faLocationDot,
+  faShield,
+  faDroplet,
+  faMoneyBill,
+  faPhone,
+  faHouse,
+  faMapLocationDot,
+  faCompass,
+  faTaxi,
+  faEnvelope,
+  faMapPin,
+)
 
 const { t, locale } = useI18n()
 
@@ -30,6 +46,7 @@ const handleAuthClick = () => {
   }, 2000)
 }
 
+/* ─── FEATURES ─── */
 const currentFeature = ref(0)
 const features = [
   {
@@ -63,6 +80,7 @@ const features = [
   },
 ]
 
+/* ─── STATS ─── */
 const stats = [
   { target: 120, label: 'Happy Tenants' },
   { target: 5, label: 'Years Running' },
@@ -70,6 +88,7 @@ const stats = [
   { target: 24, label: 'Hr Security' },
 ]
 
+/* ─── REFS ─── */
 const heroSection = ref(null)
 const bgCanvas = ref(null)
 const cubesWrapper = ref(null)
@@ -79,6 +98,9 @@ let resizeTimer = null
 let ioInstance = null
 let autoInterval = null
 
+/* ════════════════════════════════════════
+   STAR-FIELD CANVAS
+════════════════════════════════════════ */
 function initCanvas() {
   const canvas = bgCanvas.value
   if (!canvas) return
@@ -117,6 +139,7 @@ function initCanvas() {
     })
     rafId = requestAnimationFrame(draw)
   }
+
   size()
   draw()
   window.addEventListener('resize', () => {
@@ -125,33 +148,47 @@ function initCanvas() {
   })
 }
 
+/* ════════════════════════════════════════
+   CSS 3D FLOATING CUBES
+════════════════════════════════════════ */
 function buildCubes() {
   const container = cubesWrapper.value
   if (!container) return
   container.innerHTML = ''
+
   for (let i = 0; i < 8; i++) {
-    const size = 20 + Math.random() * 30,
-      hw = size / 2
+    const size = 20 + Math.random() * 30
+    const left = Math.random() * 90
+    const top = Math.random() * 90
+    const dur = 6 + Math.random() * 8
+    const delay = Math.random() * 6
+    const hw = size / 2
+
     const cube = document.createElement('div')
     cube.className = 'cube'
-    cube.style.cssText =
-      `left:${Math.random() * 90}%;top:${Math.random() * 90}%;width:${size}px;height:${size}px;animation-duration:${6 + Math.random() * 8}s;animation-delay:-${Math.random() * 6}s;transform-style:preserve-3d`[
-        (`translateZ(${hw}px)`,
-        `translateZ(-${hw}px) rotateY(180deg)`,
-        `translateX(${hw}px) rotateY(90deg)`,
-        `translateX(-${hw}px) rotateY(-90deg)`,
-        `translateY(-${hw}px) rotateX(90deg)`,
-        `translateY(${hw}px) rotateX(-90deg)`)
-      ].forEach((tf) => {
-        const face = document.createElement('div')
-        face.className = 'cube-face'
-        face.style.cssText = `width:${size}px;height:${size}px;position:absolute;transform:${tf};border:1px solid rgba(20,184,166,${0.15 + Math.random() * 0.2});background:rgba(20,184,166,.03)`
-        cube.appendChild(face)
-      })
+    cube.style.cssText = `left:${left}%;top:${top}%;width:${size}px;height:${size}px;animation-duration:${dur}s;animation-delay:-${delay}s;transform-style:preserve-3d`
+
+    const transforms = [
+      `translateZ(${hw}px)`,
+      `translateZ(-${hw}px) rotateY(180deg)`,
+      `translateX(${hw}px) rotateY(90deg)`,
+      `translateX(-${hw}px) rotateY(-90deg)`,
+      `translateY(-${hw}px) rotateX(90deg)`,
+      `translateY(${hw}px) rotateX(-90deg)`,
+    ]
+    transforms.forEach((tf) => {
+      const face = document.createElement('div')
+      face.className = 'cube-face'
+      face.style.cssText = `width:${size}px;height:${size}px;position:absolute;transform:${tf};border:1px solid rgba(20,184,166,${0.15 + Math.random() * 0.2});background:rgba(20,184,166,.03)`
+      cube.appendChild(face)
+    })
     container.appendChild(cube)
   }
 }
 
+/* ════════════════════════════════════════
+   MOUSE PARALLAX
+════════════════════════════════════════ */
 function onMouseMove(e) {
   const x = (e.clientX / window.innerWidth - 0.5) * 16
   const y = (e.clientY / window.innerHeight - 0.5) * 16
@@ -164,12 +201,16 @@ function onMouseMove(e) {
   })
 }
 
+/* ════════════════════════════════════════
+   SCROLL REVEAL + COUNTERS
+════════════════════════════════════════ */
 function initReveal() {
   ioInstance = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return
         entry.target.classList.add('in')
+
         const numEl = entry.target.querySelector('[data-target]')
         if (numEl && !numEl._done) {
           numEl._done = true
@@ -186,14 +227,19 @@ function initReveal() {
     },
     { threshold: 0.15 },
   )
+
   document.querySelectorAll('.rv').forEach((el) => ioInstance.observe(el))
 }
 
+/* ════════════════════════════════════════
+   LIFECYCLE
+════════════════════════════════════════ */
 onMounted(() => {
   initCanvas()
   buildCubes()
   initReveal()
   window.addEventListener('mousemove', onMouseMove)
+
   autoInterval = setInterval(() => {
     currentFeature.value = (currentFeature.value + 1) % features.length
   }, 3000)
@@ -210,15 +256,17 @@ onUnmounted(() => {
 
 <template>
   <div class="home-container">
-    <!-- ══════ HERO ══════ -->
+    <!-- ══════════════ HERO ══════════════ -->
     <section class="hero" id="hero-sec" ref="heroSection">
       <canvas id="bg-canvas" ref="bgCanvas"></canvas>
       <div class="scanlines"></div>
+
       <div class="ring-wrap">
         <div class="ring"></div>
         <div class="ring"></div>
         <div class="ring"></div>
       </div>
+
       <div class="cubes" ref="cubesWrapper"></div>
 
       <div class="hero-inner">
@@ -251,28 +299,28 @@ onUnmounted(() => {
             :class="{ disabled: isLoading }"
             :aria-disabled="isLoading"
             @click.prevent="isLoading ? null : handleAuthClick()"
+            >{{ $t('login') }}</router-link
           >
-            {{ $t('login') }}
-          </router-link>
+
           <router-link
             to="/register"
             class="bs"
             :class="{ disabled: isLoading }"
             :aria-disabled="isLoading"
             @click.prevent="isLoading ? null : handleAuthClick()"
+            >{{ $t('Register') }}</router-link
           >
-            {{ $t('Register') }}
-          </router-link>
         </div>
 
         <p v-if="isLoading" class="wait-message">{{ $t('waitMoment') }}</p>
       </div>
     </section>
 
-    <!-- ══════ FEATURES — 3D flip cards ══════ -->
+    <!-- ══════════════ FEATURES — 3D flip cards ══════════════ -->
     <section class="sec sec-dark">
       <p class="sec-sub rv">{{ $t('homeFeaturesTitle') }}</p>
       <h2 class="sec-title rv">{{ $t('homeFeaturesTitle') }}</h2>
+
       <div class="flip-grid">
         <div v-for="(feature, i) in features" :key="i" class="flip-card rv" :class="`d${i + 1}`">
           <div class="flip-inner">
@@ -290,7 +338,7 @@ onUnmounted(() => {
       </div>
     </section>
 
-    <!-- ══════ STATS / COUNTERS ══════ -->
+    <!-- ══════════════ STATS / COUNTERS ══════════════ -->
     <section class="sec sec-darker">
       <h2 class="sec-title rv" style="margin-bottom: 36px">{{ $t('homeStatsTitle') }}</h2>
       <div class="counter-row">
@@ -301,10 +349,11 @@ onUnmounted(() => {
       </div>
     </section>
 
-    <!-- ══════ LOCATION ══════ -->
+    <!-- ══════════════ LOCATION ══════════════ -->
     <section class="sec sec-dark">
       <p class="sec-sub rv">{{ $t('homeLocationTitle') }}</p>
       <h2 class="sec-title rv" style="margin-bottom: 32px">{{ $t('homeLocationTitle') }}</h2>
+
       <div class="map-box rv">
         <iframe
           src="https://maps.google.com/maps?q=-6.9139299,39.1565626&z=17&output=embed"
@@ -312,35 +361,35 @@ onUnmounted(() => {
           loading="lazy"
           referrerpolicy="no-referrer-when-downgrade"
         ></iframe>
+
         <div class="map-info">
           <p>
             <font-awesome-icon icon="location-dot" class="info-icon" />
             {{ $t('locationDescription') }}
           </p>
+          <p><font-awesome-icon icon="compass" class="info-icon" /> {{ $t('howToGetThere') }}</p>
           <p>
-            <font-awesome-icon icon="map-location-dot" class="info-icon" />
-            {{ $t('howToGetThere') }}
-          </p>
-          <p>
-            <font-awesome-icon icon="house" class="info-icon" /> {{ $t('transportInstructions') }}
+            <font-awesome-icon icon="taxi" class="info-icon" /> {{ $t('transportInstructions') }}
           </p>
         </div>
       </div>
     </section>
 
-    <!-- ══════ FOOTER ══════ -->
+    <!-- ══════════════ FOOTER ══════════════ -->
     <footer class="foot">
       <div class="foot-grid">
         <div class="rv">
           <h3>{{ $t('homeFooterTitle') }}</h3>
           <p>{{ $t('homeFooterDescription') }}</p>
         </div>
+
         <div class="rv d1">
           <h3>{{ $t('homeContact') }}</h3>
           <p class="contact-name">Software Engineer Victor</p>
           <p><font-awesome-icon icon="phone" class="foot-icon" /> 0683 870 268</p>
           <p><font-awesome-icon icon="phone" class="foot-icon" /> 0794 770 268</p>
         </div>
+
         <div class="rv d2">
           <h3>{{ $t('homeAddress') }}</h3>
           <p><font-awesome-icon icon="location-dot" class="foot-icon" /> Gongo la Mboto</p>
@@ -348,6 +397,7 @@ onUnmounted(() => {
           <p>Dar es Salaam, Tanzania</p>
         </div>
       </div>
+
       <div class="foot-btm">
         © {{ new Date().getFullYear() }} Majohe Bwera Rooms — All rights reserved
       </div>
@@ -356,6 +406,10 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+/* ══════════════════════════════════════════════
+   GOOGLE FONT
+══════════════════════════════════════════════ */
+
 .home-container {
   font-family: 'Inter', Arial, Helvetica, sans-serif;
   background: #030810;
@@ -363,7 +417,9 @@ onUnmounted(() => {
   overflow-x: hidden;
 }
 
-/* ── HERO ── */
+/* ══════════════════════════════════════════════
+   HERO
+══════════════════════════════════════════════ */
 .hero {
   min-height: 600px;
   position: relative;
@@ -373,6 +429,7 @@ onUnmounted(() => {
   justify-content: center;
   padding: 60px 20px;
 }
+
 #bg-canvas {
   position: absolute;
   top: 0;
@@ -381,6 +438,7 @@ onUnmounted(() => {
   height: 100%;
   pointer-events: none;
 }
+
 .scanlines {
   position: absolute;
   inset: 0;
@@ -656,11 +714,13 @@ onUnmounted(() => {
 .bs:hover::after {
   opacity: 1;
 }
+
 .disabled {
   pointer-events: none;
   opacity: 0.5;
   cursor: not-allowed;
 }
+
 .wait-message {
   margin-top: 15px;
   color: #fff;
@@ -679,7 +739,9 @@ onUnmounted(() => {
   }
 }
 
-/* ── SECTIONS ── */
+/* ══════════════════════════════════════════════
+   SECTIONS
+══════════════════════════════════════════════ */
 .sec {
   padding: 70px 16px;
   position: relative;
@@ -691,6 +753,7 @@ onUnmounted(() => {
 .sec-darker {
   background: #010406;
 }
+
 .sec-title {
   text-align: center;
   font-size: clamp(1.4rem, 3.5vw, 2.2rem);
@@ -706,7 +769,9 @@ onUnmounted(() => {
   letter-spacing: 0.1em;
 }
 
-/* ── FLIP CARDS ── */
+/* ══════════════════════════════════════════════
+   3D FLIP CARDS
+══════════════════════════════════════════════ */
 .flip-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
@@ -792,7 +857,9 @@ onUnmounted(() => {
   line-height: 1.6;
 }
 
-/* ── STATS ── */
+/* ══════════════════════════════════════════════
+   STATS / COUNTERS
+══════════════════════════════════════════════ */
 .counter-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -828,7 +895,9 @@ onUnmounted(() => {
   letter-spacing: 0.06em;
 }
 
-/* ── SCROLL REVEAL ── */
+/* ══════════════════════════════════════════════
+   SCROLL REVEAL
+══════════════════════════════════════════════ */
 .rv {
   opacity: 0;
   transform: translateY(50px) rotateX(15deg);
@@ -853,7 +922,9 @@ onUnmounted(() => {
   transition-delay: 0.4s;
 }
 
-/* ── LOCATION ── */
+/* ══════════════════════════════════════════════
+   LOCATION
+══════════════════════════════════════════════ */
 .map-box {
   border-radius: 18px;
   overflow: hidden;
@@ -889,7 +960,9 @@ onUnmounted(() => {
   flex-shrink: 0;
 }
 
-/* ── FOOTER ── */
+/* ══════════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════════ */
 .foot {
   background: #010304;
   padding: 50px 20px 0;
@@ -936,7 +1009,9 @@ onUnmounted(() => {
   color: rgba(255, 255, 255, 0.25);
 }
 
-/* ── RESPONSIVE ── */
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════ */
 @media (max-width: 600px) {
   .hero h1 {
     font-size: 2rem;
@@ -965,6 +1040,7 @@ onUnmounted(() => {
     margin: -65px 0 0 -65px;
   }
 }
+
 @media (max-width: 768px) {
   .flip-grid {
     grid-template-columns: repeat(2, 1fr);
