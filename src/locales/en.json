@@ -208,5 +208,8 @@
   "critical": "Critical",
   "warning": "Warning",
   "info": "Information",
-  "criticalRemarksWarning": "You have 3 or more critical remarks. Please address them urgently!"
+  "criticalRemarksWarning": "You have 3 or more critical remarks. Please address them urgently!",
+  "editRemark": "Edit Remark",
+  "editRemarkSubtitle": "Update the details of this remark below",
+  "updatingRemark": "Updating Remark..."
 }

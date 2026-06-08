@@ -156,7 +156,7 @@ const activeAnnouncementModal = ref(null)
 const activeCommentsModal = ref(null)
 const activePasswordResetModal = ref(null)
 
-// Add these refs for the edit remark modal
+// The refs for the edit remark modal
 const activeEditRemarkModal = ref(null)
 const editRemarkForm = ref({
   id: null,
@@ -1358,7 +1358,7 @@ function buildCubes() {
           <form @submit.prevent="updateRemark">
             <div class="mfield">
               <label><font-awesome-icon icon="user" /> {{ $t('tenant') || 'Tenant' }}</label>
-              <p>{{ editRemarkForm.tenant_name || 'N/A' }}</p>
+              <p>{{ editRemarkForm.last_name || 'N/A' }}</p>
             </div>
 
             <div class="mfield">

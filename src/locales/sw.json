@@ -221,5 +221,8 @@
   "critical": "Muhimu",
   "warning": "Tahadhari",
   "info": "Taarifa",
-  "criticalRemarksWarning": "Una maoni 3 au zaidi muhimu. Tafadhali yashughulikie haraka!"
+  "criticalRemarksWarning": "Una maoni 3 au zaidi muhimu. Tafadhali yashughulikie haraka!",
+  "editRemark": "Hariri Maoni",
+  "editRemarkSubtitle": "Sahihisha maelezo ya maoni yako hapa chini",
+  "updatingRemark": "Inasahihisha Maoni..."
 }

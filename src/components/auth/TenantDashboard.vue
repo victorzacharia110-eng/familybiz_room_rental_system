@@ -598,77 +598,68 @@ onMounted(async () => {
     <!-- ══════ MODALS ══════ -->
 
     <!-- NEW: REMARKS MODAL -->
-    <Transition name="modal-fade">
-      <div
-        v-if="activeRemarksModal === 'remarks'"
-        class="modal-overlay"
-        @click.self="closeRemarksModal"
-      >
-        <div class="glass-modal large">
-          <div class="modal-top">
-            <h3><font-awesome-icon icon="eye" /> {{ $t('yourRemarks') || 'Your Remarks' }}</h3>
-            <button class="close-x" @click="closeRemarksModal">
-              <font-awesome-icon icon="xmark" />
-            </button>
-          </div>
+<Transition name="modal-fade">
+  <div
+    v-if="activeRemarksModal === 'remarks'"
+    class="modal-overlay"
+    @click.self="closeRemarksModal"
+  >
+    <div class="glass-modal large">
+      <div class="modal-top">
+        <h3><font-awesome-icon icon="eye" /> {{ $t('yourRemarks') || 'Your Remarks' }}</h3>
+        <button class="close-x" @click="closeRemarksModal">
+          <font-awesome-icon icon="xmark" />
+        </button>
+      </div>
 
-          <div class="remarks-info">
-            <p class="info-text">
-              <font-awesome-icon icon="info-circle" />
-              {{ $t('remarksDescription') || 'These are private remarks from your landlord.' }}
-            </p>
-            <p v-if="criticalCount >= 3" class="warning-text">
-              <font-awesome-icon icon="triangle-exclamation" />
-              {{
-                $t('criticalRemarksWarning') ||
-                'You have 3 or more critical remarks. Please address them urgently!'
-              }}
-            </p>
-          </div>
+      <div class="remarks-info">
+        <p class="info-text">
+          <font-awesome-icon icon="info-circle" />
+          {{ $t('remarksDescription') || 'These are private remarks from your landlord.' }}
+        </p>
+        <p v-if="criticalCount >= 3" class="warning-text">
+          <font-awesome-icon icon="triangle-exclamation" />
+          {{
+            $t('criticalRemarksWarning') ||
+            'You have 3 or more critical remarks. Please address them urgently!'
+          }}
+        </p>
+      </div>
 
-          <div class="modal-table-wrap">
-            <table v-if="myRemarks.length">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>{{ $t('type') || 'Type' }}</th>
-                  <th>{{ $t('reason') || 'Reason' }}</th>
-                  <th>{{ $t('date') || 'Date' }}</th>
-                  <th>{{ $t('status') || 'Status' }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(remark, index) in myRemarks" :key="remark.id">
-                  <td class="idx">{{ index + 1 }}</td>
-                  <td>
-                    <span class="type-pill" :class="remark.type">
-                      <font-awesome-icon
-                        :icon="remark.type === 'critical' ? 'triangle-exclamation' : 'info-circle'"
-                      />
-                      {{ remark.type }}
-                    </span>
-                  </td>
-                  <td>{{ remark.reason_text }}</td>
-                  <td>{{ formatDate(remark.created_at) }}</td>
-                  <td>
-                    <span
-                      class="status-pill"
-                      :class="{ active: remark.active, inactive: !remark.active }"
-                    >
-                      {{ remark.active ? $t('active') || 'Active' : $t('resolved') || 'Resolved' }}
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <div v-else class="no-data">
-              <font-awesome-icon icon="check-circle" />
-              {{ $t('noRemarks') || 'No remarks have been added for you yet.' }}
+      <!-- CARD LAYOUT INSTEAD OF TABLE -->
+      <div v-if="myRemarks.length" class="remarks-cards-grid">
+        <div v-for="(remark, index) in myRemarks" :key="remark.id" class="remark-card">
+          <div class="remark-card-header">
+            <span class="remark-number">#{{ index + 1 }}</span>
+            <span class="type-pill" :class="remark.type">
+              <font-awesome-icon
+                :icon="remark.type === 'critical' ? 'triangle-exclamation' : 'info-circle'"
+              />
+              {{ remark.type }}
+            </span>
+            <span class="status-pill" :class="{ active: remark.active, inactive: !remark.active }">
+              {{ remark.active ? ($t('active') || 'Active') : ($t('resolved') || 'Resolved') }}
+            </span>
+          </div>
+          <div class="remark-card-body">
+            <div class="remark-reason">
+              <strong><font-awesome-icon icon="comment" /> {{ $t('reason') || 'Reason' }}:</strong>
+              <p>{{ remark.reason_text }}</p>
+            </div>
+            <div class="remark-date">
+              <strong><font-awesome-icon icon="calendar-alt" /> {{ $t('date') || 'Date' }}:</strong>
+              <span>{{ formatDate(remark.created_at) }}</span>
             </div>
           </div>
         </div>
       </div>
-    </Transition>
+      <div v-else class="no-data">
+        <font-awesome-icon icon="check-circle" />
+        {{ $t('noRemarks') || 'No remarks have been added for you yet.' }}
+      </div>
+    </div>
+  </div>
+</Transition>
 
     <!-- ROOMS MODAL -->
     <Transition name="modal-fade">
@@ -1938,31 +1929,141 @@ tbody tr:last-child td {
 }
 
 /* NEW: Type pill for remarks */
+/* Remarks Cards Layout - New styles only, doesn't affect existing classes */
+.remarks-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  max-height: 500px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.remark-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.remark-card:hover {
+  background: rgba(20, 184, 166, 0.05);
+  border-color: rgba(20, 184, 166, 0.3);
+  transform: translateY(-2px);
+}
+
+.remark-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: rgba(20, 184, 166, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-wrap: wrap;
+}
+
+.remark-number {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.remark-card-body {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.remark-reason strong,
+.remark-date strong {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.remark-reason p {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+  margin: 8px 0 0 0;
+  padding-left: 4px;
+}
+
+.remark-date span {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  display: inline-block;
+  margin-top: 4px;
+}
+
+/* Make sure existing classes still work */
 .type-pill {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: 20px;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
+
 .type-pill.critical {
   background: rgba(239, 68, 68, 0.15);
   color: #f87171;
   border: 1px solid rgba(239, 68, 68, 0.3);
 }
+
 .type-pill.warning {
   background: rgba(245, 158, 11, 0.15);
   color: #fbbf24;
   border: 1px solid rgba(245, 158, 11, 0.3);
 }
+
 .type-pill.info {
   background: rgba(20, 184, 166, 0.15);
   color: #5dcaa5;
   border: 1px solid rgba(20, 184, 166, 0.3);
+}
+
+.status-pill.active {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.status-pill.inactive {
+  background: rgba(156, 163, 175, 0.15);
+  color: #9ca3af;
+  border: 1px solid rgba(156, 163, 175, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .remark-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .remarks-cards-grid {
+    gap: 12px;
+  }
+  
+  .remark-card-body {
+    padding: 12px 14px;
+  }
 }
 
 .modal-fade-enter-active,
