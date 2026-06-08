@@ -9,6 +9,7 @@ import { usePaymentMethodStore } from '@/stores/paymentMethod'
 import { useLatePaymentReasonStore } from '@/stores/latePaymentReason'
 import { useCommentStore } from '@/stores/comment'
 import { useAnnouncementStore } from '@/stores/announcement'
+import { useCriticalRemarkStore } from '@/stores/criticalRemark'
 import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -37,6 +38,8 @@ import {
   faKey,
   faSpinner,
   faEnvelope,
+  faEye,
+  faInfoCircle,
 } from '@fortawesome/free-solid-svg-icons'
 
 library.add(
@@ -63,6 +66,8 @@ library.add(
   faKey,
   faSpinner,
   faEnvelope,
+  faEye,
+  faInfoCircle,
 )
 
 const router = useRouter()
@@ -73,6 +78,7 @@ const paymentMethodStore = usePaymentMethodStore()
 const latePaymentReasonStore = useLatePaymentReasonStore()
 const commentStore = useCommentStore()
 const announcementStore = useAnnouncementStore()
+const criticalRemarkStore = useCriticalRemarkStore()
 
 const { totalRooms, roomsAvailableCount } = storeToRefs(roomStore)
 
@@ -92,6 +98,28 @@ const activeProfileModal = ref(null)
 const activeCommentsModal = ref(null)
 const activeAnnouncementModal = ref(null)
 const activePasswordResetModal = ref(null)
+const activeRemarksModal = ref(null) // NEW: for remarks modal
+
+// NEW: Computed for tenant's own remarks
+const myRemarks = computed(() => {
+  return criticalRemarkStore.criticalRemarks?.filter((r) => r.user_id === auth.user?.id) || []
+})
+
+// NEW: Count critical remarks for warning
+const criticalCount = computed(() => {
+  return myRemarks.value.filter((r) => r.type === 'critical' && r.active).length
+})
+
+// NEW: Modal functions for remarks
+const openRemarksModal = async (modalName) => {
+  activeRemarksModal.value = modalName
+  if (modalName === 'remarks') {
+    await criticalRemarkStore.fetchCriticalRemarks()
+  }
+}
+const closeRemarksModal = () => {
+  activeRemarksModal.value = null
+}
 
 async function submitLateReason(payment) {
   if (latePaymentReasonStore.latePaymentReasons?.length >= 3) {
@@ -307,6 +335,7 @@ onMounted(async () => {
   paymentLoading.value = false
   await paymentMethodStore.fetchPaymentMethods()
   await announcementStore.fetchAnnouncements()
+  await criticalRemarkStore.fetchCriticalRemarks() // NEW: fetch remarks on mount
   if (announcementStore.announcements.length > 0) activeAnnouncementModal.value = 'announcements'
 })
 </script>
@@ -340,6 +369,18 @@ onMounted(async () => {
           @click.prevent="openCommentsModal('comments')"
         >
           <font-awesome-icon icon="comments" class="ni" /><span>{{ $t('Comments') }}</span>
+        </a>
+        <!-- NEW: View Remarks link in sidebar -->
+        <a
+          href="#"
+          class="nav-item"
+          :class="{ on: activeRemarksModal === 'remarks' }"
+          @click.prevent="openRemarksModal('remarks')"
+        >
+          <font-awesome-icon icon="eye" class="ni" /><span>{{
+            $t('viewRemarks') || 'View Remarks'
+          }}</span>
+          <span v-if="criticalCount > 0" class="badge-new"></span>
         </a>
         <a
           href="#"
@@ -555,6 +596,79 @@ onMounted(async () => {
     </main>
 
     <!-- ══════ MODALS ══════ -->
+
+    <!-- NEW: REMARKS MODAL -->
+    <Transition name="modal-fade">
+      <div
+        v-if="activeRemarksModal === 'remarks'"
+        class="modal-overlay"
+        @click.self="closeRemarksModal"
+      >
+        <div class="glass-modal large">
+          <div class="modal-top">
+            <h3><font-awesome-icon icon="eye" /> {{ $t('yourRemarks') || 'Your Remarks' }}</h3>
+            <button class="close-x" @click="closeRemarksModal">
+              <font-awesome-icon icon="xmark" />
+            </button>
+          </div>
+
+          <div class="remarks-info">
+            <p class="info-text">
+              <font-awesome-icon icon="info-circle" />
+              {{ $t('remarksDescription') || 'These are private remarks from your landlord.' }}
+            </p>
+            <p v-if="criticalCount >= 3" class="warning-text">
+              <font-awesome-icon icon="triangle-exclamation" />
+              {{
+                $t('criticalRemarksWarning') ||
+                'You have 3 or more critical remarks. Please address them urgently!'
+              }}
+            </p>
+          </div>
+
+          <div class="modal-table-wrap">
+            <table v-if="myRemarks.length">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>{{ $t('type') || 'Type' }}</th>
+                  <th>{{ $t('reason') || 'Reason' }}</th>
+                  <th>{{ $t('date') || 'Date' }}</th>
+                  <th>{{ $t('status') || 'Status' }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(remark, index) in myRemarks" :key="remark.id">
+                  <td class="idx">{{ index + 1 }}</td>
+                  <td>
+                    <span class="type-pill" :class="remark.type">
+                      <font-awesome-icon
+                        :icon="remark.type === 'critical' ? 'triangle-exclamation' : 'info-circle'"
+                      />
+                      {{ remark.type }}
+                    </span>
+                  </td>
+                  <td>{{ remark.reason_text }}</td>
+                  <td>{{ formatDate(remark.created_at) }}</td>
+                  <td>
+                    <span
+                      class="status-pill"
+                      :class="{ active: remark.active, inactive: !remark.active }"
+                    >
+                      {{ remark.active ? $t('active') || 'Active' : $t('resolved') || 'Resolved' }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div v-else class="no-data">
+              <font-awesome-icon icon="check-circle" />
+              {{ $t('noRemarks') || 'No remarks have been added for you yet.' }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
 
     <!-- ROOMS MODAL -->
     <Transition name="modal-fade">
@@ -1361,6 +1475,17 @@ tbody tr:last-child td {
   color: #f87171;
   border: 1px solid rgba(239, 68, 68, 0.3);
 }
+/* NEW: Status pill for remarks */
+.status-pill.active {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+.status-pill.inactive {
+  background: rgba(156, 163, 175, 0.15);
+  color: #9ca3af;
+  border: 1px solid rgba(156, 163, 175, 0.3);
+}
 
 .btn-teal {
   display: inline-flex;
@@ -1779,6 +1904,65 @@ tbody tr:last-child td {
   font-size: 13px;
   font-weight: 500;
   margin-bottom: 16px;
+}
+
+/* NEW: Remarks info and warning styles */
+.remarks-info {
+  background: rgba(20, 184, 166, 0.07);
+  border: 1px solid rgba(20, 184, 166, 0.2);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+.info-text {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px 0;
+}
+.warning-text {
+  font-size: 12px;
+  color: #f87171;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding-top: 8px;
+  border-top: 1px solid rgba(239, 68, 68, 0.2);
+}
+.info-text svg,
+.warning-text svg {
+  flex-shrink: 0;
+}
+
+/* NEW: Type pill for remarks */
+.type-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.type-pill.critical {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+.type-pill.warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+.type-pill.info {
+  background: rgba(20, 184, 166, 0.15);
+  color: #5dcaa5;
+  border: 1px solid rgba(20, 184, 166, 0.3);
 }
 
 .modal-fade-enter-active,

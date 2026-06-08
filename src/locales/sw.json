@@ -208,5 +208,18 @@
   "communityGuidelines": "Miongozo ya Jamii",
   "editAnnouncement": "Hariri Tangazo",
   "editAnnouncementSubtitle": "Sahihisha maelezo ya tangazo lako hapa chini",
-  "updatingAnnouncement": "Inasahihisha Tangazo..."
+  "updatingAnnouncement": "Inasahihisha Tangazo...",
+   "viewRemarks": "Angalia Maoni",
+  "yourRemarks": "Maoni Yako",
+  "privateRemarksFromLandlord": "Maoni ya faragha kutoka kwa mwenye nyumba",
+  "remarksDescription": "Haya ni maoni ya faragha kutoka kwa mwenye nyumba. Tafadhali yasome kwa makini.",
+  "reason": "Sababu",
+  "active": "Inatumika",
+  "inactive": "Haijatumika",
+  "resolved": "Imesuluhishwa",
+  "noRemarks": "Bado hakuna maoni kwako.",
+  "critical": "Muhimu",
+  "warning": "Tahadhari",
+  "info": "Taarifa",
+  "criticalRemarksWarning": "Una maoni 3 au zaidi muhimu. Tafadhali yashughulikie haraka!"
 }

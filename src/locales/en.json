@@ -194,5 +194,19 @@
   "communityGuidelines": "Community Guidelines",
   "editAnnouncement": "Edit Announcement",
   "editAnnouncementSubtitle": "Update your announcement details below",
-  "updatingAnnouncement": "Updating Announcement..."
+  "updatingAnnouncement": "Updating Announcement...",
+   "viewRemarks": "View Remarks",
+  "yourRemarks": "Your Remarks",
+  "privateRemarksFromLandlord": "Private remarks from your landlord",
+  "remarksDescription": "These are private remarks from your landlord. Please read them carefully.",
+  "reason": "Reason",
+  "date": "Date",
+  "active": "Active",
+  "inactive": "Inactive",
+  "resolved": "Resolved",
+  "noRemarks": "No remarks have been added for you yet.",
+  "critical": "Critical",
+  "warning": "Warning",
+  "info": "Information",
+  "criticalRemarksWarning": "You have 3 or more critical remarks. Please address them urgently!"
 }
