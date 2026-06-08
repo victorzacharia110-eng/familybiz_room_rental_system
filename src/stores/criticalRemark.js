@@ -63,7 +63,7 @@ export const useCriticalRemarkStore = defineStore('criticalRemark', () => {
         try {
             await api.get('/sanctum/csrf-cookie')
             const response = await api.patch(`/api/remarks/update/${id}`, {
-                reason: payload.reason,
+                reason: payload.reason_text,
                 type: payload.type,
                 active: payload.active,
             })
