@@ -41,6 +41,67 @@ export const useCriticalRemarkStore = defineStore('criticalRemark', () => {
         }
     }
 
+    const loadCriticalRemarkForEdit = async (id) => {
+        loading.value = true
+        error.value = null
+
+        try {
+            await api.get('/sanctum/csrf-cookie')
+            const response = await api.get(`/api/remarks/show/${id}`)
+            singleAuthCriticalRemark.value = response.data.criticalRemark || {}
+        } catch (err) {
+            error.value = err.response?.data.message || err.message
+        } finally {
+            loading.value = false
+        }
+    }
+
+    const updateCriticalRemark = async (id, payload) => {
+        loading.value = true
+        error.value = null
+
+        try {
+            await api.get('/sanctum/csrf-cookie')
+            const response = await api.put(`/api/remarks/update/${id}`, {
+                reason: payload.reason,
+                type: payload.type,
+                active: payload.active,
+            })
+            const updatedCriticalRemark = response.data.criticalRemark
+
+            // Update the local list of critical remarks
+            const index = criticalRemarks.value.findIndex((r) => r.id === id)
+            if (index !== -1) {
+                criticalRemarks.value[index] = updatedCriticalRemark
+            }
+
+            return updatedCriticalRemark
+        } catch (err) {
+            error.value = err.response?.data.message || err.message
+            return error.value
+        } finally {
+            loading.value = false
+        }
+    }
+
+    const deleteCriticalRemark = async (id) => {
+        loading.value = true
+        error.value = null
+
+        try {
+            await api.get('/sanctum/csrf-cookie')
+            await api.delete(`/api/remarks/delete/${id}`)
+            criticalRemarks.value = criticalRemarks.value.filter((r) => r.id !== id)
+            return true
+        } catch (err) {
+            error.value = err.response?.data.message || err.message
+            return false
+        } finally {
+            loading.value = false
+        }
+    }
+
+
     return {
         error,
         loading,
@@ -48,5 +109,8 @@ export const useCriticalRemarkStore = defineStore('criticalRemark', () => {
         singleAuthCriticalRemark,
         fetchCriticalRemarks,
         registerCriticalRemarks,
+        loadCriticalRemarkForEdit,
+        updateCriticalRemark,
+        deleteCriticalRemark,             
     }
 })

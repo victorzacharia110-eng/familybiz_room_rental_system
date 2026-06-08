@@ -48,6 +48,9 @@ import {
   faBell,
   faShield,
   faKey,
+  faTag,
+  faComment,
+  faTimes,
 } from '@fortawesome/free-solid-svg-icons'
 
 library.add(
@@ -83,6 +86,9 @@ library.add(
   faBell,
   faShield,
   faKey,
+  faTag,
+  faComment,
+  faTimes,
 )
 
 const router = useRouter()
@@ -112,6 +118,7 @@ onMounted(async () => {
   await latePaymentReasonStore.fetchLatePaymentReasons()
   initCanvas()
   buildCubes()
+  await criticalRemarkStore.fetchCriticalRemarks()
 })
 
 onUnmounted(() => {
@@ -148,6 +155,88 @@ const activeRemarksModal = ref(null)
 const activeAnnouncementModal = ref(null)
 const activeCommentsModal = ref(null)
 const activePasswordResetModal = ref(null)
+
+// Add these refs for the edit remark modal
+const activeEditRemarkModal = ref(null)
+const editRemarkForm = ref({
+  id: null,
+  reason_text: '',
+  type: '',
+  active: true,
+})
+const editRemarkLoading = ref(false)
+const editRemarkSuccess = ref('')
+const editRemarkError = ref('')
+
+// Check if remark can be edited (only critical or warning types, not resolved)
+const canEditRemark = (remark) => {
+  return remark.type === 'critical' || remark.type === 'warning'
+}
+
+// Open edit remark modal
+const openEditRemarkModal = async (remark) => {
+  editRemarkForm.value = {
+    id: remark.id,
+    reason_text: remark.reason_text,
+    type: remark.type,
+    active: remark.active,
+  }
+  activeEditRemarkModal.value = 'editRemark'
+}
+
+// Close edit remark modal
+const closeEditRemarkModal = () => {
+  activeEditRemarkModal.value = null
+  editRemarkForm.value = {
+    id: null,
+    reason_text: '',
+    type: '',
+    active: true,
+  }
+  editRemarkSuccess.value = ''
+  editRemarkError.value = ''
+}
+
+// Update remark
+const updateRemark = async () => {
+  editRemarkLoading.value = true
+  editRemarkSuccess.value = ''
+  editRemarkError.value = ''
+
+  const result = await criticalRemarkStore.updateCriticalRemark(editRemarkForm.value.id, {
+    reason: editRemarkForm.value.reason_text,
+    type: editRemarkForm.value.type,
+    active: editRemarkForm.value.active,
+  })
+
+  if (result && result.id) {
+    editRemarkSuccess.value = 'Remark updated successfully!'
+    setTimeout(() => {
+      editRemarkSuccess.value = ''
+      closeEditRemarkModal()
+    }, 2000)
+    await criticalRemarkStore.fetchCriticalRemarks()
+  } else {
+    editRemarkError.value = result || 'Failed to update remark'
+  }
+
+  editRemarkLoading.value = false
+}
+
+// Delete remark with confirmation
+const deleteCriticalRemark = async (id) => {
+  if (!confirm('Are you sure you want to delete this remark permanently?')) {
+    return
+  }
+
+  const success = await criticalRemarkStore.deleteCriticalRemark(id)
+  if (success) {
+    alert('Remark deleted successfully!')
+    await criticalRemarkStore.fetchCriticalRemarks()
+  } else {
+    alert('Failed to delete remark: ' + (criticalRemarkStore.error || 'Unknown error'))
+  }
+}
 
 const openModal = () => {
   showModal.value = true
@@ -1190,19 +1279,128 @@ function buildCubes() {
               </thead>
               <tbody>
                 <tr v-if="!myRemarks.length">
-                  <td colspan="4" class="no-data"><font-awesome-icon icon="ban" /> No Remarks</td>
+                  <td colspan="6" class="no-data"><font-awesome-icon icon="ban" /> No Remarks</td>
                 </tr>
                 <tr v-else v-for="(remark, i) in myRemarks" :key="remark.id">
                   <td class="idx">{{ i + 1 }}</td>
                   <td>{{ remark.user?.last_name || 'N/A' }}</td>
                   <td>
-                    <span class="type-pill">{{ remark.type }}</span>
+                    <span class="type-pill" :class="remark.type">
+                      <font-awesome-icon
+                        :icon="
+                          remark.type === 'critical'
+                            ? 'triangle-exclamation'
+                            : remark.type === 'warning'
+                              ? 'exclamation-triangle'
+                              : 'info-circle'
+                        "
+                      />
+                      {{ remark.type }}
+                    </span>
                   </td>
                   <td>{{ remark.reason_text }}</td>
+                  <td>
+                    <span
+                      class="status-pill"
+                      :class="{ active: remark.active, inactive: !remark.active }"
+                    >
+                      {{ remark.active ? 'Active' : 'Resolved' }}
+                    </span>
+                  </td>
+                  <td>
+                    <button
+                      class="btn-sm"
+                      @click="openEditRemarkModal(remark)"
+                      :disabled="!canEditRemark(remark)"
+                    >
+                      <font-awesome-icon icon="pencil" /> {{ $t('edit') }}
+                    </button>
+                  </td>
+                  <td>
+                    <button class="btn-del" @click="deleteCriticalRemark(remark.id)">
+                      <font-awesome-icon icon="trash" /> {{ $t('delete') }}
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- EDIT REMARK MODAL -->
+    <Transition name="modal-fade">
+      <div
+        v-if="activeEditRemarkModal === 'editRemark'"
+        class="modal-overlay"
+        @click.self="closeEditRemarkModal"
+      >
+        <div class="glass-modal">
+          <div class="modal-top">
+            <h3><font-awesome-icon icon="pencil" /> {{ $t('editRemark') || 'Edit Remark' }}</h3>
+            <button class="close-x" @click="closeEditRemarkModal">
+              <font-awesome-icon icon="xmark" />
+            </button>
+          </div>
+
+          <Transition name="alert-pop">
+            <div v-if="editRemarkSuccess" class="success-alert">
+              <font-awesome-icon icon="check-circle" /> {{ editRemarkSuccess }}
+            </div>
+          </Transition>
+          <Transition name="alert-pop">
+            <div v-if="editRemarkError" class="error-alert">
+              <font-awesome-icon icon="triangle-exclamation" /> {{ editRemarkError }}
+            </div>
+          </Transition>
+
+          <form @submit.prevent="updateRemark">
+            <div class="mfield">
+              <label><font-awesome-icon icon="user" /> {{ $t('tenant') || 'Tenant' }}</label>
+              <p>{{ editRemarkForm.tenant_name || 'N/A' }}</p>
+            </div>
+
+            <div class="mfield">
+              <label><font-awesome-icon icon="tag" /> {{ $t('type') || 'Type' }}</label>
+              <select v-model="editRemarkForm.type" required>
+                <option value="critical">{{ $t('critical') || 'Critical' }}</option>
+                <option value="warning">{{ $t('warning') || 'Warning' }}</option>
+                <option value="info">{{ $t('info') || 'Information' }}</option>
+              </select>
+            </div>
+
+            <div class="mfield">
+              <label><font-awesome-icon icon="comment" /> {{ $t('reason') || 'Reason' }}</label>
+              <textarea
+                v-model="editRemarkForm.reason_text"
+                rows="4"
+                :placeholder="$t('enterRemarkReason') || 'Enter remark reason...'"
+                required
+              ></textarea>
+            </div>
+
+            <div class="mfield">
+              <label><font-awesome-icon icon="circle" /> {{ $t('status') || 'Status' }}</label>
+              <select v-model="editRemarkForm.active" required>
+                <option :value="true">{{ $t('active') || 'Active' }}</option>
+                <option :value="false">{{ $t('resolved') || 'Resolved' }}</option>
+              </select>
+            </div>
+
+            <div class="modal-actions">
+              <button type="submit" class="btn-teal" :disabled="editRemarkLoading">
+                <font-awesome-icon
+                  :icon="editRemarkLoading ? 'spinner' : 'floppy-disk'"
+                  :spin="editRemarkLoading"
+                />
+                {{ editRemarkLoading ? $t('saving') || 'Saving...' : $t('save') || 'Save Changes' }}
+              </button>
+              <button type="button" class="btn-ghost" @click="closeEditRemarkModal">
+                <font-awesome-icon icon="times" /> {{ $t('cancel') || 'Cancel' }}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </Transition>
