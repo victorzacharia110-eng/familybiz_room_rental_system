@@ -207,7 +207,7 @@ const updateRemark = async () => {
   editRemarkError.value = ''
 
   const result = await criticalRemarkStore.updateCriticalRemark(editRemarkForm.value.id, {
-    reason: editRemarkForm.value.reason_text,
+    reason_text: editRemarkForm.value.reason_text,
     type: editRemarkForm.value.type,
     active: editRemarkForm.value.active,
   })
