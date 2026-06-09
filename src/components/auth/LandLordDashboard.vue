@@ -1358,7 +1358,7 @@ function buildCubes() {
           <form @submit.prevent="updateRemark">
             <div class="mfield">
               <label><font-awesome-icon icon="user" /> {{ $t('tenant') || 'Tenant' }}</label>
-              <p>{{ editRemarkForm.user.last_name || 'N/A' }}</p>
+              <p>{{ editRemarkForm.user?.last_name || 'N/A' }}</p>
             </div>
 
             <div class="mfield">
