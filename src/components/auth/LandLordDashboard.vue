@@ -163,6 +163,7 @@ const editRemarkForm = ref({
   reason_text: '',
   type: '',
   active: true,
+  user: null, 
 })
 const editRemarkLoading = ref(false)
 const editRemarkSuccess = ref('')
@@ -180,6 +181,7 @@ const openEditRemarkModal = async (remark) => {
     reason_text: remark.reason_text,
     type: remark.type,
     active: remark.active,
+    user: remark.user, 
   }
   activeEditRemarkModal.value = 'editRemark'
 }
@@ -192,6 +194,7 @@ const closeEditRemarkModal = () => {
     reason_text: '',
     type: '',
     active: true,
+    user: null
   }
   editRemarkSuccess.value = ''
   editRemarkError.value = ''
