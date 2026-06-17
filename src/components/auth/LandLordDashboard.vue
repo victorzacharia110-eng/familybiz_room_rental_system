@@ -11,6 +11,8 @@ import { useLatePaymentReasonStore } from '@/stores/latePaymentReason'
 import { useAnnouncementStore } from '@/stores/announcement'
 import { useRuleStore } from '@/stores/rules'
 import { useCommentStore } from '@/stores/comment'
+import { useFootballStore } from '@/stores/entertainment/football.js'
+import EntertainmentModal from './EntertainmentModal.vue'
 import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -102,6 +104,20 @@ const ruleStore = useRuleStore()
 const announcementStore = useAnnouncementStore()
 const commentStore = useCommentStore()
 
+// Add to state for entertainment modal
+const footballStore = useFootballStore()
+const activeEntertainmentModal = ref(null)
+
+// Add modal functions
+const openEntertainmentModal = (modalName) => {
+  activeEntertainmentModal.value = modalName
+}
+
+const closeEntertainmentModal = () => {
+  activeEntertainmentModal.value = null
+}
+// ----------------------------------------------------
+
 const { roomsAvailableCount, roomsMaintananceCount, roomsOccupiedCount, totalRooms } =
   storeToRefs(roomStore)
 
@@ -163,7 +179,7 @@ const editRemarkForm = ref({
   reason_text: '',
   type: '',
   active: true,
-  user: null, 
+  user: null,
 })
 const editRemarkLoading = ref(false)
 const editRemarkSuccess = ref('')
@@ -181,7 +197,7 @@ const openEditRemarkModal = async (remark) => {
     reason_text: remark.reason_text,
     type: remark.type,
     active: remark.active,
-    user: remark.user, 
+    user: remark.user,
   }
   activeEditRemarkModal.value = 'editRemark'
 }
@@ -194,7 +210,7 @@ const closeEditRemarkModal = () => {
     reason_text: '',
     type: '',
     active: true,
-    user: null
+    user: null,
   }
   editRemarkSuccess.value = ''
   editRemarkError.value = ''
@@ -855,6 +871,16 @@ function buildCubes() {
           @click.prevent="openPaymentMethodModal('paymentMethod')"
         >
           <font-awesome-icon icon="credit-card" class="ni" /><span>{{ $t('paymentMethods') }}</span>
+        </a>
+
+        <a
+          href="#"
+          class="nav-item"
+          :class="{ on: activeEntertainmentModal === 'entertainment' }"
+          @click.prevent="openEntertainmentModal('entertainment')"
+        >
+          <font-awesome-icon icon="tv" class="ni" />
+          <span>{{ $t('entertainment') || 'Entertainment' }}</span>
         </a>
       </nav>
 
@@ -1859,6 +1885,12 @@ function buildCubes() {
         </div>
       </div>
     </Transition>
+
+    <!-- ENTERTAINMENT MODAL -->
+    <EntertainmentModal
+      :active="activeEntertainmentModal === 'entertainment'"
+      @close="closeEntertainmentModal"
+    />
   </div>
 </template>
 
