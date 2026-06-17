@@ -408,21 +408,25 @@ const deletePayment = async (id) => {
   alert(res ? 'Deleted!' : 'Failed')
   paymentFetching()
 }
-const canDeleteRemark = (tenant) => {
-  const remark = criticalRemarkStore.criticalRemarks.find((r) => r.user_id === tenant.id)
-  return remark && (remark.type === 'critical' || remark.type === 'warning')
+
+const canDeleteTenant = (tenant) => {
+  const hasActivePayment = paymentStore.payments?.some(
+    (p) => p.user_id === tenant.id && p.status === 'unpaid',
+  )
+
+  return !hasActivePayment
 }
-const deleteRemark = async (tenant) => {
-  const remark = criticalRemarkStore.criticalRemarks.find((r) => r.user_id === tenant.id)
-  if (!remark) {
-    alert('No remark found for this tenant')
+
+const deleteTenant = async (tenant) => {
+  if (!canDeleteTenant(tenant)) {
+    alert('Cannot delete tenant with active unpaid payments.')
     return
   }
-  if (!confirm('Delete this remark permanently?')) return
-  const res = await criticalRemarkStore.deleteCriticalRemark(remark.id)
-  alert(res ? 'Remark deleted!' : 'Failed to delete remark')
-  criticalRemarkStore.fetchCriticalRemarks()
+  if (!confirm('Delete this tenant permanently?')) return
+  const res = await auth.deleteUser(tenant.id)
+  alert(res ? 'Tenant deleted!' : 'Failed to delete tenant')
 }
+
 
 const deleteComment = async (id) => await commentStore.deleteComment(id)
 const deletingAnnouncement = async (id) => {
@@ -1078,7 +1082,7 @@ function buildCubes() {
                     </ul>
                     <span v-else class="muted"><font-awesome-icon icon="ban" /> None</span>
                   </td>
-                  <td>
+                  <td style="gap: 5px;">
                     <button
                       class="btn-sm"
                       @click="addRemark(tenant)"
@@ -1088,10 +1092,10 @@ function buildCubes() {
                     </button>
                     <button
                       class="btn-del"
-                      @click="deleteRemark(tenant)"
-                      :disabled="!canDeleteRemark(tenant)"
+                      @click="deleteTenant(tenant)"
+                      :disabled="!canDeleteTenant(tenant)"
                     >
-                      {{ $t('deleteRemark') }}
+                      {{ $t('deleteTenant') }}
                     </button>
                   </td>
                 </tr>

@@ -231,5 +231,15 @@
   "deletingRemark": "Deleting remark...",
   "remarkDeleted": "Remark has been deleted.",
   "cannotDeleteRemark": "This remark cannot be deleted because it is critical or has been resolved.",
-  "canDeleteRemark": "You can delete this remark because it is not critical and has not been resolved."
+  "canDeleteRemark": "You can delete this remark because it is not critical and has not been resolved.",
+  "canDeleteTenant": "You can delete this tenant because they do not have any active unpaid payments.",
+  "deleteTenant": "Delete Tenant",
+  "deleteTenantConfirmation": "Are you sure you want to delete this tenant? This action cannot be undone.",
+  "deletingTenant": "Deleting tenant...",
+  "tenantDeleted": "Tenant has been deleted.",
+  "cannotDeleteTenant": "This tenant cannot be deleted because they have active unpaid payments.",
+  "cannotDeleteTenantDueToPayments": "This tenant cannot be deleted because they have active unpaid payments. Please ensure all payments are settled before attempting to delete the tenant.",
+  "tenantDeletionWarning": "Deleting a tenant will remove all their associated data, including payment history and remarks. Please ensure you have backed up any necessary information before proceeding.",
+  "tenantDeletionSuccess": "Tenant has been successfully deleted. All associated data has been removed.",
+  "tenantDeletionError": "An error occurred while attempting to delete the tenant. Please try again later or contact support if the issue persists."
 }
