@@ -77,7 +77,7 @@ library.add(
   faEnvelope,
   faEye,
   faInfoCircle,
-  aTv,
+  faTv,
   faFutbol,
   faTrophy,
   faCalendarAlt,
