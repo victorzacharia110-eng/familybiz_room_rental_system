@@ -238,6 +238,8 @@
   "noStandings": "Hakuna msimamo",
   "noTopScorers": "Hakuna data ya wafungaji bora",
   "loading": "Inapakia...",
-  "refresh": "Rudia ku rifreshi"
-  
+  "refresh": "Rudia ku rifreshi",
+  "deleteRemark": "Futa Maoni",
+  "deleteRemarkSubtitle": "Je, una uhakika unataka kufuta maoni haya? Hii haiwezi kurekebishwa.",
+  "deletingRemark": "Inafuta Maoni..."
 }

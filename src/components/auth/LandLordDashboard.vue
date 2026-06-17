@@ -1087,7 +1087,7 @@ function buildCubes() {
                       {{ $t('addRemark') }}
                     </button>
                     <button
-                      class="btn-sm danger"
+                      class="btn-del"
                       @click="deleteRemark(tenant)"
                       :disabled="!canDeleteRemark(tenant)"
                     >
