@@ -3,6 +3,33 @@ import { ref, watch, onMounted } from 'vue'
 import { useFootballStore } from '@/stores/entertainment/football'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
+import { library } from '@fortawesome/fontawesome-svg-core'
+import {
+  faTv,
+  faXmark,
+  faSpinner,
+  faTriangleExclamation,
+  faFutbol,
+  faCalendarAlt,
+  faSearch,
+  faTrophy,
+  faSync,
+  faFilm,
+} from '@fortawesome/free-solid-svg-icons'
+
+
+library.add(
+  faTv,
+  faXmark,
+  faSpinner,
+  faTriangleExclamation,
+  faFutbol,
+  faCalendarAlt,
+  faSearch,
+  faTrophy,
+  faSync,
+  faFilm,
+)
 const props = defineProps({
   active: Boolean,
 })
