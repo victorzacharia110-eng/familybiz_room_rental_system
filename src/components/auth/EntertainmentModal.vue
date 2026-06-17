@@ -1,6 +1,6 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
-import { useFootballStore } from '@/stores/entertainment/'
+import { useFootballStore } from '@/stores/entertainment/football'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 const props = defineProps({
