@@ -17,7 +17,6 @@ import {
   faFilm,
 } from '@fortawesome/free-solid-svg-icons'
 
-
 library.add(
   faTv,
   faXmark,
@@ -89,10 +88,10 @@ const getProgress = (match) => {
 const formatTime = (timestamp) => {
   if (!timestamp) return 'TBD'
   const date = new Date(timestamp)
-  return date.toLocaleTimeString('en-US', { 
-    hour: '2-digit', 
+  return date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
     minute: '2-digit',
-    hour12: false 
+    hour12: false,
   })
 }
 
@@ -152,18 +151,20 @@ watch(activeTab, async (newTab) => {
 })
 
 // Load initial data when modal opens
-watch(() => props.active, async (isActive) => {
-  if (isActive) {
-    await loadTabData(activeTab.value)
-  }
-})
+watch(
+  () => props.active,
+  async (isActive) => {
+    if (isActive) {
+      await loadTabData(activeTab.value)
+    }
+  },
+)
 
 onMounted(async () => {
   // Initial load when component mounts
   await loadTabData('live')
 })
 </script>
-
 
 <template>
   <Transition name="modal-fade">
@@ -297,7 +298,7 @@ onMounted(async () => {
                 class="standings-row"
                 :class="{
                   'top-four': index < 4,
-                  'relegation': index >= footballStore.standings.length - 2,
+                  relegation: index >= footballStore.standings.length - 2,
                 }"
                 @click="viewTeam(standing.participant_id)"
               >
@@ -307,7 +308,9 @@ onMounted(async () => {
                 <span class="stat">{{ standing.won || 0 }}</span>
                 <span class="stat">{{ standing.drawn || 0 }}</span>
                 <span class="stat">{{ standing.lost || 0 }}</span>
-                <span class="stat pts"><strong>{{ standing.points || 0 }}</strong></span>
+                <span class="stat pts"
+                  ><strong>{{ standing.points || 0 }}</strong></span
+                >
               </div>
             </div>
           </div>
@@ -347,9 +350,7 @@ onMounted(async () => {
 
         <!-- Footer Actions -->
         <div class="modal-footer">
-          <button class="btn-ghost" @click="close">
-            <font-awesome-icon icon="xmark" /> Close
-          </button>
+          <button class="btn-ghost" @click="close"><font-awesome-icon icon="xmark" /> Close</button>
           <button class="btn-teal" @click="refreshData">
             <font-awesome-icon icon="sync" :spin="refreshing" /> Refresh
           </button>
@@ -359,69 +360,7 @@ onMounted(async () => {
   </Transition>
 </template>
 
-
-
 <style scoped>
-/* Add these styles to make icons visible */
-
-/* Close button icon */
-.close-x svg {
-  color: rgba(255, 255, 255, 0.8) !important;
-  font-size: 18px;
-}
-
-.close-x:hover svg {
-  color: #f87171 !important;
-}
-
-/* Header icon */
-.modal-top h3 svg {
-  color: #14b8a6 !important;
-  margin-right: 8px;
-}
-
-/* Tab icons */
-.tab-btn svg {
-  color: rgba(255, 255, 255, 0.5) !important;
-}
-
-.tab-btn.active svg {
-  color: #14b8a6 !important;
-}
-
-/* Button icons */
-.btn-teal svg {
-  color: white !important;
-}
-
-.btn-ghost svg {
-  color: rgba(255, 255, 255, 0.6) !important;
-}
-
-.btn-ghost:hover svg {
-  color: white !important;
-}
-
-/* Loading spinner */
-.loading-state svg {
-  color: #14b8a6 !important;
-}
-
-/* Error icon */
-.error-state svg {
-  color: #f87171 !important;
-}
-
-/* No data icons */
-.no-data svg {
-  color: rgba(255, 255, 255, 0.3) !important;
-}
-
-/* Coming soon icon */
-.coming-icon {
-  color: rgba(20, 184, 166, 0.3) !important;
-}
-
 .entertainment-modal {
   max-width: 900px;
   width: 95%;
@@ -430,14 +369,60 @@ onMounted(async () => {
   flex-direction: column;
   padding: 0;
   overflow: hidden;
+  background: rgba(10, 20, 35, 0.95);
+  border: 1px solid rgba(20, 184, 166, 0.2);
+  border-radius: 20px;
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.6),
+    0 0 60px rgba(20, 184, 166, 0.07);
 }
 
 .modal-top {
   padding: 20px 24px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
+.modal-top h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.modal-top h3 svg {
+  color: #14b8a6;
+}
+
+/* Close Button - matches your system's close-x */
+.close-x {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+  flex-shrink: 0;
+}
+
+.close-x:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* Tabs */
 .tabs {
   display: flex;
   gap: 4px;
@@ -457,9 +442,12 @@ onMounted(async () => {
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
-  transition: all 0.2s;
+  transition: 0.2s;
   font-family: inherit;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .tab-btn:hover {
@@ -470,10 +458,6 @@ onMounted(async () => {
 .tab-btn.active {
   background: rgba(20, 184, 166, 0.15);
   color: #14b8a6;
-}
-
-.tab-icon {
-  margin-right: 6px;
 }
 
 .modal-body {
@@ -491,6 +475,56 @@ onMounted(async () => {
   flex-shrink: 0;
 }
 
+/* Button Styles - Matching your system's btn-teal and btn-ghost */
+.btn-teal {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 20px;
+  border-radius: 50px;
+  border: none;
+  background: linear-gradient(135deg, #0f766e, #14b8a6);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.3s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.btn-teal:hover {
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 10px 28px rgba(20, 184, 166, 0.4);
+}
+
+.btn-teal:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 20px;
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+  font-family: inherit;
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
 /* Loading & Error States */
 .loading-state,
 .error-state {
@@ -506,15 +540,20 @@ onMounted(async () => {
   color: rgba(255, 255, 255, 0.6);
 }
 
+.loading-state svg {
+  color: #14b8a6;
+}
+
 .error-state {
   color: #f87171;
 }
 
 .error-state svg {
   font-size: 20px;
+  color: #f87171;
 }
 
-/* Match Cards */
+/* Match Cards - Matching your system's glass effect */
 .match-card,
 .fixture-card {
   background: rgba(255, 255, 255, 0.04);
@@ -523,14 +562,15 @@ onMounted(async () => {
   padding: 16px 20px;
   margin-bottom: 12px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: 0.3s;
 }
 
 .match-card:hover,
 .fixture-card:hover {
-  background: rgba(20, 184, 166, 0.06);
-  border-color: rgba(20, 184, 166, 0.3);
-  transform: translateY(-2px);
+  transform: translateY(-5px);
+  background: rgba(20, 184, 166, 0.07);
+  border-color: rgba(20, 184, 166, 0.35);
+  box-shadow: 0 12px 35px rgba(20, 184, 166, 0.12);
 }
 
 .match-teams {
@@ -539,6 +579,7 @@ onMounted(async () => {
   justify-content: space-between;
   font-size: 16px;
   font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .team {
@@ -597,8 +638,15 @@ onMounted(async () => {
 }
 
 @keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.3; transform: scale(0.7); }
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(0.7);
+  }
 }
 
 .match-progress {
@@ -638,25 +686,28 @@ onMounted(async () => {
 }
 
 .date-selector input {
-  padding: 8px 14px;
-  border-radius: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.05);
   color: #fff;
   font-size: 13px;
   font-family: inherit;
   outline: none;
+  transition: 0.2s;
 }
 
 .date-selector input:focus {
   border-color: #14b8a6;
+  background: rgba(20, 184, 166, 0.06);
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
 }
 
 /* Standings */
 .standings-container {
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .standings-header {
@@ -668,7 +719,7 @@ onMounted(async () => {
   font-weight: 700;
   color: rgba(255, 255, 255, 0.5);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
 }
 
 .standings-row {
@@ -677,13 +728,14 @@ onMounted(async () => {
   padding: 10px 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: 0.2s;
   font-size: 13px;
   align-items: center;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .standings-row:hover {
-  background: rgba(20, 184, 166, 0.06);
+  background: rgba(20, 184, 166, 0.04);
 }
 
 .standings-row.top-four {
@@ -696,7 +748,7 @@ onMounted(async () => {
 
 .standings-row .pos {
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.3);
 }
 
 .standings-row .team-name {
@@ -719,14 +771,15 @@ onMounted(async () => {
   gap: 16px;
   padding: 12px 16px;
   background: rgba(255, 255, 255, 0.04);
-  border-radius: 8px;
+  border-radius: 10px;
   margin-bottom: 8px;
   border: 1px solid rgba(255, 255, 255, 0.06);
-  transition: all 0.2s;
+  transition: 0.2s;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .scorer-card:hover {
-  background: rgba(20, 184, 166, 0.06);
+  background: rgba(20, 184, 166, 0.05);
   border-color: rgba(20, 184, 166, 0.2);
 }
 
@@ -790,24 +843,44 @@ onMounted(async () => {
   color: rgba(255, 255, 255, 0.6);
 }
 
-/* No Data */
+/* No Data - Matches your system's .no-data */
 .no-data {
   text-align: center;
-  padding: 40px 20px;
-  color: rgba(255, 255, 255, 0.4);
+  padding: 24px;
+  color: rgba(255, 255, 255, 0.3);
 }
 
 .no-data svg {
   font-size: 32px;
   margin-bottom: 12px;
-  opacity: 0.5;
+  color: rgba(255, 255, 255, 0.2);
 }
 
 .no-data p {
   font-size: 14px;
 }
 
-/* Responsive */
+/* Modal fade transition - Matches your system */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+.modal-fade-enter-active .entertainment-modal,
+.modal-fade-leave-active .entertainment-modal {
+  transition: transform 0.25s ease;
+}
+.modal-fade-enter-from .entertainment-modal {
+  transform: scale(0.92) translateY(20px);
+}
+.modal-fade-leave-to .entertainment-modal {
+  transform: scale(0.95) translateY(10px);
+}
+
+/* Responsive - Matches your system breakpoints */
 @media (max-width: 768px) {
   .entertainment-modal {
     max-width: 100%;
@@ -868,6 +941,13 @@ onMounted(async () => {
 
   .modal-footer {
     padding: 12px 16px;
+    flex-direction: column;
+  }
+
+  .modal-footer .btn-teal,
+  .modal-footer .btn-ghost {
+    width: 100%;
+    justify-content: center;
   }
 
   .date-selector {
@@ -887,10 +967,6 @@ onMounted(async () => {
   .tab-btn {
     font-size: 11px;
     padding: 4px 10px;
-  }
-
-  .tab-icon {
-    margin-right: 4px;
   }
 
   .standings-header,
