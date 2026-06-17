@@ -408,6 +408,22 @@ const deletePayment = async (id) => {
   alert(res ? 'Deleted!' : 'Failed')
   paymentFetching()
 }
+const canDeleteRemark = (tenant) => {
+  const remark = criticalRemarkStore.criticalRemarks.find((r) => r.user_id === tenant.id)
+  return remark && (remark.type === 'critical' || remark.type === 'warning')
+}
+const deleteRemark = async (tenant) => {
+  const remark = criticalRemarkStore.criticalRemarks.find((r) => r.user_id === tenant.id)
+  if (!remark) {
+    alert('No remark found for this tenant')
+    return
+  }
+  if (!confirm('Delete this remark permanently?')) return
+  const res = await criticalRemarkStore.deleteCriticalRemark(remark.id)
+  alert(res ? 'Remark deleted!' : 'Failed to delete remark')
+  criticalRemarkStore.fetchCriticalRemarks()
+}
+
 const deleteComment = async (id) => await commentStore.deleteComment(id)
 const deletingAnnouncement = async (id) => {
   if (!confirm('Delete this announcement?')) return
@@ -1069,6 +1085,13 @@ function buildCubes() {
                       :disabled="!canAddRemark(tenant)"
                     >
                       {{ $t('addRemark') }}
+                    </button>
+                    <button
+                      class="btn-sm danger"
+                      @click="deleteRemark(tenant)"
+                      :disabled="!canDeleteRemark(tenant)"
+                    >
+                      {{ $t('deleteRemark') }}
                     </button>
                   </td>
                 </tr>
