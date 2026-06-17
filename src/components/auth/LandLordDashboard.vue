@@ -53,6 +53,13 @@ import {
   faTag,
   faComment,
   faTimes,
+  faTv,
+  faFutbol,
+  faTrophy,
+  faCalendarAlt,
+  faSearch,
+  faSync,
+  faFilm,
 } from '@fortawesome/free-solid-svg-icons'
 
 library.add(
@@ -91,6 +98,13 @@ library.add(
   faTag,
   faComment,
   faTimes,
+  faTv,
+  faFutbol,
+  faTrophy,
+  faCalendarAlt,
+  faSearch,
+  faSync,
+  faFilm,
 )
 
 const router = useRouter()
