@@ -362,6 +362,66 @@ onMounted(async () => {
 
 
 <style scoped>
+/* Add these styles to make icons visible */
+
+/* Close button icon */
+.close-x svg {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 18px;
+}
+
+.close-x:hover svg {
+  color: #f87171 !important;
+}
+
+/* Header icon */
+.modal-top h3 svg {
+  color: #14b8a6 !important;
+  margin-right: 8px;
+}
+
+/* Tab icons */
+.tab-btn svg {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.tab-btn.active svg {
+  color: #14b8a6 !important;
+}
+
+/* Button icons */
+.btn-teal svg {
+  color: white !important;
+}
+
+.btn-ghost svg {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.btn-ghost:hover svg {
+  color: white !important;
+}
+
+/* Loading spinner */
+.loading-state svg {
+  color: #14b8a6 !important;
+}
+
+/* Error icon */
+.error-state svg {
+  color: #f87171 !important;
+}
+
+/* No data icons */
+.no-data svg {
+  color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Coming soon icon */
+.coming-icon {
+  color: rgba(20, 184, 166, 0.3) !important;
+}
+
 .entertainment-modal {
   max-width: 900px;
   width: 95%;
