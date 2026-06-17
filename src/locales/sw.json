@@ -209,7 +209,7 @@
   "editAnnouncement": "Hariri Tangazo",
   "editAnnouncementSubtitle": "Sahihisha maelezo ya tangazo lako hapa chini",
   "updatingAnnouncement": "Inasahihisha Tangazo...",
-   "viewRemarks": "Angalia Maoni",
+  "viewRemarks": "Angalia Maoni",
   "yourRemarks": "Maoni Yako",
   "privateRemarksFromLandlord": "Maoni ya faragha kutoka kwa mwenye nyumba",
   "remarksDescription": "Haya ni maoni ya faragha kutoka kwa mwenye nyumba. Tafadhali yasome kwa makini.",
@@ -224,5 +224,19 @@
   "criticalRemarksWarning": "Una maoni 3 au zaidi muhimu. Tafadhali yashughulikie haraka!",
   "editRemark": "Hariri Maoni",
   "editRemarkSubtitle": "Sahihisha maelezo ya maoni yako hapa chini",
-  "updatingRemark": "Inasahihisha Maoni..."
+  "updatingRemark": "Inasahihisha Maoni...",
+
+  "entertainment": "Burudani",
+  "entertainmentHub": "Kituo cha Burudani",
+  "liveFootball": "Mechi za Moja kwa Moja",
+  "fixtures": "Ratiba",
+  "standings": "Msimamo",
+  "topScorers": "Wafungaji Bora",
+  "movies": "Filamu",
+  "noLiveMatches": "Hakuna mechi za moja kwa moja kwa sasa",
+  "noFixtures": "Hakuna ratiba kwa tarehe hii",
+  "noStandings": "Hakuna msimamo",
+  "noTopScorers": "Hakuna data ya wafungaji bora",
+  "loading": "Inapakia...",
+  "refresh": "Rudia ku rifreshi"
 }

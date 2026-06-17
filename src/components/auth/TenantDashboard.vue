@@ -10,6 +10,8 @@ import { useLatePaymentReasonStore } from '@/stores/latePaymentReason'
 import { useCommentStore } from '@/stores/comment'
 import { useAnnouncementStore } from '@/stores/announcement'
 import { useCriticalRemarkStore } from '@/stores/criticalRemark'
+import { useFootballStore } from '@/stores/entertainment/football.js'
+import EntertainmentModal from './EntertainmentModal.vue'
 import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -40,6 +42,13 @@ import {
   faEnvelope,
   faEye,
   faInfoCircle,
+  faTv,
+  faFutbol,
+  faTrophy,
+  faCalendarAlt,
+  faSearch,
+  faSync,
+  faFilm,
 } from '@fortawesome/free-solid-svg-icons'
 
 library.add(
@@ -68,6 +77,13 @@ library.add(
   faEnvelope,
   faEye,
   faInfoCircle,
+  aTv,
+  faFutbol,
+  faTrophy,
+  faCalendarAlt,
+  faSearch,
+  faSync,
+  faFilm,
 )
 
 const router = useRouter()
@@ -87,6 +103,19 @@ const successCommentMessage = ref('')
 const successUpdateRoomStatus = ref('')
 const successPasswordResetMessage = ref('')
 
+// Add to state for entertainment modal
+const footballStore = useFootballStore()
+const activeEntertainmentModal = ref(null)
+
+// Add modal functions
+const openEntertainmentModal = (modalName) => {
+  activeEntertainmentModal.value = modalName
+}
+
+const closeEntertainmentModal = () => {
+  activeEntertainmentModal.value = null
+}
+// ----------------------------------------------------
 const logoutUser = () => {
   auth.logout()
   router.push('/login')
@@ -414,6 +443,16 @@ onMounted(async () => {
         >
           <font-awesome-icon icon="credit-card" class="ni" /><span>{{ $t('paymentMethods') }}</span>
         </a>
+
+        <a
+          href="#"
+          class="nav-item"
+          :class="{ on: activeEntertainmentModal === 'entertainment' }"
+          @click.prevent="openEntertainmentModal('entertainment')"
+        >
+          <font-awesome-icon icon="tv" class="ni" />
+          <span>{{ $t('entertainment') || 'Entertainment' }}</span>
+        </a>
       </nav>
 
       <button class="sidebar-logout" @click="logoutUser">
@@ -598,68 +637,75 @@ onMounted(async () => {
     <!-- ══════ MODALS ══════ -->
 
     <!-- NEW: REMARKS MODAL -->
-<Transition name="modal-fade">
-  <div
-    v-if="activeRemarksModal === 'remarks'"
-    class="modal-overlay"
-    @click.self="closeRemarksModal"
-  >
-    <div class="glass-modal large">
-      <div class="modal-top">
-        <h3><font-awesome-icon icon="eye" /> {{ $t('yourRemarks') || 'Your Remarks' }}</h3>
-        <button class="close-x" @click="closeRemarksModal">
-          <font-awesome-icon icon="xmark" />
-        </button>
-      </div>
-
-      <div class="remarks-info">
-        <p class="info-text">
-          <font-awesome-icon icon="info-circle" />
-          {{ $t('remarksDescription') || 'These are private remarks from your landlord.' }}
-        </p>
-        <p v-if="criticalCount >= 3" class="warning-text">
-          <font-awesome-icon icon="triangle-exclamation" />
-          {{
-            $t('criticalRemarksWarning') ||
-            'You have 3 or more critical remarks. Please address them urgently!'
-          }}
-        </p>
-      </div>
-
-      <!-- CARD LAYOUT INSTEAD OF TABLE -->
-      <div v-if="myRemarks.length" class="remarks-cards-grid">
-        <div v-for="(remark, index) in myRemarks" :key="remark.id" class="remark-card">
-          <div class="remark-card-header">
-            <span class="remark-number">#{{ index + 1 }}</span>
-            <span class="type-pill" :class="remark.type">
-              <font-awesome-icon
-                :icon="remark.type === 'critical' ? 'triangle-exclamation' : 'info-circle'"
-              />
-              {{ remark.type }}
-            </span>
-            <span class="status-pill" :class="{ active: remark.active, inactive: !remark.active }">
-              {{ remark.active ? ($t('active') || 'Active') : ($t('resolved') || 'Resolved') }}
-            </span>
+    <Transition name="modal-fade">
+      <div
+        v-if="activeRemarksModal === 'remarks'"
+        class="modal-overlay"
+        @click.self="closeRemarksModal"
+      >
+        <div class="glass-modal large">
+          <div class="modal-top">
+            <h3><font-awesome-icon icon="eye" /> {{ $t('yourRemarks') || 'Your Remarks' }}</h3>
+            <button class="close-x" @click="closeRemarksModal">
+              <font-awesome-icon icon="xmark" />
+            </button>
           </div>
-          <div class="remark-card-body">
-            <div class="remark-reason">
-              <strong><font-awesome-icon icon="comment" /> {{ $t('reason') || 'Reason' }}:</strong>
-              <p>{{ remark.reason_text }}</p>
+
+          <div class="remarks-info">
+            <p class="info-text">
+              <font-awesome-icon icon="info-circle" />
+              {{ $t('remarksDescription') || 'These are private remarks from your landlord.' }}
+            </p>
+            <p v-if="criticalCount >= 3" class="warning-text">
+              <font-awesome-icon icon="triangle-exclamation" />
+              {{
+                $t('criticalRemarksWarning') ||
+                'You have 3 or more critical remarks. Please address them urgently!'
+              }}
+            </p>
+          </div>
+
+          <!-- CARD LAYOUT INSTEAD OF TABLE -->
+          <div v-if="myRemarks.length" class="remarks-cards-grid">
+            <div v-for="(remark, index) in myRemarks" :key="remark.id" class="remark-card">
+              <div class="remark-card-header">
+                <span class="remark-number">#{{ index + 1 }}</span>
+                <span class="type-pill" :class="remark.type">
+                  <font-awesome-icon
+                    :icon="remark.type === 'critical' ? 'triangle-exclamation' : 'info-circle'"
+                  />
+                  {{ remark.type }}
+                </span>
+                <span
+                  class="status-pill"
+                  :class="{ active: remark.active, inactive: !remark.active }"
+                >
+                  {{ remark.active ? $t('active') || 'Active' : $t('resolved') || 'Resolved' }}
+                </span>
+              </div>
+              <div class="remark-card-body">
+                <div class="remark-reason">
+                  <strong
+                    ><font-awesome-icon icon="comment" /> {{ $t('reason') || 'Reason' }}:</strong
+                  >
+                  <p>{{ remark.reason_text }}</p>
+                </div>
+                <div class="remark-date">
+                  <strong
+                    ><font-awesome-icon icon="calendar-alt" /> {{ $t('date') || 'Date' }}:</strong
+                  >
+                  <span>{{ formatDate(remark.created_at) }}</span>
+                </div>
+              </div>
             </div>
-            <div class="remark-date">
-              <strong><font-awesome-icon icon="calendar-alt" /> {{ $t('date') || 'Date' }}:</strong>
-              <span>{{ formatDate(remark.created_at) }}</span>
-            </div>
+          </div>
+          <div v-else class="no-data">
+            <font-awesome-icon icon="check-circle" />
+            {{ $t('noRemarks') || 'No remarks have been added for you yet.' }}
           </div>
         </div>
       </div>
-      <div v-else class="no-data">
-        <font-awesome-icon icon="check-circle" />
-        {{ $t('noRemarks') || 'No remarks have been added for you yet.' }}
-      </div>
-    </div>
-  </div>
-</Transition>
+    </Transition>
 
     <!-- ROOMS MODAL -->
     <Transition name="modal-fade">
@@ -1021,6 +1067,12 @@ onMounted(async () => {
         </div>
       </div>
     </Transition>
+
+    <!-- ENTERTAINMENT MODAL -->
+    <EntertainmentModal
+      :active="activeEntertainmentModal === 'entertainment'"
+      @close="closeEntertainmentModal"
+    />
   </div>
 </template>
 
@@ -2056,11 +2108,11 @@ tbody tr:last-child td {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .remarks-cards-grid {
     gap: 12px;
   }
-  
+
   .remark-card-body {
     padding: 12px 14px;
   }

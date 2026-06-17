@@ -195,7 +195,7 @@
   "editAnnouncement": "Edit Announcement",
   "editAnnouncementSubtitle": "Update your announcement details below",
   "updatingAnnouncement": "Updating Announcement...",
-   "viewRemarks": "View Remarks",
+  "viewRemarks": "View Remarks",
   "yourRemarks": "Your Remarks",
   "privateRemarksFromLandlord": "Private remarks from your landlord",
   "remarksDescription": "These are private remarks from your landlord. Please read them carefully.",
@@ -211,5 +211,19 @@
   "criticalRemarksWarning": "You have 3 or more critical remarks. Please address them urgently!",
   "editRemark": "Edit Remark",
   "editRemarkSubtitle": "Update the details of this remark below",
-  "updatingRemark": "Updating Remark..."
+  "updatingRemark": "Updating Remark...",
+
+  "entertainment": "Entertainment",
+  "entertainmentHub": "Entertainment Hub",
+  "liveFootball": "Live Football",
+  "fixtures": "Fixtures",
+  "standings": "Standings",
+  "topScorers": "Top Scorers",
+  "movies": "Movies",
+  "noLiveMatches": "No live matches at the moment",
+  "noFixtures": "No fixtures for this date",
+  "noStandings": "No standings available",
+  "noTopScorers": "No top scorers data",
+  "loading": "Loading...",
+  "refresh": "Refresh"
 }
