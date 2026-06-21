@@ -132,13 +132,15 @@ export const useFootballStore = defineStore('football', () => {
   const fetchFootballNews = async () => {
     try {
       loading.value = true
+      error.value = null
       await api.get('/sanctum/csrf-cookie')
       const response = await api.get('/api/football/fetch')
       footballNews.value = response.data.footballNews || []
       return footballNews.value
     } catch (err) {
       error.value = err.response?.data?.message || err.message
-      return error.value
+      console.error('Error fetching football news:', err)
+      return null
     } finally {
       loading.value = false
     }
