@@ -417,7 +417,12 @@ const filteredAnnouncements = computed(() => {
 })
 const { paginatedData: paginatedAnnouncements, currentPage: ap, totalPages: atp, showingFrom: asf, showingTo: ast, totalItems: ati, goToPage: agp, resetPage: resetAnnouncementsPage } = usePagination(filteredAnnouncements)
 
-const house = ref({ images: ['/assets/room1.jpg', '/assets/room2.jpg', '/assets/common.jpg'] })
+const galleryRooms = computed(() =>
+  roomStore.rooms.filter((r) => r.photo).map((r) => ({
+    src: `https://api.familybiz.online/storage/${r.photo}`,
+    label: `${r.room_number} — ${r.type}`,
+  })),
+)
 
 const paymentLoading = ref(true)
 onMounted(async () => {
@@ -668,13 +673,14 @@ onMounted(async () => {
               <p class="sec-sub">{{ $t('propertyImages') }}</p>
             </div>
           </div>
-          <div class="gallery-grid">
-            <div v-for="(img, idx) in house.images" :key="idx" class="gallery-card">
-              <div class="gallery-placeholder">
-                <font-awesome-icon icon="house" class="gallery-icon" /> Room {{ idx + 1 }}
-              </div>
+          <div v-if="galleryRooms.length" class="gallery-grid">
+            <div v-for="(img, idx) in galleryRooms" :key="idx" class="gallery-card">
+              <img :src="img.src" :alt="img.label" class="gallery-img" />
             </div>
           </div>
+          <p v-else class="no-gallery">
+            <font-awesome-icon icon="image" /> {{ $t('noRoomPhotos') || 'No room photos yet' }}
+          </p>
         </section>
 
         <!-- RULES -->
@@ -1768,27 +1774,25 @@ tbody tr:last-child td {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  aspect-ratio: 4/3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden;
   transition: 0.3s;
 }
 .gallery-card:hover {
   transform: translateY(-5px);
   border-color: rgba(20, 184, 166, 0.3);
-  background: rgba(20, 184, 166, 0.05);
+  box-shadow: 0 8px 24px rgba(20, 184, 166, 0.15);
 }
-.gallery-placeholder {
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.gallery-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
 }
-.gallery-icon {
-  color: rgba(20, 184, 166, 0.6);
-  font-size: 1.2rem;
+.no-gallery {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 14px;
+  padding: 24px;
 }
 
 .rules-list {

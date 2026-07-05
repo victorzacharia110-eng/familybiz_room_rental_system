@@ -11,28 +11,45 @@ export const useRoomStore = defineStore('room', () => {
   const error = ref(null)
   const loading = ref(false)
 
-  // Form state for editing a single room
   const roomForm = ref({
     id: null,
     room_number: '',
     type: '',
     status: '',
+    room_price: 0,
+    photo: null,
+    preview: null,
   })
 
-  // Create a new room
   const registerRoom = async (payload) => {
     error.value = null
     loading.value = true
 
     try {
       await api.get('/sanctum/csrf-cookie')
-      const response = await api.post('/api/room/create', {
-        room_number: payload.room_number,
-        room_price: payload.room_price,
-        type: payload.type,
-        status: payload.status,
-        amount: payload.amount,
-      })
+
+      const hasFile = payload.photo instanceof File
+      let data
+
+      if (hasFile) {
+        data = new FormData()
+        data.append('room_number', payload.room_number)
+        data.append('room_price', payload.room_price)
+        data.append('type', payload.type)
+        data.append('status', payload.status)
+        data.append('amount', payload.amount || 0)
+        data.append('photo', payload.photo)
+      } else {
+        data = {
+          room_number: payload.room_number,
+          room_price: payload.room_price,
+          type: payload.type,
+          status: payload.status,
+          amount: payload.amount,
+        }
+      }
+
+      const response = await api.post('/api/room/create', data)
 
       const newRoom = response.data.room
       rooms.value.push(newRoom)
@@ -45,7 +62,6 @@ export const useRoomStore = defineStore('room', () => {
     }
   }
 
-  // Fetch all rooms
   const fetchRooms = async () => {
     try {
       api.get('sanctum/csrf-cookie')
@@ -56,89 +72,101 @@ export const useRoomStore = defineStore('room', () => {
       roomsAvailableCount.value = response.data.roomsAvailableCount
       roomsMaintananceCount.value = response.data.roomsMaintananceCount
       roomsOccupiedCount.value = response.data.roomsOccupiedCount
-      console.log('response fetcheddd :: ', response)
     } catch (err) {
       error.value = err.response?.data?.message || err.message
     }
   }
 
-  // Load a single room into the form by ID
-const loadRoomForEdit = async (id) => {
-  try {
-    await api.get('sanctum/csrf-cookie')
+  const loadRoomForEdit = async (id) => {
+    try {
+      await api.get('sanctum/csrf-cookie')
 
-    const response = await api.get(`/api/room/show/${id}`)
+      const response = await api.get(`/api/room/show/${id}`)
 
-    const room = response?.data?.room
+      const room = response?.data?.room
 
-    if (!room) {
-      throw new Error('Room data not found in response')
-    }
-
-    // ✅ update fields reactively (IMPORTANT)
-    roomForm.value.id = room.id
-    roomForm.value.room_number = room.room_number
-    roomForm.value.type = room.type
-    roomForm.value.status = room.status
-
-    return roomForm.value
-  } catch (err) {
-    error.value = err.response?.data?.message || err.message
-    return null
-  }
-}
-
-  // Update a room from the form
- const updateRoom = async () => {
-  if (!roomForm.value.id) return null
-
-  loading.value = true
-  error.value = null
-
-  try {
-    await api.get('sanctum/csrf-cookie')
-
-    const response = await api.patch(
-      `/api/room/update/${roomForm.value.id}`,
-      {
-        room_number: roomForm.value.room_number,
-        type: roomForm.value.type,
-        status: roomForm.value.status,
+      if (!room) {
+        throw new Error('Room data not found in response')
       }
-    )
 
-    // ✅ Laravel returns: { room: {...} }
-    const updatedRoom = response?.data?.room
+      roomForm.value.id = room.id
+      roomForm.value.room_number = room.room_number
+      roomForm.value.type = room.type
+      roomForm.value.status = room.status
+      roomForm.value.room_price = room.room_price ?? 0
+      roomForm.value.photo = null
+      roomForm.value.preview = room.photo
+        ? `https://api.familybiz.online/storage/${room.photo}`
+        : null
 
-    if (!updatedRoom) {
-      throw new Error('Updated room not found in response')
+      return roomForm.value
+    } catch (err) {
+      error.value = err.response?.data?.message || err.message
+      return null
     }
-
-    // ✅ update local list safely
-    const index = rooms.value.findIndex(
-      (r) => r.id === roomForm.value.id
-    )
-
-    if (index !== -1) {
-      rooms.value[index] = updatedRoom
-    }
-
-    return updatedRoom
-  } catch (err) {
-    error.value = err.response?.data?.message || err.message
-    return null
-  } finally {
-    loading.value = false
   }
-}
 
-  // Update just the status of the room
+  const updateRoom = async () => {
+    if (!roomForm.value.id) return null
+
+    loading.value = true
+    error.value = null
+
+    try {
+      await api.get('sanctum/csrf-cookie')
+
+      const hasFile = roomForm.value.photo instanceof File
+      let data
+
+      if (hasFile) {
+        data = new FormData()
+        data.append('room_number', roomForm.value.room_number)
+        data.append('type', roomForm.value.type)
+        data.append('status', roomForm.value.status)
+        data.append('room_price', roomForm.value.room_price ?? 0)
+        data.append('photo', roomForm.value.photo)
+        data.append('_method', 'PATCH')
+      } else {
+        data = {
+          room_number: roomForm.value.room_number,
+          type: roomForm.value.type,
+          status: roomForm.value.status,
+          room_price: roomForm.value.room_price,
+        }
+      }
+
+      const endpoint = `/api/room/update/${roomForm.value.id}`
+      const response = hasFile ? await api.post(endpoint, data) : await api.patch(endpoint, data)
+
+      const updatedRoom = response?.data?.room
+
+      if (!updatedRoom) {
+        throw new Error('Updated room not found in response')
+      }
+
+      const index = rooms.value.findIndex(
+        (r) => r.id === roomForm.value.id
+      )
+
+      if (index !== -1) {
+        rooms.value[index] = updatedRoom
+      }
+
+      return updatedRoom
+    } catch (err) {
+      error.value = err.response?.data?.message || err.message
+      return null
+    } finally {
+      loading.value = false
+    }
+  }
+
   const updateRoomStatus = async (id, checked) => {
     try {
       const status = checked ? 'Occupied' : 'Available'
       await api.patch(`/api/room/update/status/${id}`, { status })
 
-      const room = this.rooms.find((r) => r.id === id)
+      const room = rooms.value.find((r) => r.id === id)
 
       if (room) {
         room.status = status
@@ -152,9 +180,11 @@ const loadRoomForEdit = async (id) => {
     try {
       api.get('sanctum/csrf-cookie')
       const response = await api.delete(`/api/room/delete/${id}`)
-      console.log('Room deleted successfully', response.data)
+      rooms.value = rooms.value.filter((r) => r.id !== id)
+      return true
     } catch (error) {
-      console.error('Error deleting room:', error)
+      error.value = error.response?.data?.message || error.message
+      return false
     }
   }
 

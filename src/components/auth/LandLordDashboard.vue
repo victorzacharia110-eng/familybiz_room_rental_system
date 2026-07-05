@@ -1416,6 +1416,7 @@ function buildCubes() {
             <table v-else>
               <thead>
                 <tr>
+                  <th>{{ $t('photo') || 'Photo' }}</th>
                   <th>{{ $t('room') }}</th>
                   <th>{{ $t('type') }}</th>
                   <th>{{ $t('status') }}</th>
@@ -1424,6 +1425,15 @@ function buildCubes() {
               </thead>
               <tbody>
                 <tr v-for="room in paginatedRooms" :key="room?.id">
+                  <td>
+                    <img
+                      v-if="room?.photo"
+                      :src="`https://api.familybiz.online/storage/${room.photo}`"
+                      alt="Room"
+                      class="room-thumb"
+                    />
+                    <span v-else class="no-photo">&mdash;</span>
+                  </td>
                   <td>{{ room?.room_number || 'N/A' }}</td>
                   <td>{{ room?.type || '—' }}</td>
                   <td>
@@ -3041,6 +3051,18 @@ tbody tr:last-child td {
 }
 .profile-details {
   flex: 1;
+}
+
+.room-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid rgba(20, 184, 166, 0.2);
+}
+.no-photo {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 12px;
 }
 
 .img-preview {

@@ -18,6 +18,7 @@ import {
   faExclamationTriangle,
   faSpinner,
   faInfoCircle,
+  faCamera,
 } from '@fortawesome/free-solid-svg-icons'
 
 library.add(
@@ -32,6 +33,7 @@ library.add(
   faExclamationTriangle,
   faSpinner,
   faInfoCircle,
+  faCamera,
 )
 
 const { locale, t } = useI18n()
@@ -69,6 +71,15 @@ const submit = async () => {
   } else {
     saveError.value = roomStore.error || 'Failed to update room.'
   }
+}
+
+const fileInput = ref(null)
+
+const handleImageUpload = (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  roomForm.value.photo = file
+  roomForm.value.preview = URL.createObjectURL(file)
 }
 
 /* ════════ 3D CANVAS ════════ */
@@ -428,6 +439,17 @@ function onMouseLeave() {
           >
           <div class="input-wrap">
             <input v-model="roomForm.room_price" type="number" placeholder="0" min="0" />
+          </div>
+        </div>
+
+        <div class="field" style="animation-delay: 0.48s">
+          <label><font-awesome-icon icon="camera" /> {{ t('roomPhotoOptional') || 'Photo (optional)' }}</label>
+          <input ref="fileInput" type="file" accept="image/*" @change="handleImageUpload" hidden />
+          <button type="button" class="btn-ghost-photo" @click="fileInput.click()">
+            <font-awesome-icon icon="camera" /> {{ t('selectImage') || 'Select Image' }}
+          </button>
+          <div v-if="roomForm.preview" class="img-preview-edit">
+            <img :src="roomForm.preview" alt="Room preview" />
           </div>
         </div>
 
@@ -876,6 +898,36 @@ label svg {
 }
 .back-home svg {
   font-size: 11px;
+}
+
+.btn-ghost-photo {
+  width: 100%;
+  background: rgba(20, 184, 166, 0.1);
+  border: 1px dashed rgba(20, 184, 166, 0.4);
+  color: #5dcaa5;
+  padding: 10px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  transition: 0.25s;
+}
+.btn-ghost-photo:hover {
+  background: rgba(20, 184, 166, 0.2);
+  border-color: #14b8a6;
+}
+.img-preview-edit {
+  margin-top: 12px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(20, 184, 166, 0.2);
+}
+.img-preview-edit img {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  display: block;
 }
 
 .shake-fade-enter-active {
