@@ -14,6 +14,9 @@ import { useFootballStore } from '@/stores/entertainment/football.js'
 import EntertainmentModal from './EntertainmentModal.vue'
 import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
+import SkeletonLoader from './SkeletonLoader.vue'
+import PaginationControls from './PaginationControls.vue'
+import { usePagination } from '@/composables/usePagination'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import {
@@ -212,7 +215,7 @@ const months = [
 
 const openRoomsModal = (modalName) => {
   activeRoomsModal.value = modalName
-  if (modalName === 'rooms') roomFetching()
+  if (modalName === 'rooms') { roomFetching(); resetRoomsPage() }
 }
 const closeRoomsModal = () => {
   activeRoomsModal.value = null
@@ -244,7 +247,7 @@ const updatingRoomStatus = async (id, checked) => await roomStore.updateRoomStat
 
 const openPaymentMethodModal = (ModalName) => {
   activePaymentMethod.value = ModalName
-  if (ModalName === 'paymentMethod') paymentMethodFetching()
+  if (ModalName === 'paymentMethod') { paymentMethodFetching(); resetPaymentMethodsPage() }
 }
 const closePaymentMethodModal = () => {
   activePaymentMethod.value = null
@@ -271,7 +274,7 @@ const updatingPhoneNumber = async (user) => {
 
 const openCommentsModal = (ModalName) => {
   activeCommentsModal.value = ModalName
-  if (ModalName === 'comments') commentFetching()
+  if (ModalName === 'comments') { commentFetching(); resetCommentsPage() }
 }
 const closeCommentsModal = () => {
   activeCommentsModal.value = null
@@ -301,6 +304,7 @@ const openAnnouncementModal = async (ModalName) => {
   activeAnnouncementModal.value = ModalName
   if (ModalName === 'announcements') {
     await announcementsFetching()
+    resetAnnouncementsPage()
     const announcements = announcementStore.announcements
     if (announcements.length > 0)
       localStorage.setItem('lastSeenAnnouncementId', announcements[0].id)
@@ -353,6 +357,66 @@ const setLanguage = (lang) => {
 }
 
 const isSidebarOpen = ref(false)
+
+const searchRooms = ref('')
+const searchPaymentMethods = ref('')
+const searchComments = ref('')
+const searchAnnouncements = ref('')
+
+const filteredRooms = computed(() => {
+  if (!roomStore.rooms) return []
+  const q = searchRooms.value.toLowerCase()
+  if (!q) return roomStore.rooms
+  return roomStore.rooms.filter(
+    (r) =>
+      (r.room_number || '').toLowerCase().includes(q) ||
+      (r.type || '').toLowerCase().includes(q) ||
+      (r.status || '').toLowerCase().includes(q),
+  )
+})
+const { paginatedData: paginatedRooms, currentPage: rp, totalPages: rtp, showingFrom: rsf, showingTo: rst, totalItems: rti, goToPage: rgp, resetPage: resetRoomsPage } = usePagination(filteredRooms)
+
+const filteredPaymentMethods = computed(() => {
+  if (!paymentMethodStore.paymentMethods) return []
+  const q = searchPaymentMethods.value.toLowerCase()
+  if (!q) return paymentMethodStore.paymentMethods
+  return paymentMethodStore.paymentMethods.filter(
+    (pm) =>
+      String(pm.airtel_money_number || '').includes(q) ||
+      String(pm.m_pesa_number || '').includes(q) ||
+      String(pm.mixx_by_yas_number || '').includes(q) ||
+      String(pm.halopesa_number || '').includes(q) ||
+      String(pm.nmb_account_number || '').includes(q) ||
+      String(pm.crdb_account_number || '').includes(q) ||
+      String(pm.nbc_account_number || '').includes(q),
+  )
+})
+const { paginatedData: paginatedPaymentMethods, currentPage: pmp, totalPages: pmtp, showingFrom: pmsf, showingTo: pmst, totalItems: pmti, goToPage: pmgp, resetPage: resetPaymentMethodsPage } = usePagination(filteredPaymentMethods)
+
+const filteredComments = computed(() => {
+  if (!commentStore.comments) return []
+  const q = searchComments.value.toLowerCase()
+  if (!q) return commentStore.comments
+  return commentStore.comments.filter(
+    (c) =>
+      (c.user?.last_name || '').toLowerCase().includes(q) ||
+      (c.comment || '').toLowerCase().includes(q),
+  )
+})
+const { paginatedData: paginatedComments, currentPage: cp, totalPages: ctp, showingFrom: csf, showingTo: cst, totalItems: cti, goToPage: cgp, resetPage: resetCommentsPage } = usePagination(filteredComments)
+
+const filteredAnnouncements = computed(() => {
+  if (!announcementStore.announcements) return []
+  const q = searchAnnouncements.value.toLowerCase()
+  if (!q) return announcementStore.announcements
+  return announcementStore.announcements.filter(
+    (a) =>
+      (a.title || '').toLowerCase().includes(q) ||
+      (a.message || '').toLowerCase().includes(q),
+  )
+})
+const { paginatedData: paginatedAnnouncements, currentPage: ap, totalPages: atp, showingFrom: asf, showingTo: ast, totalItems: ati, goToPage: agp, resetPage: resetAnnouncementsPage } = usePagination(filteredAnnouncements)
+
 const house = ref({ images: ['/assets/room1.jpg', '/assets/room2.jpg', '/assets/common.jpg'] })
 
 const paymentLoading = ref(true)
@@ -722,9 +786,18 @@ onMounted(async () => {
               <font-awesome-icon icon="check-circle" /> {{ successUpdateRoomStatus }}
             </div>
           </Transition>
+          <div class="search-bar">
+            <font-awesome-icon icon="search" class="search-icon" />
+            <input
+              v-model="searchRooms"
+              class="search-input"
+              placeholder="Search rooms..."
+            />
+          </div>
           <div class="modal-table-wrap">
             <h4 class="table-subtitle">{{ $t('existingRooms') }}</h4>
-            <table>
+            <SkeletonLoader v-if="roomStore.loading" :rows="4" :cols="6" />
+            <table v-else>
               <thead>
                 <tr>
                   <th>#</th>
@@ -736,8 +809,11 @@ onMounted(async () => {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(room, index) in roomStore.rooms" :key="room?.id">
-                  <td class="idx">{{ index + 1 }}</td>
+                <tr v-if="!paginatedRooms.length">
+                  <td colspan="6" class="no-data"><font-awesome-icon icon="ban" /> No Rooms</td>
+                </tr>
+                <tr v-else v-for="(room, index) in paginatedRooms" :key="room?.id">
+                  <td class="idx">{{ rsf + index }}</td>
                   <td>
                     <strong>{{ room?.room_number || 'N/A' }}</strong>
                   </td>
@@ -759,6 +835,14 @@ onMounted(async () => {
                 </tr>
               </tbody>
             </table>
+            <PaginationControls
+              :current-page="rp"
+              :total-pages="rtp"
+              :showing-from="rsf"
+              :showing-to="rst"
+              :total-items="rti"
+              @page-change="rgp"
+            />
           </div>
         </div>
       </div>
@@ -785,9 +869,18 @@ onMounted(async () => {
               {{ $t('method1ApprovalWarning') }}</span
             >
           </div>
+          <div class="search-bar">
+            <font-awesome-icon icon="search" class="search-icon" />
+            <input
+              v-model="searchPaymentMethods"
+              class="search-input"
+              placeholder="Search payment methods..."
+            />
+          </div>
           <div class="modal-table-wrap">
             <h4 class="table-subtitle">{{ $t('existingPaymentMethods') }}</h4>
-            <table>
+            <SkeletonLoader v-if="paymentMethodStore.loading" :rows="4" :cols="8" />
+            <table v-else>
               <thead>
                 <tr>
                   <th>#</th>
@@ -801,8 +894,11 @@ onMounted(async () => {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(pm, index) in paymentMethodStore.paymentMethods" :key="pm.id">
-                  <td class="idx">{{ $t('method') }} {{ index + 1 }}</td>
+                <tr v-if="!paginatedPaymentMethods.length">
+                  <td colspan="8" class="no-data"><font-awesome-icon icon="ban" /> No Payment Methods</td>
+                </tr>
+                <tr v-else v-for="(pm, index) in paginatedPaymentMethods" :key="pm.id">
+                  <td class="idx">{{ pmsf + index }}</td>
                   <td>{{ pm.airtel_money_number || 'N/A' }}</td>
                   <td>{{ pm.m_pesa_number || 'N/A' }}</td>
                   <td>{{ pm.mixx_by_yas_number || 'N/A' }}</td>
@@ -813,6 +909,14 @@ onMounted(async () => {
                 </tr>
               </tbody>
             </table>
+            <PaginationControls
+              :current-page="pmp"
+              :total-pages="pmtp"
+              :showing-from="pmsf"
+              :showing-to="pmst"
+              :total-items="pmti"
+              @page-change="pmgp"
+            />
           </div>
           <hr class="divider" />
           <h4 class="section-subtitle">{{ $t('method2Title') }}</h4>
@@ -945,9 +1049,18 @@ onMounted(async () => {
               </button>
             </div>
           </form>
+          <div class="search-bar">
+            <font-awesome-icon icon="search" class="search-icon" />
+            <input
+              v-model="searchComments"
+              class="search-input"
+              placeholder="Search comments..."
+            />
+          </div>
           <div class="modal-table-wrap">
             <h4 class="table-subtitle">{{ $t('All Comments') }}</h4>
-            <table>
+            <SkeletonLoader v-if="commentStore.loading" :rows="4" :cols="6" />
+            <table v-else>
               <thead>
                 <tr>
                   <th>#</th>
@@ -959,8 +1072,11 @@ onMounted(async () => {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(comment, index) in commentStore.comments" :key="comment.id">
-                  <td class="idx">{{ index + 1 }}</td>
+                <tr v-if="!paginatedComments.length">
+                  <td colspan="6" class="no-data"><font-awesome-icon icon="ban" /> No Comments</td>
+                </tr>
+                <tr v-else v-for="(comment, index) in paginatedComments" :key="comment.id">
+                  <td class="idx">{{ csf + index }}</td>
                   <td>{{ comment.user?.last_name || 'N/A' }}</td>
                   <td>{{ comment?.comment }}</td>
                   <td>{{ comment?.rating }} <font-awesome-icon icon="star" class="star-icon" /></td>
@@ -971,11 +1087,16 @@ onMounted(async () => {
                     </button>
                   </td>
                 </tr>
-                <tr v-if="!commentStore.comments.length">
-                  <td colspan="6" class="no-data"><font-awesome-icon icon="ban" /> No Comments</td>
-                </tr>
               </tbody>
             </table>
+            <PaginationControls
+              :current-page="cp"
+              :total-pages="ctp"
+              :showing-from="csf"
+              :showing-to="cst"
+              :total-items="cti"
+              @page-change="cgp"
+            />
           </div>
         </div>
       </div>
@@ -995,22 +1116,41 @@ onMounted(async () => {
               <font-awesome-icon icon="xmark" />
             </button>
           </div>
+          <div class="search-bar">
+            <font-awesome-icon icon="search" class="search-icon" />
+            <input
+              v-model="searchAnnouncements"
+              class="search-input"
+              placeholder="Search announcements..."
+            />
+          </div>
           <div class="announcements-list">
-            <div v-if="!announcementStore.announcements.length" class="no-data">
-              <font-awesome-icon icon="ban" /> {{ $t('noAnnouncements') }}
-            </div>
-            <div
-              v-for="(announcement, index) in announcementStore.announcements"
-              :key="announcement.id"
-              class="message-card"
-            >
-              <div class="message-header">
-                <span class="message-index">#{{ index + 1 }}</span>
-                <span class="message-date">{{ formatDate(announcement.created_at) }}</span>
+            <SkeletonLoader v-if="announcementStore.loading" :rows="4" :cols="1" />
+            <template v-else>
+              <div v-if="!paginatedAnnouncements.length" class="no-data">
+                <font-awesome-icon icon="ban" /> {{ $t('noAnnouncements') }}
               </div>
-              <div class="message-title">{{ announcement.title }}</div>
-              <div class="message-body">{{ announcement.message }}</div>
-            </div>
+              <div
+                v-for="(announcement, index) in paginatedAnnouncements"
+                :key="announcement.id"
+                class="message-card"
+              >
+                <div class="message-header">
+                  <span class="message-index">#{{ asf + index }}</span>
+                  <span class="message-date">{{ formatDate(announcement.created_at) }}</span>
+                </div>
+                <div class="message-title">{{ announcement.title }}</div>
+                <div class="message-body">{{ announcement.message }}</div>
+              </div>
+              <PaginationControls
+                :current-page="ap"
+                :total-pages="atp"
+                :showing-from="asf"
+                :showing-to="ast"
+                :total-items="ati"
+                @page-change="agp"
+              />
+            </template>
           </div>
         </div>
       </div>
@@ -2204,5 +2344,38 @@ tbody tr:last-child td {
   .menu-btn {
     display: none !important;
   }
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  margin-bottom: 12px;
+  transition: border-color 0.2s;
+}
+.search-bar:focus-within {
+  border-color: #14b8a6;
+  background: rgba(20, 184, 166, 0.06);
+}
+.search-icon {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
 }
 </style>

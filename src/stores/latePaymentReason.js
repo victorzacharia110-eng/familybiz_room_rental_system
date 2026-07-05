@@ -8,17 +8,20 @@ export const useLatePaymentReasonStore = defineStore('latePaymentReason', () => 
   const loading = ref(false)
 
   const fetchLatePaymentReasons = async () => {
+    loading.value = true
     try {
       await api.get('/sanctum/csrf-cookie')
       const response = await api.get('/api/reasons/fetch')
       latePaymentReasons.value = response.data.latePaymentReasons
-      console.log('Late Payment REasons : ', response.data)
     } catch (err) {
       error.value = err.response?.data?.message || err.message
+    } finally {
+      loading.value = false
     }
   }
 
   const registerLatePaymentReasons = async (payload) => {
+    loading.value = true
     try {
       await api.get('/sanctum/csrf-cookie')
       const response = await api.post('/api/reasons/create', {
@@ -33,6 +36,8 @@ export const useLatePaymentReasonStore = defineStore('latePaymentReason', () => 
     } catch (err) {
       error.value = err.response?.data?.message || err.message
       return error.value
+    } finally {
+      loading.value = false
     }
   }
   return {

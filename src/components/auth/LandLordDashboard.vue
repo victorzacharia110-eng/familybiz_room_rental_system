@@ -15,6 +15,9 @@ import { useFootballStore } from '@/stores/entertainment/football.js'
 import EntertainmentModal from './EntertainmentModal.vue'
 import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
+import SkeletonLoader from './SkeletonLoader.vue'
+import PaginationControls from './PaginationControls.vue'
+import { usePagination } from '@/composables/usePagination'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import {
@@ -198,6 +201,110 @@ const editRemarkForm = ref({
 const editRemarkLoading = ref(false)
 const editRemarkSuccess = ref('')
 const editRemarkError = ref('')
+
+// Search & Pagination state
+const searchTenants = ref('')
+const searchRooms = ref('')
+const searchPayments = ref('')
+const searchPaymentMethods = ref('')
+const searchRemarks = ref('')
+const searchAnnouncements = ref('')
+const searchComments = ref('')
+
+const filteredTenants = computed(() => {
+  if (!auth.users) return []
+  const q = searchTenants.value.toLowerCase()
+  if (!q) return auth.users
+  return auth.users.filter(
+    (t) =>
+      (t.last_name || '').toLowerCase().includes(q) ||
+      (t.phone_number || '').toLowerCase().includes(q) ||
+      (t.room?.room_number || '').toString().toLowerCase().includes(q),
+  )
+})
+const { paginatedData: paginatedTenants, currentPage: tp, totalPages: ttp, showingFrom: tsf, showingTo: tst, totalItems: tti, goToPage: tgp } = usePagination(filteredTenants)
+
+const filteredRooms = computed(() => {
+  if (!roomStore.rooms) return []
+  const q = searchRooms.value.toLowerCase()
+  if (!q) return roomStore.rooms
+  return roomStore.rooms.filter(
+    (r) =>
+      (r.room_number || '').toLowerCase().includes(q) ||
+      (r.type || '').toLowerCase().includes(q) ||
+      (r.status || '').toLowerCase().includes(q),
+  )
+})
+const { paginatedData: paginatedRooms, currentPage: rp, totalPages: rtp, showingFrom: rsf, showingTo: rst, totalItems: rti, goToPage: rgp, resetPage: resetRoomsPage } = usePagination(filteredRooms)
+
+const filteredPayments = computed(() => {
+  if (!paymentStore.payments) return []
+  const q = searchPayments.value.toLowerCase()
+  if (!q) return paymentStore.payments
+  return paymentStore.payments.filter(
+    (p) =>
+      (p.room?.room_number || '').toLowerCase().includes(q) ||
+      (p.month_name || '').toLowerCase().includes(q) ||
+      String(p.year || '').includes(q) ||
+      String(p.amount || '').includes(q) ||
+      (p.status || '').toLowerCase().includes(q),
+  )
+})
+const { paginatedData: paginatedPayments, currentPage: pp, totalPages: ptp, showingFrom: psf, showingTo: pst, totalItems: pti, goToPage: pgp, resetPage: resetPaymentsPage } = usePagination(filteredPayments)
+
+const filteredPaymentMethods = computed(() => {
+  if (!paymentMethodStore.paymentMethods) return []
+  const q = searchPaymentMethods.value.toLowerCase()
+  if (!q) return paymentMethodStore.paymentMethods
+  return paymentMethodStore.paymentMethods.filter(
+    (pm) =>
+      String(pm.airtel_money_number || '').includes(q) ||
+      String(pm.m_pesa_number || '').includes(q) ||
+      String(pm.mixx_by_yas_number || '').includes(q) ||
+      String(pm.halopesa_number || '').includes(q) ||
+      String(pm.nmb_account_number || '').includes(q) ||
+      String(pm.crdb_account_number || '').includes(q) ||
+      String(pm.nbc_account_number || '').includes(q),
+  )
+})
+const { paginatedData: paginatedPaymentMethods, currentPage: pmp, totalPages: pmtp, showingFrom: pmsf, showingTo: pmst, totalItems: pmti, goToPage: pmgp, resetPage: resetPaymentMethodsPage } = usePagination(filteredPaymentMethods)
+
+const filteredRemarks = computed(() => {
+  if (!criticalRemarkStore.criticalRemarks) return []
+  const q = searchRemarks.value.toLowerCase()
+  if (!q) return criticalRemarkStore.criticalRemarks
+  return criticalRemarkStore.criticalRemarks.filter(
+    (r) =>
+      (r.user?.last_name || '').toLowerCase().includes(q) ||
+      (r.type || '').toLowerCase().includes(q) ||
+      (r.reason_text || '').toLowerCase().includes(q),
+  )
+})
+const { paginatedData: paginatedRemarks, currentPage: rmp, totalPages: rmtp, showingFrom: rmsf, showingTo: rmst, totalItems: rmit, goToPage: rmgp, resetPage: resetRemarksPage } = usePagination(filteredRemarks)
+
+const filteredAnnouncements = computed(() => {
+  if (!announcementStore.announcements) return []
+  const q = searchAnnouncements.value.toLowerCase()
+  if (!q) return announcementStore.announcements
+  return announcementStore.announcements.filter(
+    (a) =>
+      (a.title || '').toLowerCase().includes(q) ||
+      (a.message || '').toLowerCase().includes(q),
+  )
+})
+const { paginatedData: paginatedAnnouncements, currentPage: ap, totalPages: atp, showingFrom: asf, showingTo: ast, totalItems: ati, goToPage: agp, resetPage: resetAnnouncementsPage } = usePagination(filteredAnnouncements)
+
+const filteredComments = computed(() => {
+  if (!commentStore.comments) return []
+  const q = searchComments.value.toLowerCase()
+  if (!q) return commentStore.comments
+  return commentStore.comments.filter(
+    (c) =>
+      (c.user?.last_name || '').toLowerCase().includes(q) ||
+      (c.comment || '').toLowerCase().includes(q),
+  )
+})
+const { paginatedData: paginatedComments, currentPage: cp, totalPages: ctp, showingFrom: csf, showingTo: cst, totalItems: cti, goToPage: cgp, resetPage: resetCommentsPage } = usePagination(filteredComments)
 
 // Check if remark can be edited (only critical or warning types, not resolved)
 const canEditRemark = (remark) => {
@@ -427,7 +534,6 @@ const deleteTenant = async (tenant) => {
   alert(res ? 'Tenant deleted!' : 'Failed to delete tenant')
 }
 
-
 const deleteComment = async (id) => await commentStore.deleteComment(id)
 const deletingAnnouncement = async (id) => {
   if (!confirm('Delete this announcement?')) return
@@ -481,21 +587,21 @@ const resetAnnouncementForm = () => {
 
 const openPaymentsModal = (n) => {
   activePaymentsModal.value = n
-  if (n === 'payments') paymentFetching()
+  if (n === 'payments') { paymentFetching(); resetPaymentsPage() }
 }
 const closePaymentsModal = () => {
   activePaymentsModal.value = null
 }
 const openPaymentMethodModal = (n) => {
   activePaymentMethodModal.value = n
-  if (n === 'paymentMethod') paymentMethodFetching()
+  if (n === 'paymentMethod') { paymentMethodFetching(); resetPaymentMethodsPage() }
 }
 const closePaymentMethodModal = () => {
   activePaymentMethodModal.value = null
 }
 const openRoomsModal = (n) => {
   activeRoomsModal.value = n
-  if (n === 'rooms') roomFetching()
+  if (n === 'rooms') { roomFetching(); resetRoomsPage() }
 }
 const closeRoomsModal = () => {
   activeRoomsModal.value = null
@@ -509,21 +615,21 @@ const closeProfileModal = () => {
 }
 const openRemarksModal = (n) => {
   activeRemarksModal.value = n
-  if (n === 'remarks') criticalRemarkStore.fetchCriticalRemarks()
+  if (n === 'remarks') { criticalRemarkStore.fetchCriticalRemarks(); resetRemarksPage() }
 }
 const closeRemarksModal = () => {
   activeRemarksModal.value = null
 }
 const openAnnouncementModal = (n) => {
   activeAnnouncementModal.value = n
-  if (n === 'announcements') announcementStore.fetchAnnouncements()
+  if (n === 'announcements') { announcementStore.fetchAnnouncements(); resetAnnouncementsPage() }
 }
 const closeAnnouncementsModal = () => {
   activeAnnouncementModal.value = null
 }
 const openCommentsModal = (n) => {
   activeCommentsModal.value = n
-  if (n === 'comments') commentStore.fetchComments()
+  if (n === 'comments') { commentStore.fetchComments(); resetCommentsPage() }
 }
 const closeCommentsModal = () => {
   activeCommentsModal.value = null
@@ -1028,14 +1134,16 @@ function buildCubes() {
             </div>
           </Transition>
 
+          <div class="search-bar">
+            <font-awesome-icon icon="search" class="search-icon" />
+            <input
+              v-model="searchTenants"
+              class="search-input"
+              :placeholder="$t('search') || 'Search tenants...'"
+            />
+          </div>
           <div class="table-wrap">
-            <div v-if="tenantLoading" class="table-skeleton">
-              <div class="skeleton-row"></div>
-              <div class="skeleton-row"></div>
-              <div class="skeleton-row"></div>
-              <div class="skeleton-row"></div>
-              <div class="skeleton-row"></div>
-            </div>
+            <SkeletonLoader v-if="tenantLoading" :rows="5" :cols="8" />
             <table v-else>
               <thead>
                 <tr>
@@ -1050,8 +1158,8 @@ function buildCubes() {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(tenant, index) in auth.users" :key="tenant?.id">
-                  <td class="idx">{{ index + 1 }}</td>
+                <tr v-for="(tenant, index) in paginatedTenants" :key="tenant?.id">
+                  <td class="idx">{{ tsf + index }}</td>
                   <td>
                     <strong>{{ tenant.last_name }}</strong>
                   </td>
@@ -1082,7 +1190,7 @@ function buildCubes() {
                     </ul>
                     <span v-else class="muted"><font-awesome-icon icon="ban" /> None</span>
                   </td>
-                  <td style="gap: 5px;">
+                  <td style="gap: 5px">
                     <button
                       class="btn-sm"
                       @click="addRemark(tenant)"
@@ -1101,6 +1209,15 @@ function buildCubes() {
                 </tr>
               </tbody>
             </table>
+            <PaginationControls
+              v-if="!tenantLoading"
+              :current-page="tp"
+              :total-pages="ttp"
+              :showing-from="tsf"
+              :showing-to="tst"
+              :total-items="tti"
+              @page-change="tgp"
+            />
           </div>
         </section>
 
@@ -1285,9 +1402,18 @@ function buildCubes() {
               </button>
             </div>
           </form>
+          <div class="search-bar">
+            <font-awesome-icon icon="search" class="search-icon" />
+            <input
+              v-model="searchRooms"
+              class="search-input"
+              :placeholder="$t('search') || 'Search rooms...'"
+            />
+          </div>
           <div class="modal-table-wrap">
             <h4 class="table-subtitle">{{ $t('existingRooms') }}</h4>
-            <table>
+            <SkeletonLoader v-if="roomStore.loading" :rows="4" :cols="4" />
+            <table v-else>
               <thead>
                 <tr>
                   <th>{{ $t('room') }}</th>
@@ -1297,7 +1423,7 @@ function buildCubes() {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="room in roomStore.rooms" :key="room?.id">
+                <tr v-for="room in paginatedRooms" :key="room?.id">
                   <td>{{ room?.room_number || 'N/A' }}</td>
                   <td>{{ room?.type || '—' }}</td>
                   <td>
@@ -1318,6 +1444,14 @@ function buildCubes() {
                 </tr>
               </tbody>
             </table>
+            <PaginationControls
+              :current-page="rp"
+              :total-pages="rtp"
+              :showing-from="rsf"
+              :showing-to="rst"
+              :total-items="rti"
+              @page-change="rgp"
+            />
           </div>
         </div>
       </div>
@@ -1337,22 +1471,34 @@ function buildCubes() {
               <font-awesome-icon icon="xmark" />
             </button>
           </div>
+          <div class="search-bar">
+            <font-awesome-icon icon="search" class="search-icon" />
+            <input
+              v-model="searchRemarks"
+              class="search-input"
+              placeholder="Search remarks..."
+            />
+          </div>
           <div class="modal-table-wrap">
-            <table>
+            <SkeletonLoader v-if="criticalRemarkStore.loading" :rows="4" :cols="6" />
+            <table v-else>
               <thead>
                 <tr>
                   <th>#</th>
                   <th>Tenant</th>
                   <th>Type</th>
                   <th>Reason</th>
+                  <th>Status</th>
+                  <th></th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-if="!myRemarks.length">
-                  <td colspan="6" class="no-data"><font-awesome-icon icon="ban" /> No Remarks</td>
+                <tr v-if="!paginatedRemarks.length">
+                  <td colspan="7" class="no-data"><font-awesome-icon icon="ban" /> No Remarks</td>
                 </tr>
-                <tr v-else v-for="(remark, i) in myRemarks" :key="remark.id">
-                  <td class="idx">{{ i + 1 }}</td>
+                <tr v-else v-for="(remark, i) in paginatedRemarks" :key="remark.id">
+                  <td class="idx">{{ rmsf + i }}</td>
                   <td>{{ remark.user?.last_name || 'N/A' }}</td>
                   <td>
                     <span class="type-pill" :class="remark.type">
@@ -1394,6 +1540,14 @@ function buildCubes() {
                 </tr>
               </tbody>
             </table>
+            <PaginationControls
+              :current-page="rmp"
+              :total-pages="rmtp"
+              :showing-from="rmsf"
+              :showing-to="rmst"
+              :total-items="rmit"
+              @page-change="rmgp"
+            />
           </div>
         </div>
       </div>
@@ -1544,9 +1698,18 @@ function buildCubes() {
               <button type="button" class="btn-ghost" @click="closePaymentsModal">Close</button>
             </div>
           </form>
+          <div class="search-bar">
+            <font-awesome-icon icon="search" class="search-icon" />
+            <input
+              v-model="searchPayments"
+              class="search-input"
+              placeholder="Search payments..."
+            />
+          </div>
           <div class="modal-table-wrap">
             <h4 class="table-subtitle">{{ $t('payments') }}</h4>
-            <table>
+            <SkeletonLoader v-if="paymentStore.loading" :rows="4" :cols="7" />
+            <table v-else>
               <thead>
                 <tr>
                   <th>{{ $t('Room') }}</th>
@@ -1559,7 +1722,10 @@ function buildCubes() {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="p in paymentStore.payments" :key="p.id">
+                <tr v-if="!paginatedPayments.length">
+                  <td colspan="7" class="no-data"><font-awesome-icon icon="ban" /> No Payments</td>
+                </tr>
+                <tr v-else v-for="p in paginatedPayments" :key="p.id">
                   <td>{{ p.room?.room_number || 'N/A' }}</td>
                   <td>{{ p.month_name }}</td>
                   <td>{{ p.year }}</td>
@@ -1581,6 +1747,14 @@ function buildCubes() {
                 </tr>
               </tbody>
             </table>
+            <PaginationControls
+              :current-page="pp"
+              :total-pages="ptp"
+              :showing-from="psf"
+              :showing-to="pst"
+              :total-items="pti"
+              @page-change="pgp"
+            />
           </div>
         </div>
       </div>
@@ -1673,9 +1847,18 @@ function buildCubes() {
               </button>
             </div>
           </form>
+          <div class="search-bar">
+            <font-awesome-icon icon="search" class="search-icon" />
+            <input
+              v-model="searchPaymentMethods"
+              class="search-input"
+              placeholder="Search payment methods..."
+            />
+          </div>
           <div class="modal-table-wrap">
             <h4 class="table-subtitle">{{ $t('existingPaymentMethods') }}</h4>
-            <table>
+            <SkeletonLoader v-if="paymentMethodStore.loading" :rows="4" :cols="9" />
+            <table v-else>
               <thead>
                 <tr>
                   <th>#</th>
@@ -1690,8 +1873,11 @@ function buildCubes() {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(pm, i) in paymentMethodStore.paymentMethods" :key="pm?.id">
-                  <td class="idx">{{ i + 1 }}</td>
+                <tr v-if="!paginatedPaymentMethods.length">
+                  <td colspan="9" class="no-data"><font-awesome-icon icon="ban" /> No Payment Methods</td>
+                </tr>
+                <tr v-else v-for="(pm, i) in paginatedPaymentMethods" :key="pm?.id">
+                  <td class="idx">{{ pmsf + i }}</td>
                   <td>{{ pm?.airtel_money_number || '—' }}</td>
                   <td>{{ pm?.m_pesa_number || '—' }}</td>
                   <td>{{ pm?.mixx_by_yas_number || '—' }}</td>
@@ -1712,6 +1898,14 @@ function buildCubes() {
                 </tr>
               </tbody>
             </table>
+            <PaginationControls
+              :current-page="pmp"
+              :total-pages="pmtp"
+              :showing-from="pmsf"
+              :showing-to="pmst"
+              :total-items="pmti"
+              @page-change="pmgp"
+            />
           </div>
         </div>
       </div>
@@ -1758,9 +1952,18 @@ function buildCubes() {
               </button>
             </div>
           </form>
+          <div class="search-bar">
+            <font-awesome-icon icon="search" class="search-icon" />
+            <input
+              v-model="searchAnnouncements"
+              class="search-input"
+              placeholder="Search announcements..."
+            />
+          </div>
           <div class="modal-table-wrap">
             <h4 class="table-subtitle">{{ $t('announcements') }}</h4>
-            <table>
+            <SkeletonLoader v-if="announcementStore.loading" :rows="4" :cols="5" />
+            <table v-else>
               <thead>
                 <tr>
                   <th>Title</th>
@@ -1771,12 +1974,12 @@ function buildCubes() {
                 </tr>
               </thead>
               <tbody>
-                <tr v-if="!announcementStore.announcements.length">
+                <tr v-if="!paginatedAnnouncements.length">
                   <td colspan="5" class="no-data">
                     <font-awesome-icon icon="ban" /> No Announcements
                   </td>
                 </tr>
-                <tr v-else v-for="a in announcementStore.announcements" :key="a.id">
+                <tr v-else v-for="a in paginatedAnnouncements" :key="a.id">
                   <td>
                     <strong>{{ a.title }}</strong>
                   </td>
@@ -1795,6 +1998,14 @@ function buildCubes() {
                 </tr>
               </tbody>
             </table>
+            <PaginationControls
+              :current-page="ap"
+              :total-pages="atp"
+              :showing-from="asf"
+              :showing-to="ast"
+              :total-items="ati"
+              @page-change="agp"
+            />
           </div>
         </div>
       </div>
@@ -1841,9 +2052,18 @@ function buildCubes() {
               <button type="button" class="btn-ghost" @click="closeCommentsModal">Close</button>
             </div>
           </form>
+          <div class="search-bar">
+            <font-awesome-icon icon="search" class="search-icon" />
+            <input
+              v-model="searchComments"
+              class="search-input"
+              placeholder="Search comments..."
+            />
+          </div>
           <div class="modal-table-wrap">
             <h4 class="table-subtitle">{{ $t('All Comments') }}</h4>
-            <table>
+            <SkeletonLoader v-if="commentStore.loading" :rows="4" :cols="5" />
+            <table v-else>
               <thead>
                 <tr>
                   <th>Tenant</th>
@@ -1854,10 +2074,10 @@ function buildCubes() {
                 </tr>
               </thead>
               <tbody>
-                <tr v-if="!commentStore.comments.length">
+                <tr v-if="!paginatedComments.length">
                   <td colspan="5" class="no-data"><font-awesome-icon icon="ban" /> No Comments</td>
                 </tr>
-                <tr v-else v-for="c in commentStore.comments" :key="c.id">
+                <tr v-else v-for="c in paginatedComments" :key="c.id">
                   <td>{{ c.user?.last_name || 'N/A' }}</td>
                   <td>{{ c.comment }}</td>
                   <td>{{ c.rating }} <font-awesome-icon icon="star" class="star-icon" /></td>
@@ -1870,6 +2090,14 @@ function buildCubes() {
                 </tr>
               </tbody>
             </table>
+            <PaginationControls
+              :current-page="cp"
+              :total-pages="ctp"
+              :showing-from="csf"
+              :showing-to="cst"
+              :total-items="cti"
+              @page-change="cgp"
+            />
           </div>
         </div>
       </div>
@@ -2937,6 +3165,39 @@ tbody tr:last-child td {
     flex-direction: column;
   }
 }
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  margin-bottom: 12px;
+  transition: border-color 0.2s;
+}
+.search-bar:focus-within {
+  border-color: #14b8a6;
+  background: rgba(20, 184, 166, 0.06);
+}
+.search-icon {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
 @media (min-width: 769px) {
   .menu-btn {
     display: none !important;

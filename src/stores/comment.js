@@ -8,29 +8,49 @@ export const useCommentStore = defineStore('comment', () => {
   const error = ref(null)
 
   const fetchComments = async () => {
-    await api.get('/sanctum/csrf-cookie')
-
-    const response = await api.get('/api/comments/fetch')
-
-    comments.value = response.data.comments 
-
-    return comments.value
+    loading.value = true
+    try {
+      await api.get('/sanctum/csrf-cookie')
+      const response = await api.get('/api/comments/fetch')
+      comments.value = response.data.comments
+      return comments.value
+    } catch (err) {
+      error.value = err.response?.data?.message || err.message
+      return error.value
+    } finally {
+      loading.value = false
+    }
   }
 
   const registerComments = async (payload) => {
+    loading.value = true
     try {
       await api.get('/sanctum/csrf-cookie')
-      const response = api.post('/api/comments/create', {
+      const response = await api.post('/api/comments/create', {
         comment: payload.comment,
         rating: payload.rating,
       })
 
-      const newComment = (await response).data.comment
+      const newComment = response.data.comment
       comments.value.push(newComment)
       return newComment
     } catch (err) {
       error.value = err.response?.data?.message || err.message
       return error.value
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const deleteComment = async (id) => {
+    try {
+      await api.get('/sanctum/csrf-cookie')
+      await api.delete(`/api/comments/delete/${id}`)
+      comments.value = comments.value.filter((c) => c.id !== id)
+      return true
+    } catch (err) {
+      error.value = err.response?.data?.message || err.message
+      return false
     }
   }
 
@@ -41,5 +61,6 @@ export const useCommentStore = defineStore('comment', () => {
     error,
     fetchComments,
     registerComments,
+    deleteComment,
   }
 })

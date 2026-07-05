@@ -15,7 +15,7 @@ export const useRuleStore = defineStore('rule', () => {
     } catch (err) {
       error.value = err.response?.data?.message || err.message
     } finally {
-      loading.value = true
+      loading.value = false
     }
   }
 
