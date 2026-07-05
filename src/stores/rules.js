@@ -11,7 +11,8 @@ export const useRuleStore = defineStore('rule', () => {
     try {
       await api.get('/sanctum/csrf-cookie')
       const response = await api.get('/api/rule/fetch')
-      rules.value = response.data.rules
+      const result = response.data.rules
+      rules.value = Array.isArray(result) ? result : (result?.data ?? [])
     } catch (err) {
       error.value = err.response?.data?.message || err.message
     } finally {

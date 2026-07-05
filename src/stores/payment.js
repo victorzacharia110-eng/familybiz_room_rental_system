@@ -62,8 +62,8 @@ export const usePaymentStore = defineStore('payment', () => {
     try {
       await api.get('/sanctum/csrf-cookie')
       const response = await api.get('/api/payment/fetch')
-      payments.value = await response.data.payments
-      console.log(' payments response fetched :: ', response)
+      const result = response.data.payments
+      payments.value = Array.isArray(result) ? result : (result?.data ?? [])
     } catch (err) {
       error.value = err.response?.data?.message || err.message
     } finally {

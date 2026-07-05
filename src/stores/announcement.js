@@ -16,7 +16,8 @@ export const useAnnouncementStore = defineStore('announcement', () => {
       loading.value = true
       await api.get('/sanctum/csrf-cookie')
       const response = await api.get('/api/announcements/fetch')
-      announcements.value = response.data.announcements
+      const result = response.data.announcements
+      announcements.value = Array.isArray(result) ? result : (result?.data ?? [])
       return announcements.value
     } catch (err) {
       error.value = err.response?.data?.message || err.message

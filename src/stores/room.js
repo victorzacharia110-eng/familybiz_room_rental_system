@@ -50,7 +50,8 @@ export const useRoomStore = defineStore('room', () => {
     try {
       api.get('sanctum/csrf-cookie')
       const response = await api.get('/api/room/fetch')
-      rooms.value = response.data.rooms
+      const result = response.data.rooms
+      rooms.value = Array.isArray(result) ? result : (result?.data ?? [])
       totalRooms.value = response.data.totalRooms
       roomsAvailableCount.value = response.data.roomsAvailableCount
       roomsMaintananceCount.value = response.data.roomsMaintananceCount

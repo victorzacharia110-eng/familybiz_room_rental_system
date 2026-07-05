@@ -12,7 +12,8 @@ export const useLatePaymentReasonStore = defineStore('latePaymentReason', () => 
     try {
       await api.get('/sanctum/csrf-cookie')
       const response = await api.get('/api/reasons/fetch')
-      latePaymentReasons.value = response.data.latePaymentReasons
+      const result = response.data.latePaymentReasons
+      latePaymentReasons.value = Array.isArray(result) ? result : (result?.data ?? [])
     } catch (err) {
       error.value = err.response?.data?.message || err.message
     } finally {

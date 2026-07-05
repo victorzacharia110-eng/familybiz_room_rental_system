@@ -12,7 +12,8 @@ export const useCommentStore = defineStore('comment', () => {
     try {
       await api.get('/sanctum/csrf-cookie')
       const response = await api.get('/api/comments/fetch')
-      comments.value = response.data.comments
+      const result = response.data.comments
+      comments.value = Array.isArray(result) ? result : (result?.data ?? [])
       return comments.value
     } catch (err) {
       error.value = err.response?.data?.message || err.message

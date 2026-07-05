@@ -13,7 +13,8 @@ export const useCriticalRemarkStore = defineStore('criticalRemark', () => {
     try {
       await api.get('/sanctum/csrf-cookie')
       const response = await api.get('/api/remarks/fetch')
-      criticalRemarks.value = response.data.criticalRemarks
+      const result = response.data.criticalRemarks
+      criticalRemarks.value = Array.isArray(result) ? result : (result?.data ?? [])
       return criticalRemarks.value
     } catch (err) {
       error.value = err.response?.data.message || err.message

@@ -51,7 +51,8 @@ export const useAuthStore = defineStore(
       try {
         await api.get('/sanctum/csrf-cookie')
         const response = await api.get('/api/user/fetch')
-        users.value = response.data.users
+        const result = response.data.users
+        users.value = Array.isArray(result) ? result : (result?.data ?? [])
       } catch (err) {
         error.value = err.response?.message || err.message
       } finally {
