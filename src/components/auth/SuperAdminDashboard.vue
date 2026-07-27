@@ -431,36 +431,36 @@ onMounted(async () => {
       </div>
     </main>
 
-    <!-- RESET PASSWORD MODAL - TEST 1: Full structure, no v-model/:disabled/v-if -->
+    <!-- RESET PASSWORD MODAL - TEST 2: FA icons only, no t(), no optional chaining -->
     <div v-if="resetModalOpen" class="modal-overlay" @click.self="closeResetModal">
       <div class="reset-modal">
         <div class="reset-modal-header">
           <div class="reset-modal-icon">
             <font-awesome-icon icon="key" />
           </div>
-          <h3>{{ t('resetPassword') }}</h3>
+          <h3>RESET PASSWORD</h3>
           <button class="modal-close-btn" @click="closeResetModal">
             <font-awesome-icon icon="xmark" />
           </button>
         </div>
 
         <div class="reset-user-info">
-          <span class="reset-user-name">{{ resetUser?.last_name || '—' }}</span>
-          <span class="reset-user-email">{{ resetUser?.email }}</span>
+          <span class="reset-user-name">User</span>
+          <span class="reset-user-email">email@test.com</span>
         </div>
 
         <div class="reset-form-group">
-          <label>{{ t('newPassword') }}</label>
+          <label>New Password</label>
           <input type="text" class="reset-input" />
-          <p class="reset-hint">{{ t('passwordHint') }}</p>
+          <p class="reset-hint">Password must be at least 8 characters.</p>
         </div>
 
         <div class="reset-modal-actions">
           <button class="reset-btn cancel" @click="closeResetModal">
-            {{ t('cancel') }}
+            Cancel
           </button>
           <button class="reset-btn confirm">
-            {{ t('resetPassword') }}
+            Reset
           </button>
         </div>
       </div>
