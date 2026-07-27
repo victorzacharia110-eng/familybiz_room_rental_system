@@ -14,7 +14,7 @@ base: "/",
 
   // 👇 ADD THIS SECTION
   test: {
-    environment: 'jsdom', // simulate browser
+    environment: 'jsdom', // simulate browse
     globals: true, // allow describe, it, expect without imports
     setupFiles: './tests/setup.js',
   },

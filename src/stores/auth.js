@@ -41,10 +41,12 @@ export const useAuthStore = defineStore(
       error.value = null
       try {
         const response = await api.get('/api/user/fetch')
-        user.value = response.data.user || null
+        user.value = response.data.user || response.data || null
       } catch (err) {
-        user.value = null
-        localStorage.removeItem('auth_token')
+        if (err.response?.status === 401) {
+          user.value = null
+          localStorage.removeItem('auth_token')
+        }
         error.value = err.response?.data?.message || err.message
       } finally {
         loading.value = false

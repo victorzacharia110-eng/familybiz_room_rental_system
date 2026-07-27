@@ -123,7 +123,6 @@ const tenantCount = computed(() => admin.tenants.length)
 const roomCount = computed(() => roomStore.totalRooms)
 
 onMounted(async () => {
-  await auth.fetchUser()
   await admin.fetchLandlords()
   await admin.fetchTenants()
   await roomStore.fetchRooms()

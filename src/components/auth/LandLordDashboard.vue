@@ -192,7 +192,6 @@ const successAddingRemarkMessage = ref('')
 const successCreationRuleMessage = ref('')
 const successAnnouncementMessage = ref('')
 const successCommentMessage = ref('')
-const successPasswordResetMessage = ref('')
 const unconfirmedPayments = ref([])
 const unconfirmedPaymentLoading = ref(false)
 const activeUnconfirmedModal = ref(null)
@@ -216,8 +215,6 @@ const activeProfileModal = ref(null)
 const activeRemarksModal = ref(null)
 const activeAnnouncementModal = ref(null)
 const activeCommentsModal = ref(null)
-const activePasswordResetModal = ref(null)
-
 // The refs for the edit remark modal
 const activeEditRemarkModal = ref(null)
 const editRemarkForm = ref({
@@ -477,8 +474,6 @@ const paymentMethodForm = ref({
 const ruleForm = ref({ title: '', description: '', type: '' })
 const announcementForm = ref({ title: '', message: '' })
 const commentForm = ref({ comment: '', rating: 5 })
-const passwordResetForm = ref({ email: '' })
-
 const paymentMethodFetching = async () => await paymentMethodStore.fetchPaymentMethods()
 const paymentFetching = async () => await paymentStore.fetchPayments()
 const roomFetching = async () => await roomStore.fetchRooms()
@@ -662,23 +657,6 @@ const openCommentsModal = (n) => {
 }
 const closeCommentsModal = () => {
   activeCommentsModal.value = null
-}
-const openPasswordResetModal = (n) => {
-  activePasswordResetModal.value = n
-  if (n === 'passwordReset') passwordResetForm.value.email = auth.user?.email || ''
-}
-const closePasswordResetModal = () => {
-  activePasswordResetModal.value = null
-  successPasswordResetMessage.value = ''
-  passwordResetForm.value.email = ''
-}
-
-const sendPasswordResetLink = async () => {
-  const res = await auth.requestPasswordReset(passwordResetForm.value.email)
-  if (res) {
-    successPasswordResetMessage.value = 'Reset link sent!'
-    setTimeout(() => closePasswordResetModal(), 3000)
-  }
 }
 
 const openUnconfirmedModal = async (n) => {
@@ -1062,14 +1040,6 @@ function buildCubes() {
           @click.prevent="openProfileModal('profile')"
         >
           <font-awesome-icon icon="user" class="ni" /><span>{{ $t('Profile') }}</span>
-        </a>
-        <a
-          href="#"
-          class="nav-item"
-          :class="{ on: activePasswordResetModal === 'passwordReset' }"
-          @click.prevent="openPasswordResetModal('passwordReset')"
-        >
-          <font-awesome-icon icon="lock" class="ni" /><span>{{ $t('resetPassword') }}</span>
         </a>
         <a
           href="#"
@@ -2216,58 +2186,6 @@ function buildCubes() {
               @page-change="cgp"
             />
           </div>
-        </div>
-      </div>
-    </Transition>
-
-    <!-- PASSWORD RESET -->
-    <Transition name="modal-fade">
-      <div
-        v-if="activePasswordResetModal === 'passwordReset'"
-        class="modal-overlay"
-        @click.self="closePasswordResetModal"
-      >
-        <div class="glass-modal">
-          <div class="modal-top">
-            <h3><font-awesome-icon icon="key" /> {{ $t('resetPasswordTitle') }}</h3>
-            <button class="close-x" @click="closePasswordResetModal">
-              <font-awesome-icon icon="xmark" />
-            </button>
-          </div>
-          <Transition name="alert-pop">
-            <div v-if="successPasswordResetMessage" class="success-alert">
-              <font-awesome-icon icon="check-circle" /> {{ successPasswordResetMessage }}
-            </div>
-          </Transition>
-          <Transition name="alert-pop">
-            <div v-if="auth.error" class="error-alert">
-              <font-awesome-icon icon="triangle-exclamation" /> {{ auth.error }}
-            </div>
-          </Transition>
-          <p class="modal-desc">{{ $t('resetPasswordDescription') }}</p>
-          <form @submit.prevent="sendPasswordResetLink">
-            <div class="mfield">
-              <label>{{ $t('email') }}</label
-              ><input
-                v-model="passwordResetForm.email"
-                type="email"
-                :placeholder="$t('email')"
-                required
-              />
-            </div>
-            <div class="modal-actions">
-              <button type="submit" class="btn-teal" :disabled="auth.loading">
-                <font-awesome-icon
-                  :icon="auth.loading ? 'spinner' : 'envelope'"
-                  :spin="auth.loading"
-                />
-                {{ auth.loading ? 'Sending...' : $t('sendResetLink') }}
-              </button>
-              <button type="button" class="btn-ghost" @click="closePasswordResetModal">
-                {{ $t('close') }}
-              </button>
-            </div>
-          </form>
         </div>
       </div>
     </Transition>
