@@ -78,17 +78,33 @@ const tenantSearch = ref('')
 const doLandlordSearch = () => admin.fetchLandlords(landlordSearch.value)
 const doTenantSearch = () => admin.fetchTenants(tenantSearch.value)
 
-const handleResetPassword = async (userId) => {
-  const pw = prompt('Enter new password (min 8 chars):')
-  if (!pw || pw.length < 8) return alert('Password must be at least 8 characters')
-  loadingAction.value = userId
-  const msg = await admin.resetPassword(userId, pw)
-  loadingAction.value = null
+const resetModalOpen = ref(false)
+const resetUser = ref(null)
+const resetPassword = ref('')
+const resetLoading = ref(false)
+const resetSuccess = ref('')
+
+const openResetModal = (user) => {
+  resetUser.value = user
+  resetPassword.value = (user.last_name || 'USER').toUpperCase() + '@2026!'
+  resetModalOpen.value = true
+  resetSuccess.value = ''
+}
+const closeResetModal = () => { resetModalOpen.value = false; resetUser.value = null }
+
+const submitResetPassword = async () => {
+  if (!resetPassword.value || resetPassword.value.length < 8) return
+  resetLoading.value = true
+  const msg = await admin.resetPassword(resetUser.value.id, resetPassword.value)
+  resetLoading.value = false
   if (msg) {
-    alert(msg)
+    resetSuccess.value = msg
     admin.fetchLandlords(landlordSearch.value)
     admin.fetchTenants(tenantSearch.value)
-  } else alert(admin.error || 'Failed')
+    setTimeout(() => { resetModalOpen.value = false; resetUser.value = null }, 1500)
+  } else {
+    alert(admin.error || 'Failed')
+  }
 }
 
 const handleToggleStatus = async (userId) => {
@@ -278,7 +294,7 @@ onMounted(async () => {
                     <button
                       class="icon-btn reset"
                       :disabled="loadingAction === u.id"
-                      @click="handleResetPassword(u.id)"
+                      @click="openResetModal(u)"
                       :title="t('resetPassword')"
                     >
                       <font-awesome-icon icon="key" />
@@ -350,7 +366,7 @@ onMounted(async () => {
                     <button
                       class="icon-btn reset"
                       :disabled="loadingAction === u.id"
-                      @click="handleResetPassword(u.id)"
+                      @click="openResetModal(u)"
                       :title="t('resetPassword')"
                     >
                       <font-awesome-icon icon="key" />
@@ -414,6 +430,56 @@ onMounted(async () => {
         </section>
       </div>
     </main>
+
+    <!-- RESET PASSWORD MODAL -->
+    <Transition name="modal-fade">
+      <div v-if="resetModalOpen" class="modal-overlay" @click.self="closeResetModal">
+        <div class="reset-modal">
+          <div class="reset-modal-header">
+            <div class="reset-modal-icon">
+              <font-awesome-icon icon="key" />
+            </div>
+            <h3>{{ t('resetPassword') }}</h3>
+            <button class="modal-close-btn" @click="closeResetModal">
+              <font-awesome-icon icon="xmark" />
+            </button>
+          </div>
+
+          <div v-if="resetSuccess" class="reset-success">
+            <font-awesome-icon icon="check-circle" />
+            <span>{{ resetSuccess }}</span>
+          </div>
+
+          <template v-else>
+            <div class="reset-user-info">
+              <span class="reset-user-name">{{ resetUser?.last_name || '—' }}</span>
+              <span class="reset-user-email">{{ resetUser?.email }}</span>
+            </div>
+
+            <div class="reset-form-group">
+              <label>{{ t('newPassword') }}</label>
+              <input
+                v-model="resetPassword"
+                type="text"
+                class="reset-input"
+                :placeholder="t('enterNewPassword')"
+              />
+              <p class="reset-hint">{{ t('passwordHint') }}</p>
+            </div>
+
+            <div class="reset-modal-actions">
+              <button class="reset-btn cancel" @click="closeResetModal" :disabled="resetLoading">
+                {{ t('cancel') }}
+              </button>
+              <button class="reset-btn confirm" @click="submitResetPassword" :disabled="resetLoading || !resetPassword || resetPassword.length < 8">
+                <font-awesome-icon v-if="resetLoading" icon="spinner" spin />
+                {{ resetLoading ? t('resetting') : t('resetPassword') }}
+              </button>
+            </div>
+          </template>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -843,30 +909,42 @@ onMounted(async () => {
 }
 
 @media (max-width: 768px) {
-  .sidebar {
-    transform: translateX(-100%);
-  }
-  .sidebar-open .sidebar {
-    transform: translateX(0);
-  }
-  .sidebar-overlay {
-    display: block;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 99;
-  }
-  .dash-main {
-    margin-left: 0;
-  }
-  .menu-btn {
-    display: block;
-  }
-  .dash-content {
-    padding: 16px;
-  }
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
+  .sidebar { transform: translateX(-100%); }
+  .sidebar-open .sidebar { transform: translateX(0); }
+  .sidebar-overlay { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+  .dash-main { margin-left: 0; }
+  .menu-btn { display: block; }
+  .dash-content { padding: 16px; }
+  .stats-grid { grid-template-columns: 1fr; }
 }
+
+/* MODAL OVERLAY */
+.modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; padding: 20px; }
+.modal-fade-enter-active, .modal-fade-leave-active { transition: 0.2s; }
+.modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; }
+
+/* RESET PASSWORD MODAL */
+.reset-modal { width: 100%; max-width: 420px; background: #111827; border: 1px solid rgba(20,184,166,0.15); border-radius: 16px; overflow: hidden; box-shadow: 0 24px 48px rgba(0,0,0,0.4); }
+.reset-modal-header { display: flex; align-items: center; gap: 12px; padding: 20px 20px 0; }
+.reset-modal-icon { width: 40px; height: 40px; border-radius: 10px; background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); display: flex; align-items: center; justify-content: center; color: #f59e0b; font-size: 16px; flex-shrink: 0; }
+.reset-modal-header h3 { flex: 1; font-size: 16px; font-weight: 700; color: #fff; }
+.modal-close-btn { background: none; border: none; color: rgba(255,255,255,0.3); font-size: 18px; cursor: pointer; padding: 4px; transition: 0.2s; }
+.modal-close-btn:hover { color: #ef4444; }
+.reset-success { padding: 32px 20px; text-align: center; color: #22c55e; font-size: 14px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.reset-success .fa-check-circle { font-size: 32px; }
+.reset-user-info { padding: 16px 20px 0; display: flex; flex-direction: column; gap: 2px; }
+.reset-user-name { font-size: 15px; font-weight: 700; color: #fff; }
+.reset-user-email { font-size: 12px; color: rgba(255,255,255,0.35); }
+.reset-form-group { padding: 16px 20px 0; display: flex; flex-direction: column; gap: 6px; }
+.reset-form-group label { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px; }
+.reset-input { width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-size: 13px; font-family: 'Courier New', monospace; outline: none; transition: 0.2s; }
+.reset-input:focus { border-color: rgba(245,158,11,0.5); }
+.reset-hint { font-size: 11px; color: rgba(255,255,255,0.25); }
+.reset-modal-actions { padding: 20px; display: flex; gap: 10px; justify-content: flex-end; }
+.reset-btn { padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
+.reset-btn.cancel { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); }
+.reset-btn.cancel:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.reset-btn.confirm { background: linear-gradient(135deg, #0f766e, #14b8a6); color: #fff; }
+.reset-btn.confirm:hover { opacity: 0.9; transform: translateY(-1px); }
+.reset-btn.confirm:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 </style>

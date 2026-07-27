@@ -300,5 +300,10 @@
   "allRooms": "All Rooms",
   "systemWideRoomOverview": "System-wide room overview",
   "roomNumber": "Room Number",
-  "noRoomsFound": "No rooms found"
+  "noRoomsFound": "No rooms found",
+  "newPassword": "New Password",
+  "enterNewPassword": "Enter new password",
+  "passwordHint": "Default: LASTNAME@2026!",
+  "resetting": "Resetting...",
+  "cancel": "Cancel"
 }

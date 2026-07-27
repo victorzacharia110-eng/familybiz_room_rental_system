@@ -318,6 +318,11 @@
   "allRooms": "Vyumba Vyote",
   "systemWideRoomOverview": "Muhtasari wa vyumba kote mfumoni",
   "roomNumber": "Nambari ya Chumba",
-  "noRoomsFound": "Hakuna vyumba vilivyopatikana"
+  "noRoomsFound": "Hakuna vyumba vilivyopatikana",
+  "newPassword": "Nenosiri Jipya",
+  "enterNewPassword": "Weka nenosiri jipya",
+  "passwordHint": "Chaguo-msingi: JINALA@2026!",
+  "resetting": "Inasawazisha...",
+  "cancel": "Ghairi"
   
 }
