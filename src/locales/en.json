@@ -243,6 +243,8 @@
   "tenantDeletionSuccess": "Tenant has been successfully deleted. All associated data has been removed.",
   "tenantDeletionError": "An error occurred while attempting to delete the tenant. Please try again later or contact support if the issue persists.",
 
+  "editProfile": "Edit Profile",
+  "rejectPayment": "Reject Payment",
   "cancelPayment": "Cancel Payment",
   "cancelPaymentConfirm": "Type CANCEL to cancel this payment. This will release the room selection.",
   "paymentCancelled": "Payment cancelled successfully",

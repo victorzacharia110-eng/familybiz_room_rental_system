@@ -185,6 +185,20 @@ export const usePaymentStore = defineStore('payment', () => {
     }
   }
 
+  const rejectPayment = async (paymentId) => {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await api.patch(`/api/payment/reject/${paymentId}`)
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || err.message
+      return null
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     payments,
     tenant_payment,
@@ -203,5 +217,6 @@ export const usePaymentStore = defineStore('payment', () => {
     unconfirmedPayments,
     fetchUnconfirmedPayments,
     cancelPayment,
+    rejectPayment,
   }
 })

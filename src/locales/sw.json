@@ -267,6 +267,8 @@
   "canDeleteRule": "Je, una uhakika unataka kufuta sheria hii? Hii haiwezi kurekebishwa.",
   "canDeletePaymentMethod": "Je, una uhakika unataka kufuta njia ya malipo hii? Hii haiwezi kurekebishwa.",
 
+  "editProfile": "Hariri Wasifu",
+  "rejectPayment": "Kataa Malipo",
   "cancelPayment": "Ghairi Malipo",
   "cancelPaymentConfirm": "Andika CANCEL kughairi malipo hii. Hii itaondoa chumba ulichochagua.",
   "paymentCancelled": "Malipo yameghairishwa kwa mafanikio",

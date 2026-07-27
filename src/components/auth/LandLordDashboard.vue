@@ -715,6 +715,20 @@ const confirmTenantPayment = async (paymentId) => {
   }
 }
 
+const rejectTenantPayment = async (paymentId) => {
+  if (!confirm('Reject this payment? The tenant\'s room selection will be released.')) return
+  const result = await paymentStore.rejectPayment(paymentId)
+  if (result && result.message) {
+    alert(result.message)
+    await fetchUnconfirmedPaymentsList()
+    await roomStore.fetchRooms()
+    await auth.fetchUsers()
+    await paymentStore.fetchPayments()
+  } else {
+    alert(paymentStore.error || 'Failed to reject payment')
+  }
+}
+
 const handleImageUpload = (e) => {
   const file = e.target.files[0]
   if (!file) return
@@ -2289,9 +2303,14 @@ function buildCubes() {
                   <td>{{ payment.room?.room_number || 'N/A' }}</td>
                   <td>TZS {{ payment.amount?.toLocaleString() }}</td>
                   <td>
-                    <button class="btn-teal" @click="confirmTenantPayment(payment.id)">
-                      <font-awesome-icon icon="check-circle" /> {{ $t('confirmPayment') || 'Confirm Payment' }}
-                    </button>
+                    <span class="row-actions">
+                      <button class="btn-teal" @click="confirmTenantPayment(payment.id)">
+                        <font-awesome-icon icon="check-circle" /> {{ $t('confirmPayment') || 'Confirm Payment' }}
+                      </button>
+                      <button class="btn-del" @click="rejectTenantPayment(payment.id)">
+                        <font-awesome-icon icon="ban" /> {{ $t('rejectPayment') || 'Reject' }}
+                      </button>
+                    </span>
                   </td>
                 </tr>
               </tbody>
