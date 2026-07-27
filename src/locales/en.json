@@ -273,5 +273,7 @@
   "noRoomPhotos": "No room photos yet",
   "paymentManagement": "Payment Management",
   "deletePhoto": "Remove Photo",
-  "deletePhotoConfirm": "Remove this photo?"
+  "deletePhotoConfirm": "Remove this photo?",
+  "viewAll": "View All",
+  "showLess": "Show Less"
 }

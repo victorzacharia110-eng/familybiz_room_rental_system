@@ -511,11 +511,15 @@ const filteredAnnouncements = computed(() => {
 })
 const { paginatedData: paginatedAnnouncements, currentPage: ap, totalPages: atp, showingFrom: asf, showingTo: ast, totalItems: ati, goToPage: agp, resetPage: resetAnnouncementsPage } = usePagination(filteredAnnouncements)
 
+const showAllGallery = ref(false)
 const galleryRooms = computed(() =>
   roomStore.rooms.filter((r) => r.photo_url).map((r) => ({
     src: r.photo_url,
     label: `${r.room_number} — ${r.type}`,
   })),
+)
+const visibleGalleryRooms = computed(() =>
+  showAllGallery.value ? galleryRooms.value : galleryRooms.value.slice(0, 6),
 )
 
 const paymentLoading = ref(true)
@@ -782,10 +786,15 @@ onMounted(async () => {
             </div>
           </div>
           <div v-if="galleryRooms.length" class="gallery-grid">
-            <div v-for="(img, idx) in galleryRooms" :key="idx" class="gallery-card">
+            <div v-for="(img, idx) in visibleGalleryRooms" :key="idx" class="gallery-card">
               <img :src="img.src" :alt="img.label" class="gallery-img" />
+              <div class="gallery-label">{{ img.label }}</div>
             </div>
           </div>
+          <button v-if="galleryRooms.length > 6" class="gallery-toggle" @click="showAllGallery = !showAllGallery">
+            <font-awesome-icon :icon="showAllGallery ? 'chevron-up' : 'chevron-down'" />
+            {{ showAllGallery ? $t('showLess') : `${$t('viewAll')} (${galleryRooms.length})` }}
+          </button>
           <p v-else class="no-gallery">
             <font-awesome-icon icon="image" /> {{ $t('noRoomPhotos') || 'No room photos yet' }}
           </p>
@@ -1991,6 +2000,31 @@ tbody tr:last-child td {
   height: 180px;
   object-fit: cover;
   display: block;
+}
+.gallery-label {
+  padding: 8px 12px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gallery-toggle {
+  display: block;
+  margin: 16px auto 0;
+  padding: 8px 20px;
+  background: rgba(20,184,166,0.12);
+  border: 1px solid rgba(20,184,166,0.3);
+  border-radius: 8px;
+  color: #14b8a6;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.gallery-toggle:hover {
+  background: rgba(20,184,166,0.2);
 }
 .no-gallery {
   text-align: center;
