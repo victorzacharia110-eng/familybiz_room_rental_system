@@ -185,7 +185,7 @@ onMounted(async () => {
     <!-- MAIN -->
     <main class="dash-main">
       <div class="hero-banner">
-        <div class="hero-cubes" ref="cubesRef"></div>
+        <div class="hero-cubes"></div>
         <div class="hero-scanlines"></div>
         <div class="hero-text">
           <button class="menu-btn" @click="isSidebarOpen = !isSidebarOpen">
@@ -433,54 +433,52 @@ onMounted(async () => {
     </main>
 
     <!-- RESET PASSWORD MODAL -->
-    <Transition name="modal-fade">
-      <div v-if="resetModalOpen" class="modal-overlay" @click.self="closeResetModal">
-        <div class="reset-modal">
-          <div class="reset-modal-header">
-            <div class="reset-modal-icon">
-              <font-awesome-icon icon="key" />
-            </div>
-            <h3>{{ t('resetPassword') }}</h3>
-            <button class="modal-close-btn" @click="closeResetModal">
-              <font-awesome-icon icon="xmark" />
+    <div v-if="resetModalOpen" class="modal-overlay" @click.self="closeResetModal">
+      <div class="reset-modal">
+        <div class="reset-modal-header">
+          <div class="reset-modal-icon">
+            <font-awesome-icon icon="key" />
+          </div>
+          <h3>{{ t('resetPassword') }}</h3>
+          <button class="modal-close-btn" @click="closeResetModal">
+            <font-awesome-icon icon="xmark" />
+          </button>
+        </div>
+
+        <div v-if="resetSuccess" class="reset-success">
+          <font-awesome-icon icon="check-circle" />
+          <span>{{ resetSuccess }}</span>
+        </div>
+
+        <div v-if="!resetSuccess">
+          <div class="reset-user-info">
+            <span class="reset-user-name">{{ resetUser?.last_name || '—' }}</span>
+            <span class="reset-user-email">{{ resetUser?.email }}</span>
+          </div>
+
+          <div class="reset-form-group">
+            <label>{{ t('newPassword') }}</label>
+            <input
+              v-model="resetPassword"
+              type="text"
+              class="reset-input"
+              :placeholder="t('enterNewPassword')"
+            />
+            <p class="reset-hint">{{ t('passwordHint') }}</p>
+          </div>
+
+          <div class="reset-modal-actions">
+            <button class="reset-btn cancel" @click="closeResetModal" :disabled="resetLoading">
+              {{ t('cancel') }}
             </button>
-          </div>
-
-          <div v-if="resetSuccess" class="reset-success">
-            <font-awesome-icon icon="check-circle" />
-            <span>{{ resetSuccess }}</span>
-          </div>
-
-          <div v-else>
-            <div class="reset-user-info">
-              <span class="reset-user-name">{{ resetUser?.last_name || '—' }}</span>
-              <span class="reset-user-email">{{ resetUser?.email }}</span>
-            </div>
-
-            <div class="reset-form-group">
-              <label>{{ t('newPassword') }}</label>
-              <input
-                v-model="resetPassword"
-                type="text"
-                class="reset-input"
-                :placeholder="t('enterNewPassword')"
-              />
-              <p class="reset-hint">{{ t('passwordHint') }}</p>
-            </div>
-
-            <div class="reset-modal-actions">
-              <button class="reset-btn cancel" @click="closeResetModal" :disabled="resetLoading">
-                {{ t('cancel') }}
-              </button>
-              <button class="reset-btn confirm" @click="submitResetPassword" :disabled="resetLoading || !resetPassword || resetPassword.length < 8">
-                <font-awesome-icon v-if="resetLoading" icon="spinner" spin />
-                {{ resetLoading ? t('resetting') : t('resetPassword') }}
-              </button>
-            </div>
+            <button class="reset-btn confirm" @click="submitResetPassword" :disabled="resetLoading || !resetPassword || resetPassword.length < 8">
+              <font-awesome-icon v-if="resetLoading" icon="spinner" spin />
+              {{ resetLoading ? t('resetting') : t('resetPassword') }}
+            </button>
           </div>
         </div>
       </div>
-    </Transition>
+    </div>
   </div>
 </template>
 
