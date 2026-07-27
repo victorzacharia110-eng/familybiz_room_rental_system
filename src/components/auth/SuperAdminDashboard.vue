@@ -451,7 +451,7 @@ onMounted(async () => {
             <span>{{ resetSuccess }}</span>
           </div>
 
-          <template v-else>
+          <div v-else>
             <div class="reset-user-info">
               <span class="reset-user-name">{{ resetUser?.last_name || '—' }}</span>
               <span class="reset-user-email">{{ resetUser?.email }}</span>
@@ -477,7 +477,7 @@ onMounted(async () => {
                 {{ resetLoading ? t('resetting') : t('resetPassword') }}
               </button>
             </div>
-          </template>
+          </div>
         </div>
       </div>
     </Transition>

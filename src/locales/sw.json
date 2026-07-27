@@ -36,7 +36,7 @@
   "tenantRulesPolicies": "Sheria na Sera za Wapangaji",
   "roomManagement": "Usimamizi wa Vyumba",
   "paymentManagement": "Usimamizi wa malipo",
-  "roomNumber": "Namba ya Chumba",
+  "roomNumber": "Nambari ya Chumba",
   "roomPrice": "Bei ya Chumba",
   "roomType": "Aina ya Chumba",
   "single": "Chumba chenye kitanda kimoja",
@@ -95,7 +95,6 @@
   "Register": "Jisajili",
   "register": "Jisajili",
   "Back to Home": "Rudi Nyumbani",
-
   "Create Account": "Fungua Akaunti",
   "Register to Get a Room": "Jisajili Kupata Chumba",
   "Enter Phone Number": "Ingiza namba ya simu",
@@ -106,24 +105,18 @@
   "homeWelcomeTitle": "Karibu kwenye FamilyBiz System",
   "homeLocationDescription": "Vyumba vya bei nafuu na vya starehe katika Gongo la Mboto – Majohe Bwera, Dar es Salaam",
   "homeHeroDescription": "Tunatoa vyumba safi, salama na vinavyotunzwa vizuri kwa wanafunzi, wafanyakazi na familia wanaotafuta sehemu ya kuishi kwa amani. Eneo hili lina huduma muhimu na usafiri rahisi.",
-
   "homeFeaturesTitle": "Kwa Nini Uchague Vyumba Vyetu?",
   "homeFeatureLocationTitle": "Eneo Bora",
   "homeFeatureLocationDesc": "Iko Majohe Bwera karibu na mabasi na barabara kuu.",
-
   "homeFeatureSecurityTitle": "Usalama",
   "homeFeatureSecurityDesc": "Eneo salama na tulivu kwa maisha ya starehe.",
-
   "homeFeatureUtilitiesTitle": "Huduma Muhimu",
   "homeFeatureUtilitiesDesc": "Maji ya uhakika, umeme na miundombinu mizuri.",
-
   "homeFeaturePriceTitle": "Bei Nafuu",
   "homeFeaturePriceDesc": "Bei nafuu kwa wanafunzi, wafanyakazi na familia.",
-
   "homeLocationTitle": "Eneo Letu",
   "homeLocationDesc": "Vyumba vyetu vipo Gongo la Mboto – Majohe Bwera, Dar es Salaam. Eneo linafikika kirahisi na lina mazingira tulivu na salama.",
   "homeLocationHighlight": "Karibu na maduka, shule, vituo vya mabasi na huduma muhimu.",
-
   "homeFooterTitle": "Nyumba za Majohe Bwera",
   "homeFooterDescription": "Vyumba vya bei nafuu na vya ubora katika Dar es Salaam vinavyokupa starehe, usalama na urahisi.",
   "homeContact": "Mawasiliano",
@@ -185,9 +178,7 @@
   "method1ApprovalWarning": "TAHADHARI!!! Baada ya kufanya malipo, lazima uwasiliane na mwenye nyumba kwa uthibitisho na idhini.",
   "waitMoment": "Tafadhali subiri kidogo...",
   "locationDescription": "Iko mkabala na MASJD IBRAHIM MAJOHE, karibu na Soko la Bwera, Majohe Bwera, Gongo la Mboto, Dar es Salaam.",
-
   "howToGetThere": "Jinsi ya kufika: Kutoka Gongo la Mboto elekea Majohe Bwera na fuata maelekezo kuelekea eneo la msikiti.",
-
   "transportInstructions": "Kutoka Gongo la Mboto panda bodaboda au bajaj hadi stendi ya Majohe Bwera. Ukifika uliza njia ya kwenda msikitini, kisha uliza vyumba vya kupanga vilivyo karibu.",
   "editPayment": "Hariri Malipo",
   "editPaymentSubtitle": "Sahihisha taarifa za malipo hapa chini",
@@ -214,8 +205,8 @@
   "privateRemarksFromLandlord": "Maoni ya faragha kutoka kwa mwenye nyumba",
   "remarksDescription": "Haya ni maoni ya faragha kutoka kwa mwenye nyumba. Tafadhali yasome kwa makini.",
   "reason": "Sababu",
-  "active": "Inatumika",
-  "inactive": "Haijatumika",
+  "active": "Hai",
+  "inactive": "Haiwezi",
   "resolved": "Imesuluhishwa",
   "noRemarks": "Bado hakuna maoni kwako.",
   "critical": "Muhimu",
@@ -225,7 +216,6 @@
   "editRemark": "Hariri Maoni",
   "editRemarkSubtitle": "Sahihisha maelezo ya maoni yako hapa chini",
   "updatingRemark": "Inasahihisha Maoni...",
-
   "entertainment": "Burudani",
   "entertainmentHub": "Kituo cha Burudani",
   "liveFootball": "Mechi za Moja kwa Moja",
@@ -266,7 +256,6 @@
   "canDeleteAnnouncement": "Je, una uhakika unataka kufuta tangazo hili? Hii haiwezi kurekebishwa.",
   "canDeleteRule": "Je, una uhakika unataka kufuta sheria hii? Hii haiwezi kurekebishwa.",
   "canDeletePaymentMethod": "Je, una uhakika unataka kufuta njia ya malipo hii? Hii haiwezi kurekebishwa.",
-
   "editProfile": "Hariri Wasifu",
   "rejectPayment": "Kataa Malipo",
   "cancelPayment": "Ghairi Malipo",
@@ -274,7 +263,6 @@
   "paymentCancelled": "Malipo yameghairishwa kwa mafanikio",
   "cancelPaymentFailed": "Imeshindwa kughairi malipo",
   "onlyPendingCancellation": "Malipo yanayosubiri pekee yanaweza kughairishwa",
-
   "unconfirmedPayments": "Malipo Yanayohitaji Uthibitisho",
   "noUnconfirmedPayments": "Hakuna malipo yanayohitaji uthibitisho",
   "confirmPayment": "Thibitisha Malipo",
@@ -283,12 +271,9 @@
   "clickPesaNote": "Utapokea USSD kwenye simu yako ili kukamilisha malipo. Chumba kitapewa baada ya malipo kufanikiwa.",
   "confirmAndPay": "Thibitisha na Lipa",
   "paymentMethod": "Njia ya Malipo",
-
   "paymentConfirmationAlert": "Malipo Yanahitaji Uthibitisho",
   "aTenantHasMadeAPayment": "Mpangaji amefanya malipo ya mkono yanayohitaji uthibitisho wako.",
-
   "cancelled": "Imeghairiwa",
-
   "noRoomPhotos": "Bado hakuna picha za chumba",
   "deletePhoto": "Ondoa Picha",
   "deletePhotoConfirm": "Ondoa picha hii?",
@@ -306,23 +291,17 @@
   "systemOverview": "Muhtasari wa Mfumo",
   "quickGlance": "Machapisho ya haraka ya mfumo",
   "landlords": "Wamiliki",
-  "tenants": "Wapangaji",
   "searchLandlords": "Tafuta wamiliki...",
   "searchTenants": "Tafuta wapangaji...",
   "toggleStatus": "Badilisha Hali",
-  "active": "Hai",
-  "inactive": "Haiwezi",
   "actions": "Vitendo",
   "noLandlordsFound": "Hakuna wamiliki waliopatikana",
   "noTenantsFound": "Hakuna wapangaji waliopatikana",
   "allRooms": "Vyumba Vyote",
   "systemWideRoomOverview": "Muhtasari wa vyumba kote mfumoni",
-  "roomNumber": "Nambari ya Chumba",
   "noRoomsFound": "Hakuna vyumba vilivyopatikana",
   "newPassword": "Nenosiri Jipya",
   "enterNewPassword": "Weka nenosiri jipya",
   "passwordHint": "Mifumo: JINALA@MWAKA! (mfano DOE@2026!)",
-  "resetting": "Inasawazisha...",
-  "cancel": "Ghairi"
-  
+  "resetting": "Inasawazisha..."
 }

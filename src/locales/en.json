@@ -102,24 +102,18 @@
   "homeWelcomeTitle": "Welcome to FamilyBiz System",
   "homeLocationDescription": "Affordable & Comfortable Rooms for Rent in Gongo la Mboto – Majohe Bwera, Dar es Salaam",
   "homeHeroDescription": "We provide clean, secure, and well-maintained rental rooms designed for students, workers, and families looking for a peaceful place to live. Located in a convenient neighborhood with easy access to transport, shops, and essential services.",
-
   "homeFeaturesTitle": "Why Choose Our Rooms?",
   "homeFeatureLocationTitle": "Prime Location",
   "homeFeatureLocationDesc": "Situated in Majohe Bwera with easy access to buses and main roads.",
-
   "homeFeatureSecurityTitle": "Secure Environment",
   "homeFeatureSecurityDesc": "Safe and quiet surroundings suitable for comfortable living.",
-
   "homeFeatureUtilitiesTitle": "Essential Utilities",
   "homeFeatureUtilitiesDesc": "Reliable water supply, electricity, and well-maintained facilities.",
-
   "homeFeaturePriceTitle": "Affordable Rent",
   "homeFeaturePriceDesc": "Fair pricing designed to suit students, workers, and families.",
-
   "homeLocationTitle": "Our Location",
   "homeLocationDesc": "Our rental rooms are located in Gongo la Mboto – Majohe Bwera, Dar es Salaam. The area is easily accessible by public transport and provides a quiet and secure environment ideal for comfortable living.",
   "homeLocationHighlight": "Close to shops, schools, bus routes, and essential services.",
-
   "homeFooterTitle": "Majohe Bwera Rooms",
   "homeFooterDescription": "Quality and affordable rental rooms in Dar es Salaam designed to give you comfort, safety, and convenience.",
   "homeContact": "Contact",
@@ -164,9 +158,7 @@
   "method1ApprovalWarning": "WARNING!!! You must communicate with your landlord after making payment for confirmation and approval.",
   "waitMoment": "Please wait a moment...",
   "locationDescription": "Located opposite MASJD IBRAHIM MAJOHE, near Soko la Bwera, Majohe Bwera, Gongo la Mboto, Dar es Salaam.",
-
   "howToGetThere": "How to get there: From Gongo la Mboto, head towards Majohe Bwera and follow directions to the mosque area.",
-
   "transportInstructions": "From Gongo la Mboto, take a motorcycle (bodaboda) or bajaj to Majohe Bwera stand. Once you arrive, ask for directions to the mosque, then request nearby renting rooms.",
   "editPayment": "Edit Payment",
   "editPaymentSubtitle": "Update payment details below",
@@ -177,7 +169,6 @@
   "back": "Back",
   "editPaymentMethod": "Edit Payment Method",
   "editPaymentMethodSubtitle": "Update your payment details",
-
   "airtelMoney": "Airtel Money",
   "mpesa": "M-Pesa",
   "mixxByYas": "Mixx by Yas",
@@ -212,7 +203,6 @@
   "editRemark": "Edit Remark",
   "editRemarkSubtitle": "Update the details of this remark below",
   "updatingRemark": "Updating Remark...",
-
   "entertainment": "Entertainment",
   "entertainmentHub": "Entertainment Hub",
   "liveFootball": "Live Football",
@@ -242,7 +232,6 @@
   "tenantDeletionWarning": "Deleting a tenant will remove all their associated data, including payment history and remarks. Please ensure you have backed up any necessary information before proceeding.",
   "tenantDeletionSuccess": "Tenant has been successfully deleted. All associated data has been removed.",
   "tenantDeletionError": "An error occurred while attempting to delete the tenant. Please try again later or contact support if the issue persists.",
-
   "editProfile": "Edit Profile",
   "rejectPayment": "Reject Payment",
   "cancelPayment": "Cancel Payment",
@@ -250,7 +239,6 @@
   "paymentCancelled": "Payment cancelled successfully",
   "cancelPaymentFailed": "Failed to cancel payment",
   "onlyPendingCancellation": "Only pending payments can be cancelled",
-
   "unconfirmedPayments": "Unconfirmed Payments",
   "noUnconfirmedPayments": "No unconfirmed payments",
   "confirmPayment": "Confirm Payment",
@@ -259,19 +247,10 @@
   "clickPesaNote": "You will receive a USSD prompt on your phone to complete the payment. The room will be automatically assigned after successful payment.",
   "confirmAndPay": "Confirm & Pay",
   "paymentMethod": "Payment Method",
-
-  "paymentMethodManagement": "Payment Method Management",
-  "noRoomAssigned": "No room assigned yet",
-  "noPaymentData": "No payment data yet",
-  "maxLateReasons": "Maximum late reasons",
-
   "paymentConfirmationAlert": "Payment Confirmation Required",
   "aTenantHasMadeAPayment": "A tenant has made a manual payment that requires your confirmation.",
-
   "cancelled": "Cancelled",
-
   "noRoomPhotos": "No room photos yet",
-  "paymentManagement": "Payment Management",
   "deletePhoto": "Remove Photo",
   "deletePhotoConfirm": "Remove this photo?",
   "viewAll": "View All",
@@ -288,22 +267,17 @@
   "systemOverview": "System Overview",
   "quickGlance": "A quick glance at the system",
   "landlords": "Landlords",
-  "tenants": "Tenants",
   "searchLandlords": "Search landlords...",
   "searchTenants": "Search tenants...",
   "toggleStatus": "Toggle Status",
-  "active": "Active",
-  "inactive": "Inactive",
   "actions": "Actions",
   "noLandlordsFound": "No landlords found",
   "noTenantsFound": "No tenants found",
   "allRooms": "All Rooms",
   "systemWideRoomOverview": "System-wide room overview",
-  "roomNumber": "Room Number",
   "noRoomsFound": "No rooms found",
   "newPassword": "New Password",
   "enterNewPassword": "Enter new password",
   "passwordHint": "Default pattern: LASTNAME@YEAR! (e.g. DOE@2026!)",
-  "resetting": "Resetting...",
-  "cancel": "Cancel"
+  "resetting": "Resetting..."
 }
