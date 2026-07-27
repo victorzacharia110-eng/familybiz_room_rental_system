@@ -2,6 +2,15 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import api from '@/composables/api'
 
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
+
 export const useRoomStore = defineStore('room', () => {
   const rooms = ref([])
   const totalRooms = ref(0)
@@ -26,26 +35,16 @@ export const useRoomStore = defineStore('room', () => {
     loading.value = true
 
     try {
+      const data = {
+        room_number: payload.room_number,
+        room_price: payload.room_price,
+        type: payload.type,
+        status: payload.status,
+        amount: payload.amount,
+      }
 
-      const hasFile = payload.photo instanceof File
-      let data
-
-      if (hasFile) {
-        data = new FormData()
-        data.append('room_number', payload.room_number)
-        data.append('room_price', payload.room_price)
-        data.append('type', payload.type)
-        data.append('status', payload.status)
-        data.append('amount', payload.amount || 0)
-        data.append('photo', payload.photo)
-      } else {
-        data = {
-          room_number: payload.room_number,
-          room_price: payload.room_price,
-          type: payload.type,
-          status: payload.status,
-          amount: payload.amount,
-        }
+      if (payload.photo instanceof File) {
+        data.photo = await fileToBase64(payload.photo)
       }
 
       const response = await api.post('/api/room/create', data)
@@ -77,9 +76,7 @@ export const useRoomStore = defineStore('room', () => {
 
   const loadRoomForEdit = async (id) => {
     try {
-
       const response = await api.get(`/api/room/show/${id}`)
-
       const room = response?.data?.room
 
       if (!room) {
@@ -108,29 +105,21 @@ export const useRoomStore = defineStore('room', () => {
     error.value = null
 
     try {
+      const data = {
+        room_number: roomForm.value.room_number,
+        type: roomForm.value.type,
+        status: roomForm.value.status,
+        room_price: roomForm.value.room_price,
+      }
 
-      const hasFile = roomForm.value.photo instanceof File
-      let data
-
-      if (hasFile) {
-        data = new FormData()
-        data.append('room_number', roomForm.value.room_number)
-        data.append('type', roomForm.value.type)
-        data.append('status', roomForm.value.status)
-        data.append('room_price', roomForm.value.room_price ?? 0)
-        data.append('photo', roomForm.value.photo)
-        data.append('_method', 'PATCH')
-      } else {
-        data = {
-          room_number: roomForm.value.room_number,
-          type: roomForm.value.type,
-          status: roomForm.value.status,
-          room_price: roomForm.value.room_price,
-        }
+      if (roomForm.value.photo instanceof File) {
+        data.photo = await fileToBase64(roomForm.value.photo)
+      } else if (roomForm.value.photo === null && roomForm.value.preview === null) {
+        data.photo = ''
       }
 
       const endpoint = `/api/room/update/${roomForm.value.id}`
-      const response = hasFile ? await api.post(endpoint, data) : await api.patch(endpoint, data)
+      const response = await api.patch(endpoint, data)
 
       const updatedRoom = response?.data?.room
 
