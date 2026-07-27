@@ -434,8 +434,41 @@ onMounted(async () => {
     <!-- RESET PASSWORD MODAL -->
     <div v-if="resetModalOpen" class="modal-overlay" @click.self="closeResetModal">
       <div class="reset-modal">
-        <h3>RESET MODAL TEST</h3>
-        <button @click="closeResetModal">Close</button>
+        <div class="reset-modal-header">
+          <div class="reset-modal-icon">
+            <font-awesome-icon icon="key" />
+          </div>
+          <h3>{{ t('resetPassword') }}</h3>
+          <button class="modal-close-btn" @click="closeResetModal">
+            <font-awesome-icon icon="xmark" />
+          </button>
+        </div>
+
+        <div class="reset-user-info">
+          <span class="reset-user-name">{{ resetUser?.last_name || '—' }}</span>
+          <span class="reset-user-email">{{ resetUser?.email }}</span>
+        </div>
+
+        <div class="reset-form-group">
+          <label>{{ t('newPassword') }}</label>
+          <input
+            v-model="newPasswordValue"
+            type="text"
+            class="reset-input"
+            :placeholder="t('enterNewPassword')"
+          />
+          <p class="reset-hint">{{ t('passwordHint') }}</p>
+        </div>
+
+        <div class="reset-modal-actions">
+          <button class="reset-btn cancel" @click="closeResetModal" :disabled="resetLoading">
+            {{ t('cancel') }}
+          </button>
+          <button class="reset-btn confirm" @click="submitResetPassword" :disabled="resetLoading || !newPasswordValue || newPasswordValue.length < 8">
+            <font-awesome-icon v-if="resetLoading" icon="spinner" spin />
+            {{ resetLoading ? t('resetting') : t('resetPassword') }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
