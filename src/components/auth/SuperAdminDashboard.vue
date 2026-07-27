@@ -431,7 +431,7 @@ onMounted(async () => {
       </div>
     </main>
 
-    <!-- RESET PASSWORD MODAL -->
+    <!-- RESET PASSWORD MODAL - TEST 1: Full structure, no v-model/:disabled/v-if -->
     <div v-if="resetModalOpen" class="modal-overlay" @click.self="closeResetModal">
       <div class="reset-modal">
         <div class="reset-modal-header">
@@ -451,22 +451,16 @@ onMounted(async () => {
 
         <div class="reset-form-group">
           <label>{{ t('newPassword') }}</label>
-          <input
-            v-model="newPasswordValue"
-            type="text"
-            class="reset-input"
-            :placeholder="t('enterNewPassword')"
-          />
+          <input type="text" class="reset-input" />
           <p class="reset-hint">{{ t('passwordHint') }}</p>
         </div>
 
         <div class="reset-modal-actions">
-          <button class="reset-btn cancel" @click="closeResetModal" :disabled="resetLoading">
+          <button class="reset-btn cancel" @click="closeResetModal">
             {{ t('cancel') }}
           </button>
-          <button class="reset-btn confirm" @click="submitResetPassword" :disabled="resetLoading || !newPasswordValue || newPasswordValue.length < 8">
-            <font-awesome-icon v-if="resetLoading" icon="spinner" spin />
-            {{ resetLoading ? t('resetting') : t('resetPassword') }}
+          <button class="reset-btn confirm">
+            {{ t('resetPassword') }}
           </button>
         </div>
       </div>
