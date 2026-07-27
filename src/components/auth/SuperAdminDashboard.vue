@@ -80,23 +80,23 @@ const doTenantSearch = () => admin.fetchTenants(tenantSearch.value)
 
 const resetModalOpen = ref(false)
 const resetUser = ref(null)
-const resetPassword = ref('')
+const newPasswordValue = ref('')
 const resetLoading = ref(false)
 const resetSuccess = ref('')
 
 const openResetModal = (user) => {
   resetUser.value = user
   const year = new Date().getFullYear()
-  resetPassword.value = (user.last_name || 'USER').toUpperCase() + '@' + year + '!'
+  newPasswordValue.value = (user.last_name || 'USER').toUpperCase() + '@' + year + '!'
   resetModalOpen.value = true
   resetSuccess.value = ''
 }
 const closeResetModal = () => { resetModalOpen.value = false; resetUser.value = null }
 
 const submitResetPassword = async () => {
-  if (!resetPassword.value || resetPassword.value.length < 8) return
+  if (!newPasswordValue.value || newPasswordValue.value.length < 8) return
   resetLoading.value = true
-  const msg = await admin.resetPassword(resetUser.value.id, resetPassword.value)
+  const msg = await admin.resetPassword(resetUser.value.id, newPasswordValue.value)
   resetLoading.value = false
   if (msg) {
     resetSuccess.value = msg
@@ -458,7 +458,7 @@ onMounted(async () => {
           <div class="reset-form-group">
             <label>{{ t('newPassword') }}</label>
             <input
-              v-model="resetPassword"
+              v-model="newPasswordValue"
               type="text"
               class="reset-input"
               :placeholder="t('enterNewPassword')"
@@ -470,7 +470,7 @@ onMounted(async () => {
             <button class="reset-btn cancel" @click="closeResetModal" :disabled="resetLoading">
               {{ t('cancel') }}
             </button>
-            <button class="reset-btn confirm" @click="submitResetPassword" :disabled="resetLoading || !resetPassword || resetPassword.length < 8">
+            <button class="reset-btn confirm" @click="submitResetPassword" :disabled="resetLoading || !newPasswordValue || newPasswordValue.length < 8">
               <font-awesome-icon v-if="resetLoading" icon="spinner" spin />
               {{ resetLoading ? t('resetting') : t('resetPassword') }}
             </button>
@@ -597,6 +597,7 @@ onMounted(async () => {
   flex: 1;
   margin-left: 240px;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 .hero-banner {
   position: relative;
@@ -693,6 +694,7 @@ onMounted(async () => {
 /* CONTENT */
 .dash-content {
   padding: 24px 32px;
+  overflow-x: hidden;
 }
 .glass-section {
   background: rgba(255, 255, 255, 0.02);
@@ -701,6 +703,7 @@ onMounted(async () => {
   padding: 20px;
   margin-bottom: 20px;
   position: relative;
+  overflow: hidden;
 }
 .glass-section::before {
   content: '';
