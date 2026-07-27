@@ -1006,15 +1006,16 @@ function buildCubes() {
       hw = size / 2
     const cube = document.createElement('div')
     cube.className = 'css-cube'
-    cube.style.cssText =
-      `left:${Math.random() * 90}%;top:${Math.random() * 90}%;width:${size}px;height:${size}px;animation-duration:${6 + Math.random() * 8}s;animation-delay:-${Math.random() * 6}s`[
-        (`translateZ(${hw}px)`,
-        `translateZ(-${hw}px) rotateY(180deg)`,
-        `translateX(${hw}px) rotateY(90deg)`,
-        `translateX(-${hw}px) rotateY(-90deg)`,
-        `translateY(-${hw}px) rotateX(90deg)`,
-        `translateY(${hw}px) rotateX(-90deg)`)
-      ].forEach((tf) => {
+    cube.style.cssText = `left:${Math.random() * 90}%;top:${Math.random() * 90}%;width:${size}px;height:${size}px;animation-duration:${6 + Math.random() * 8}s;animation-delay:-${Math.random() * 6}s`
+    const tfs = [
+      `translateZ(${hw}px)`,
+      `translateZ(-${hw}px) rotateY(180deg)`,
+      `translateX(${hw}px) rotateY(90deg)`,
+      `translateX(-${hw}px) rotateY(-90deg)`,
+      `translateY(-${hw}px) rotateX(90deg)`,
+      `translateY(${hw}px) rotateX(-90deg)`,
+    ]
+    tfs.forEach((tf) => {
         const f = document.createElement('div')
         f.className = 'css-cube-face'
         f.style.cssText = `width:${size}px;height:${size}px;position:absolute;transform:${tf};border:1px solid rgba(20,184,166,${0.12 + Math.random() * 0.2});background:rgba(20,184,166,.02)`
