@@ -438,7 +438,7 @@ onMounted(async () => {
           <div class="reset-modal-icon">
             <font-awesome-icon icon="key" />
           </div>
-          <h3>RESET PASSWORD</h3>
+          <h3>{{ t('resetPassword') }}</h3>
           <button class="modal-close-btn" @click="closeResetModal">
             <font-awesome-icon icon="xmark" />
           </button>
@@ -450,17 +450,17 @@ onMounted(async () => {
         </div>
 
         <div class="reset-form-group">
-          <label>New Password</label>
+          <label>{{ t('newPassword') }}</label>
           <input type="text" class="reset-input" />
           <p class="reset-hint">Password must be at least 8 characters.</p>
         </div>
 
         <div class="reset-modal-actions">
           <button class="reset-btn cancel" @click="closeResetModal">
-            Cancel
+            {{ t('cancel') }}
           </button>
           <button class="reset-btn confirm">
-            Reset
+            {{ t('resetPassword') }}
           </button>
         </div>
       </div>
