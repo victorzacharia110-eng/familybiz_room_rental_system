@@ -271,5 +271,7 @@
   "cancelled": "Cancelled",
 
   "noRoomPhotos": "No room photos yet",
-  "paymentManagement": "Payment Management"
+  "paymentManagement": "Payment Management",
+  "deletePhoto": "Remove Photo",
+  "deletePhotoConfirm": "Remove this photo?"
 }

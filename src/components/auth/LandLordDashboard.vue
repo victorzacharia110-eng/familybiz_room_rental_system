@@ -735,6 +735,11 @@ const handleImageUpload = (e) => {
   roomForm.value.photo = file
   roomForm.value.preview = URL.createObjectURL(file)
 }
+const clearRoomPreview = () => {
+  roomForm.value.photo = null
+  roomForm.value.preview = null
+  if (fileInput.value) fileInput.value.value = ''
+}
 const updatingPhoneNumber = async (user) => {
   const p = prompt('Enter new phone number:')
   if (!p?.trim()) return
@@ -1489,6 +1494,9 @@ function buildCubes() {
               </button>
             </div>
             <div v-if="roomForm.preview" class="img-preview">
+              <button type="button" class="preview-close" @click="clearRoomPreview">
+                <font-awesome-icon icon="xmark" />
+              </button>
               <img :src="roomForm.preview" alt="Room" />
             </div>
             <div class="modal-actions">
@@ -3219,12 +3227,34 @@ tbody tr:last-child td {
   overflow: hidden;
   border: 1px solid rgba(20, 184, 166, 0.2);
   margin-bottom: 16px;
+  position: relative;
 }
 .img-preview img {
   width: 100%;
   max-height: 200px;
   object-fit: cover;
   display: block;
+}
+.preview-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+  z-index: 2;
+}
+.preview-close:hover {
+  background: rgba(220, 38, 38, 0.8);
 }
 
 .success-alert {

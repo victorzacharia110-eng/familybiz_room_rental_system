@@ -289,6 +289,8 @@
 
   "cancelled": "Imeghairiwa",
 
-  "noRoomPhotos": "Bado hakuna picha za chumba"
+  "noRoomPhotos": "Bado hakuna picha za chumba",
+  "deletePhoto": "Ondoa Picha",
+  "deletePhotoConfirm": "Ondoa picha hii?"
   
 }

@@ -19,6 +19,8 @@ import {
   faSpinner,
   faInfoCircle,
   faCamera,
+  faTrash,
+  faXmark,
 } from '@fortawesome/free-solid-svg-icons'
 
 library.add(
@@ -34,6 +36,8 @@ library.add(
   faSpinner,
   faInfoCircle,
   faCamera,
+  faTrash,
+  faXmark,
 )
 
 const { locale, t } = useI18n()
@@ -80,6 +84,17 @@ const handleImageUpload = (e) => {
   if (!file) return
   roomForm.value.photo = file
   roomForm.value.preview = URL.createObjectURL(file)
+}
+
+const clearPreview = () => {
+  roomForm.value.photo = null
+  roomForm.value.preview = null
+  if (fileInput.value) fileInput.value.value = ''
+}
+
+const deletePhoto = async () => {
+  if (!confirm(t('deletePhotoConfirm') || 'Remove this photo?')) return
+  clearPreview()
 }
 
 /* ════════ 3D CANVAS ════════ */
@@ -445,10 +460,23 @@ function onMouseLeave() {
         <div class="field" style="animation-delay: 0.48s">
           <label><font-awesome-icon icon="camera" /> {{ t('roomPhotoOptional') || 'Photo (optional)' }}</label>
           <input ref="fileInput" type="file" accept="image/*" @change="handleImageUpload" hidden />
-          <button type="button" class="btn-ghost-photo" @click="fileInput.click()">
-            <font-awesome-icon icon="camera" /> {{ t('selectImage') || 'Select Image' }}
-          </button>
+          <div class="photo-actions">
+            <button type="button" class="btn-ghost-photo" @click="fileInput.click()">
+              <font-awesome-icon icon="camera" /> {{ t('selectImage') || 'Select Image' }}
+            </button>
+            <button
+              v-if="roomForm.preview"
+              type="button"
+              class="btn-delete-photo"
+              @click="deletePhoto"
+            >
+              <font-awesome-icon icon="trash" /> {{ t('deletePhoto') || 'Remove Photo' }}
+            </button>
+          </div>
           <div v-if="roomForm.preview" class="img-preview-edit">
+            <button type="button" class="preview-close" @click="clearPreview">
+              <font-awesome-icon icon="xmark" />
+            </button>
             <img :src="roomForm.preview" alt="Room preview" />
           </div>
         </div>
@@ -917,17 +945,63 @@ label svg {
   background: rgba(20, 184, 166, 0.2);
   border-color: #14b8a6;
 }
+.photo-actions {
+  display: flex;
+  gap: 8px;
+}
+.photo-actions .btn-ghost-photo {
+  flex: 1;
+}
+.btn-delete-photo {
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px dashed rgba(220, 38, 38, 0.4);
+  color: #fca5a5;
+  padding: 10px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  transition: 0.25s;
+  white-space: nowrap;
+}
+.btn-delete-photo:hover {
+  background: rgba(220, 38, 38, 0.2);
+  border-color: #dc2626;
+}
 .img-preview-edit {
   margin-top: 12px;
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid rgba(20, 184, 166, 0.2);
+  position: relative;
 }
 .img-preview-edit img {
   width: 100%;
   max-height: 200px;
   object-fit: cover;
   display: block;
+}
+.preview-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+  z-index: 2;
+}
+.preview-close:hover {
+  background: rgba(220, 38, 38, 0.8);
 }
 
 .shake-fade-enter-active {
