@@ -8,6 +8,7 @@ import Register from '../components/Register.vue'
 import ForgotPassword from '../components/ForgotPassword.vue'
 import LandLordDashboard from '../components/auth/LandLordDashboard.vue'
 import TenantDashboard from '../components/auth/TenantDashboard.vue'
+import SuperAdminDashboard from '../components/auth/SuperAdminDashboard.vue'
 import RoomEdit from '@/components/auth/edits/RoomEdit.vue'
 import PaymentEdit from '@/components/auth/edits/PaymentEdit.vue'
 import PaymentMethodEdit from '@/components/auth/edits/PaymentMethodEdit.vue'
@@ -45,6 +46,11 @@ const router = createRouter({
 
     // role-based routes
     {
+      path: '/admin',
+      component: SuperAdminDashboard,
+      meta: { requiresAuth: true, role: 'admin' },
+    },
+    {
       path: '/landlord',
       component: LandLordDashboard,
       meta: { requiresAuth: true, role: 'landlord' },
@@ -79,6 +85,19 @@ const router = createRouter({
   ],
 })
 
+function getRole(user) {
+  if (!user) return null
+  if (user.is_super_admin) return 'admin'
+  if (user.is_landlord) return 'landlord'
+  return 'tenant'
+}
+
+function defaultPath(role) {
+  if (role === 'admin') return '/admin'
+  if (role === 'landlord') return '/landlord'
+  return '/tenant'
+}
+
 router.beforeEach(async (to) => {
   const auth = useAuthStore()
   const roomStore = useRoomStore()
@@ -87,8 +106,7 @@ router.beforeEach(async (to) => {
     await auth.fetchUser()
   }
 
-  // define normalized role ONCE
-  const role = (auth.user?.is_landlord == 1 || auth.user?.is_super_admin) ? 'landlord' : 'tenant'
+  const role = getRole(auth.user)
 
   // not logged in
   if (to.meta.requiresAuth && !auth.user) {
@@ -97,12 +115,12 @@ router.beforeEach(async (to) => {
 
   // guest-only pages (login/register/home)
   if (to.meta.requiresGuest && auth.user) {
-    return role === 'landlord' ? '/landlord' : '/tenant'
+    return defaultPath(role)
   }
 
   // role protection
   if (to.meta.role && to.meta.role !== role) {
-    return role === 'landlord' ? '/landlord' : '/tenant'
+    return defaultPath(role)
   }
 
   // Prefetch landlord dashboard stats
