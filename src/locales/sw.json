@@ -265,6 +265,28 @@
   "canDeletePayment": "Je, una uhakika unataka kufuta malipo haya? Hii haiwezi kurekebishwa.",
   "canDeleteAnnouncement": "Je, una uhakika unataka kufuta tangazo hili? Hii haiwezi kurekebishwa.",
   "canDeleteRule": "Je, una uhakika unataka kufuta sheria hii? Hii haiwezi kurekebishwa.",
-  "canDeletePaymentMethod": "Je, una uhakika unataka kufuta njia ya malipo hii? Hii haiwezi kurekebishwa."
+  "canDeletePaymentMethod": "Je, una uhakika unataka kufuta njia ya malipo hii? Hii haiwezi kurekebishwa.",
+
+  "cancelPayment": "Ghairi Malipo",
+  "cancelPaymentConfirm": "Andika CANCEL kughairi malipo hii. Hii itaondoa chumba ulichochagua.",
+  "paymentCancelled": "Malipo yameghairishwa kwa mafanikio",
+  "cancelPaymentFailed": "Imeshindwa kughairi malipo",
+  "onlyPendingCancellation": "Malipo yanayosubiri pekee yanaweza kughairishwa",
+
+  "unconfirmedPayments": "Malipo Yanayohitaji Uthibitisho",
+  "noUnconfirmedPayments": "Hakuna malipo yanayohitaji uthibitisho",
+  "confirmPayment": "Thibitisha Malipo",
+  "newUnconfirmedPayments": "malipo mapya yanayohitaji uthibitisho wako!",
+  "manualPaymentNote": "Kwa uhamisho wa mkono, mwenye nyumba atathibitisha malipo yako kabla ya chumba kukupatikanwa. Utapokea taarifa baada ya kuthibitishwa.",
+  "clickPesaNote": "Utapokea USSD kwenye simu yako ili kukamilisha malipo. Chumba kitapewa baada ya malipo kufanikiwa.",
+  "confirmAndPay": "Thibitisha na Lipa",
+  "paymentMethod": "Njia ya Malipo",
+
+  "paymentConfirmationAlert": "Malipo Yanahitaji Uthibitisho",
+  "aTenantHasMadeAPayment": "Mpangaji amefanya malipo ya mkono yanayohitaji uthibitisho wako.",
+
+  "cancelled": "Imeghairiwa",
+
+  "noRoomPhotos": "Bado hakuna picha za chumba"
   
 }

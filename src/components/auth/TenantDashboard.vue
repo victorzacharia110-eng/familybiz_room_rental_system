@@ -244,6 +244,25 @@ async function submitLateReason(payment) {
   }
 }
 
+const cancelPaymentLoading = ref(false)
+const successCancelMessage = ref('')
+const cancelPaymentById = async (paymentId) => {
+  const confirmText = 'CANCEL'
+  const input = prompt(`Type "${confirmText}" to cancel this payment. This will release the room selection.`)
+  if (input?.trim() !== confirmText) return
+  cancelPaymentLoading.value = true
+  const result = await paymentStore.cancelPayment(paymentId)
+  if (result && result.message) {
+    successCancelMessage.value = result.message
+    setTimeout(() => { successCancelMessage.value = '' }, 3000)
+    await paymentStore.fetchPayment()
+    await roomStore.fetchRooms()
+  } else {
+    alert(paymentStore.error || 'Failed to cancel payment')
+  }
+  cancelPaymentLoading.value = false
+}
+
 const paymentForm = ref({
   room_id: '',
   month: '',
@@ -693,6 +712,12 @@ onMounted(async () => {
               {{ successLatePaymentReasonSubmissionMessage }}
             </div>
           </Transition>
+          <Transition name="alert-pop">
+            <div v-if="successCancelMessage" class="success-alert">
+              <font-awesome-icon icon="check-circle" />
+              {{ successCancelMessage }}
+            </div>
+          </Transition>
           <div class="table-wrap">
             <div v-if="paymentLoading" class="payment-skeleton">
               <div class="skeleton"></div>
@@ -728,6 +753,15 @@ onMounted(async () => {
                       :disabled="paymentStore.tenant_payment.status === 'paid'"
                     >
                       {{ $t('submitLateReason') }}
+                    </button>
+                    <button
+                      v-if="paymentStore.tenant_payment.status === 'pending'"
+                      class="btn-sm btn-cancel"
+                      @click="cancelPaymentById(paymentStore.tenant_payment.id)"
+                      :disabled="cancelPaymentLoading"
+                    >
+                      <font-awesome-icon :icon="cancelPaymentLoading ? 'spinner' : 'ban'" :spin="cancelPaymentLoading" />
+                      {{ $t('cancelPayment') || 'Cancel Payment' }}
                     </button>
                   </td>
                 </tr>
@@ -1881,6 +1915,15 @@ tbody tr:last-child td {
 .btn-sm:disabled {
   opacity: 0.35;
   cursor: not-allowed;
+}
+.btn-sm.btn-cancel {
+  margin-left: 6px;
+  border-color: rgba(239, 68, 68, 0.25);
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+.btn-sm.btn-cancel:hover {
+  background: rgba(239, 68, 68, 0.22);
 }
 .btn-ghost {
   display: inline-flex;

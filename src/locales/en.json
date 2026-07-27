@@ -241,5 +241,33 @@
   "cannotDeleteTenantDueToPayments": "This tenant cannot be deleted because they have active unpaid payments. Please ensure all payments are settled before attempting to delete the tenant.",
   "tenantDeletionWarning": "Deleting a tenant will remove all their associated data, including payment history and remarks. Please ensure you have backed up any necessary information before proceeding.",
   "tenantDeletionSuccess": "Tenant has been successfully deleted. All associated data has been removed.",
-  "tenantDeletionError": "An error occurred while attempting to delete the tenant. Please try again later or contact support if the issue persists."
+  "tenantDeletionError": "An error occurred while attempting to delete the tenant. Please try again later or contact support if the issue persists.",
+
+  "cancelPayment": "Cancel Payment",
+  "cancelPaymentConfirm": "Type CANCEL to cancel this payment. This will release the room selection.",
+  "paymentCancelled": "Payment cancelled successfully",
+  "cancelPaymentFailed": "Failed to cancel payment",
+  "onlyPendingCancellation": "Only pending payments can be cancelled",
+
+  "unconfirmedPayments": "Unconfirmed Payments",
+  "noUnconfirmedPayments": "No unconfirmed payments",
+  "confirmPayment": "Confirm Payment",
+  "newUnconfirmedPayments": "new unconfirmed payment(s) require your attention!",
+  "manualPaymentNote": "With manual transfer, the landlord will verify your payment before the room is assigned. You will receive a notification once confirmed.",
+  "clickPesaNote": "You will receive a USSD prompt on your phone to complete the payment. The room will be automatically assigned after successful payment.",
+  "confirmAndPay": "Confirm & Pay",
+  "paymentMethod": "Payment Method",
+
+  "paymentMethodManagement": "Payment Method Management",
+  "noRoomAssigned": "No room assigned yet",
+  "noPaymentData": "No payment data yet",
+  "maxLateReasons": "Maximum late reasons",
+
+  "paymentConfirmationAlert": "Payment Confirmation Required",
+  "aTenantHasMadeAPayment": "A tenant has made a manual payment that requires your confirmation.",
+
+  "cancelled": "Cancelled",
+
+  "noRoomPhotos": "No room photos yet",
+  "paymentManagement": "Payment Management"
 }

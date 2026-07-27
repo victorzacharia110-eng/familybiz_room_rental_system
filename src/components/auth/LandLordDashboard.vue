@@ -151,6 +151,8 @@ onMounted(async () => {
   await criticalRemarkStore.fetchCriticalRemarks()
   await latePaymentReasonStore.fetchLatePaymentReasons()
   await fetchUnconfirmedPaymentsList()
+  lastUnconfirmedCount.value = unconfirmedPayments.value.length
+  startUnconfirmedPolling()
   initCanvas()
   buildCubes()
   await criticalRemarkStore.fetchCriticalRemarks()
@@ -158,7 +160,29 @@ onMounted(async () => {
 
 onUnmounted(() => {
   cancelAnimationFrame(rafId)
+  if (unconfirmedPollInterval) clearInterval(unconfirmedPollInterval)
 })
+
+let unconfirmedPollInterval = null
+const lastUnconfirmedCount = ref(0)
+const showAlertBanner = ref(false)
+
+const startUnconfirmedPolling = () => {
+  unconfirmedPollInterval = setInterval(async () => {
+    try {
+      const response = await api.get('/api/payment/unconfirmed')
+      const payments = response.data.unconfirmed_payments || []
+      if (payments.length > lastUnconfirmedCount.value && lastUnconfirmedCount.value > 0) {
+        showAlertBanner.value = true
+        try { new Audio('/alert.mp3').play().catch(() => {}) } catch (e) {}
+      }
+      lastUnconfirmedCount.value = payments.length
+      unconfirmedPayments.value = payments
+    } catch (err) {
+      console.error('Polling error:', err)
+    }
+  }, 30000)
+}
 
 const successMessage = ref('')
 const successPaymentMessage = ref('')
@@ -1083,6 +1107,16 @@ function buildCubes() {
 
     <!-- ══════ MAIN ══════ -->
     <main class="dash-main">
+      <!-- UNCONFIRMED PAYMENT ALERT BANNER -->
+      <Transition name="alert-pop">
+        <div v-if="showAlertBanner && unconfirmedPayments.length > 0" class="alert-banner" @click="showAlertBanner = false; openUnconfirmedModal('unconfirmed')">
+          <font-awesome-icon icon="bell" class="alert-bell-icon" />
+          <span>{{ unconfirmedPayments.length }} {{ $t('newUnconfirmedPayments') || 'new unconfirmed payment(s) require your attention!' }}</span>
+          <button class="alert-dismiss" @click.stop="showAlertBanner = false">
+            <font-awesome-icon icon="xmark" />
+          </button>
+        </div>
+      </Transition>
       <div class="hero-banner">
         <canvas ref="canvasRef" class="hero-canvas"></canvas>
         <div class="hero-cubes" ref="cubesRef"></div>
@@ -3320,5 +3354,50 @@ tbody tr:last-child td {
   .menu-btn {
     display: none !important;
   }
+}
+
+.alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  margin: 0 24px 16px;
+  background: linear-gradient(135deg, #ff6b35, #ff4444);
+  color: #fff;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  animation: alertPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 4px 20px rgba(255, 68, 68, 0.3);
+}
+.alert-banner:hover {
+  filter: brightness(1.05);
+}
+.alert-bell-icon {
+  font-size: 20px;
+  animation: ringBell 1s ease-in-out infinite;
+}
+@keyframes ringBell {
+  0%, 100% { transform: rotate(0); }
+  10%, 30%, 50% { transform: rotate(8deg); }
+  20%, 40% { transform: rotate(-8deg); }
+  60% { transform: rotate(0); }
+}
+.alert-dismiss {
+  margin-left: auto;
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: #fff;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.alert-dismiss:hover {
+  background: rgba(255,255,255,0.35);
 }
 </style>
