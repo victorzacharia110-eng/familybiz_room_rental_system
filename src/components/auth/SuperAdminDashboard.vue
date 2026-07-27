@@ -431,7 +431,7 @@ onMounted(async () => {
       </div>
     </main>
 
-    <!-- RESET PASSWORD MODAL -->
+    <!-- RESET PASSWORD MODAL - adding back optional chaining + resetUser data -->
     <div v-if="resetModalOpen" class="modal-overlay" @click.self="closeResetModal">
       <div class="reset-modal">
         <div class="reset-modal-header">
@@ -444,37 +444,24 @@ onMounted(async () => {
           </button>
         </div>
 
-        <div v-if="resetSuccess" class="reset-success">
-          <font-awesome-icon icon="check-circle" />
-          <span>{{ resetSuccess }}</span>
+        <div class="reset-user-info">
+          <span class="reset-user-name">{{ resetUser?.last_name || '—' }}</span>
+          <span class="reset-user-email">{{ resetUser?.email }}</span>
         </div>
 
-        <div v-if="!resetSuccess">
-          <div class="reset-user-info">
-            <span class="reset-user-name">{{ resetUser?.last_name || '—' }}</span>
-            <span class="reset-user-email">{{ resetUser?.email }}</span>
-          </div>
+        <div class="reset-form-group">
+          <label>{{ t('newPassword') }}</label>
+          <input type="text" class="reset-input" />
+          <p class="reset-hint">{{ t('passwordHint') }}</p>
+        </div>
 
-          <div class="reset-form-group">
-            <label>{{ t('newPassword') }}</label>
-            <input
-              v-model="newPasswordValue"
-              type="text"
-              class="reset-input"
-              :placeholder="t('enterNewPassword')"
-            />
-            <p class="reset-hint">{{ t('passwordHint') }}</p>
-          </div>
-
-          <div class="reset-modal-actions">
-            <button class="reset-btn cancel" @click="closeResetModal" :disabled="resetLoading">
-              {{ t('cancel') }}
-            </button>
-            <button class="reset-btn confirm" @click="submitResetPassword" :disabled="resetLoading || !newPasswordValue || newPasswordValue.length < 8">
-              <font-awesome-icon v-if="resetLoading" icon="spinner" spin />
-              {{ resetLoading ? t('resetting') : t('resetPassword') }}
-            </button>
-          </div>
+        <div class="reset-modal-actions">
+          <button class="reset-btn cancel" @click="closeResetModal">
+            {{ t('cancel') }}
+          </button>
+          <button class="reset-btn confirm">
+            {{ t('resetPassword') }}
+          </button>
         </div>
       </div>
     </div>
