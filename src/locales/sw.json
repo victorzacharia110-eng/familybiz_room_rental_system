@@ -293,6 +293,8 @@
   "deletePhoto": "Ondoa Picha",
   "deletePhotoConfirm": "Ondoa picha hii?",
   "viewAll": "Ona Zote",
-  "showLess": "Onyesha Kidogo"
+  "showLess": "Onyesha Kidogo",
+  "clickToExpand": "Bofya picha yoyote kuona kwa ukamilifu",
+  "noPhotoAvailable": "Hakuna picha"
   
 }

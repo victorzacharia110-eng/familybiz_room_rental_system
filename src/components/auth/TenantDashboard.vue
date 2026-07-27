@@ -514,15 +514,15 @@ const { paginatedData: paginatedAnnouncements, currentPage: ap, totalPages: atp,
 const showAllGallery = ref(false)
 const lightboxImage = ref(null)
 const galleryRooms = computed(() =>
-  roomStore.rooms.filter((r) => r.photo_url).map((r) => ({
-    src: r.photo_url,
+  roomStore.rooms.map((r) => ({
+    src: r.photo_url || null,
     label: `${r.room_number} — ${r.type}`,
   })),
 )
 const visibleGalleryRooms = computed(() =>
   showAllGallery.value ? galleryRooms.value : galleryRooms.value.slice(0, 6),
 )
-const openLightbox = (img) => { lightboxImage.value = img }
+const openLightbox = (img) => { if (img.src) lightboxImage.value = img }
 const closeLightbox = () => { lightboxImage.value = null }
 
 const paymentLoading = ref(true)
@@ -790,8 +790,12 @@ onMounted(async () => {
           </div>
           <div v-if="galleryRooms.length" class="gallery-grid">
             <div v-for="(img, idx) in visibleGalleryRooms" :key="idx" class="gallery-card" @click="openLightbox(img)">
-              <img :src="img.src" :alt="img.label" class="gallery-img" />
-              <div class="gallery-overlay">
+              <img v-if="img.src" :src="img.src" :alt="img.label" class="gallery-img" />
+              <div v-else class="gallery-placeholder">
+                <font-awesome-icon icon="image" class="placeholder-icon" />
+                <span class="placeholder-text">{{ $t('noPhotoAvailable') }}</span>
+              </div>
+              <div v-if="img.src" class="gallery-overlay">
                 <font-awesome-icon icon="hand-pointer" style="color:#fff;font-size:20px" />
                 <span>{{ $t('clickToExpand') }}</span>
               </div>
@@ -2049,6 +2053,24 @@ tbody tr:last-child td {
   height: 180px;
   object-fit: cover;
   display: block;
+}
+.gallery-placeholder {
+  width: 100%;
+  height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.04);
+}
+.placeholder-icon {
+  font-size: 32px;
+  color: rgba(255,255,255,0.15);
+}
+.placeholder-text {
+  font-size: 11px;
+  color: rgba(255,255,255,0.25);
 }
 .gallery-label {
   padding: 8px 12px;
