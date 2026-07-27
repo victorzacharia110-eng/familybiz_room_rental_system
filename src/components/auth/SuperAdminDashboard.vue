@@ -86,7 +86,8 @@ const resetSuccess = ref('')
 
 const openResetModal = (user) => {
   resetUser.value = user
-  resetPassword.value = (user.last_name || 'USER').toUpperCase() + '@2026!'
+  const year = new Date().getFullYear()
+  resetPassword.value = (user.last_name || 'USER').toUpperCase() + '@' + year + '!'
   resetModalOpen.value = true
   resetSuccess.value = ''
 }

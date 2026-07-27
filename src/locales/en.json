@@ -303,7 +303,7 @@
   "noRoomsFound": "No rooms found",
   "newPassword": "New Password",
   "enterNewPassword": "Enter new password",
-  "passwordHint": "Default: LASTNAME@2026!",
+  "passwordHint": "Default pattern: LASTNAME@YEAR! (e.g. DOE@2026!)",
   "resetting": "Resetting...",
   "cancel": "Cancel"
 }
