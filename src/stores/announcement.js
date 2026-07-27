@@ -14,7 +14,6 @@ export const useAnnouncementStore = defineStore('announcement', () => {
   const fetchAnnouncements = async () => {
     try {
       loading.value = true
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.get('/api/announcements/fetch')
       const result = response.data.announcements
       announcements.value = Array.isArray(result) ? result : (result?.data ?? [])
@@ -29,7 +28,6 @@ export const useAnnouncementStore = defineStore('announcement', () => {
 
   const registerAnnouncement = async (payload) => {
     try {
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.post('/api/announcements/create', {
         title: payload.title,
         message: payload.message,
@@ -45,7 +43,6 @@ export const useAnnouncementStore = defineStore('announcement', () => {
 
   const deleteAnnouncement = async (id) => {
     try {
-      await api.get('/sanctum/csrf-cookie')
       await api.delete(`/api/announcements/delete/${id}`)
       announcements.value = announcements.value.filter((a) => a.id !== id)
       return true
@@ -60,7 +57,6 @@ export const useAnnouncementStore = defineStore('announcement', () => {
       loading.value = true
        // reset while loading to avoid showing stale data if switching between records
       announcementForm.value = null    
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.get(`/api/announcements/show/${id}`)
 
       //  POPULATE the form ref with the fetched announcement data
@@ -78,7 +74,6 @@ export const useAnnouncementStore = defineStore('announcement', () => {
   const updateAnnouncement = async (id, payload) => {
     try {
       loading.value = true
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.patch(`/api/announcements/update/${id}`, payload)
       
       // sync updated record back into the list if it's loaded

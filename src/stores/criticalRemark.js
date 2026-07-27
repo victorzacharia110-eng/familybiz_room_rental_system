@@ -11,7 +11,6 @@ export const useCriticalRemarkStore = defineStore('criticalRemark', () => {
   const fetchCriticalRemarks = async () => {
     loading.value = true
     try {
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.get('/api/remarks/fetch')
       const result = response.data.criticalRemarks
       criticalRemarks.value = Array.isArray(result) ? result : (result?.data ?? [])
@@ -26,7 +25,6 @@ export const useCriticalRemarkStore = defineStore('criticalRemark', () => {
 
   const registerCriticalRemarks = async (payload) => {
     try {
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.post('/api/remarks/create', {
         user_id: payload.user_id, //  Send the TENANT ID
         reason: payload.reason,
@@ -49,7 +47,6 @@ export const useCriticalRemarkStore = defineStore('criticalRemark', () => {
     error.value = null
 
     try {
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.get(`/api/remarks/show/${id}`)
       singleAuthCriticalRemark.value = response.data.criticalRemark || {}
     } catch (err) {
@@ -64,7 +61,6 @@ export const useCriticalRemarkStore = defineStore('criticalRemark', () => {
     error.value = null
 
     try {
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.patch(`/api/remarks/update/${id}`, {
         reason_text: payload.reason_text,
         type: payload.type,
@@ -92,7 +88,6 @@ export const useCriticalRemarkStore = defineStore('criticalRemark', () => {
     error.value = null
 
     try {
-      await api.get('/sanctum/csrf-cookie')
       await api.delete(`/api/remarks/delete/${id}`)
       criticalRemarks.value = criticalRemarks.value.filter((r) => r.id !== id)
       return true

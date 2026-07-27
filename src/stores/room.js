@@ -26,7 +26,6 @@ export const useRoomStore = defineStore('room', () => {
     loading.value = true
 
     try {
-      await api.get('/sanctum/csrf-cookie')
 
       const hasFile = payload.photo instanceof File
       let data
@@ -64,7 +63,6 @@ export const useRoomStore = defineStore('room', () => {
 
   const fetchRooms = async () => {
     try {
-      api.get('sanctum/csrf-cookie')
       const response = await api.get('/api/room/fetch')
       const result = response.data.rooms
       rooms.value = Array.isArray(result) ? result : (result?.data ?? [])
@@ -79,7 +77,6 @@ export const useRoomStore = defineStore('room', () => {
 
   const loadRoomForEdit = async (id) => {
     try {
-      await api.get('sanctum/csrf-cookie')
 
       const response = await api.get(`/api/room/show/${id}`)
 
@@ -95,9 +92,7 @@ export const useRoomStore = defineStore('room', () => {
       roomForm.value.status = room.status
       roomForm.value.room_price = room.room_price ?? 0
       roomForm.value.photo = null
-      roomForm.value.preview = room.photo
-        ? `https://api.familybiz.online/storage/${room.photo}`
-        : null
+      roomForm.value.preview = room.photo_url || null
 
       return roomForm.value
     } catch (err) {
@@ -113,7 +108,6 @@ export const useRoomStore = defineStore('room', () => {
     error.value = null
 
     try {
-      await api.get('sanctum/csrf-cookie')
 
       const hasFile = roomForm.value.photo instanceof File
       let data
@@ -178,7 +172,6 @@ export const useRoomStore = defineStore('room', () => {
 
   const deleteRoom = async (id) => {
     try {
-      api.get('sanctum/csrf-cookie')
       const response = await api.delete(`/api/room/delete/${id}`)
       rooms.value = rooms.value.filter((r) => r.id !== id)
       return true

@@ -19,7 +19,6 @@ export const usePaymentMethodStore = defineStore('paymentMethod', () => {
   const fetchPaymentMethods = async () => {
     loading.value = true
     try {
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.get('/api/method/fetch')
       const result = response.data.paymentMethods
       paymentMethods.value = Array.isArray(result) ? result : (result?.data ?? [])
@@ -36,7 +35,6 @@ export const usePaymentMethodStore = defineStore('paymentMethod', () => {
     error.value = null
 
     try {
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.get(`/api/method/show/${id}`)
       const paymentMethod = response.data.paymentMethod || {}
 
@@ -58,7 +56,6 @@ export const usePaymentMethodStore = defineStore('paymentMethod', () => {
 
   const registerPaymentMethods = async (payload) => {
     try {
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.post('/api/method/create', {
         airtel_money_number: payload.airtel_money_number,
         m_pesa_number: payload.m_pesa_number,
@@ -87,7 +84,6 @@ export const usePaymentMethodStore = defineStore('paymentMethod', () => {
     error.value = null
 
     try {
-      await api.get('/sanctum/csrf-cookie')
 
       const response = await api.patch(`/api/method/update/${id}`, paymentMethodForm.value)
 
@@ -105,7 +101,6 @@ export const usePaymentMethodStore = defineStore('paymentMethod', () => {
     error.value = null
 
     try {
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.delete(`/api/method/delete/${id}`)
       return response.data
     } catch (err) {

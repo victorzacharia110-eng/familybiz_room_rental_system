@@ -10,7 +10,6 @@ export const useLatePaymentReasonStore = defineStore('latePaymentReason', () => 
   const fetchLatePaymentReasons = async () => {
     loading.value = true
     try {
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.get('/api/reasons/fetch')
       const result = response.data.latePaymentReasons
       latePaymentReasons.value = Array.isArray(result) ? result : (result?.data ?? [])
@@ -24,7 +23,6 @@ export const useLatePaymentReasonStore = defineStore('latePaymentReason', () => 
   const registerLatePaymentReasons = async (payload) => {
     loading.value = true
     try {
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.post('/api/reasons/create', {
         payment_id: payload.payment_id,
         reason_text: payload.reason_text,

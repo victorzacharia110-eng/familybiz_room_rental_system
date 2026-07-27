@@ -22,7 +22,6 @@ export const usePaymentStore = defineStore('payment', () => {
     error.value = null
 
     try {
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.get(`/api/payment/show/${id}`)
 
       const payment = response.data.payment || {}
@@ -44,7 +43,6 @@ export const usePaymentStore = defineStore('payment', () => {
 
   const fetchPayment = async () => {
     try {
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.get('/api/payment/fetch')
       tenant_payment.value = await response.data.tenant_payment
       count_tenant_unpaid_payment.value = await response.data.count_tenant_unpaid_payment
@@ -60,7 +58,6 @@ export const usePaymentStore = defineStore('payment', () => {
   const fetchPayments = async () => {
     loading.value = true
     try {
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.get('/api/payment/fetch')
       const result = response.data.payments
       payments.value = Array.isArray(result) ? result : (result?.data ?? [])
@@ -73,7 +70,6 @@ export const usePaymentStore = defineStore('payment', () => {
   // create a new payment
   const registerPayment = async (payload) => {
     try {
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.post('/api/payment/create', {
         room_id: payload.room_id,
         month: payload.month,
@@ -101,7 +97,6 @@ export const usePaymentStore = defineStore('payment', () => {
     error.value = null
 
     try {
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.patch(`/api/payment/update/${id}`, {
         amount: payload.amount,
         status: payload.status,
@@ -117,7 +112,6 @@ export const usePaymentStore = defineStore('payment', () => {
 
   const deletePayment = async (id) => {
     try {
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.delete(`/api/payment/delete/${id}`)
       console.log('Payment deleted successfully', response.data)
     } catch (err) {

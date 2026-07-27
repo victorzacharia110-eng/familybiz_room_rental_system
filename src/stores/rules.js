@@ -9,7 +9,6 @@ export const useRuleStore = defineStore('rule', () => {
 
   const fetchRules = async () => {
     try {
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.get('/api/rule/fetch')
       const result = response.data.rules
       rules.value = Array.isArray(result) ? result : (result?.data ?? [])
@@ -25,7 +24,6 @@ export const useRuleStore = defineStore('rule', () => {
     error.value = null
 
     try {
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.post('/api/rule/create', {
         title: payload.title,
         description: payload.description,

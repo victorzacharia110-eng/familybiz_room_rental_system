@@ -10,16 +10,17 @@ export const useAuthStore = defineStore(
     const loading = ref(false)
     const error = ref(null)
 
-    // Login
     const login = async (payload) => {
       loading.value = true
       error.value = null
 
       try {
-        await api.get('/sanctum/csrf-cookie')
         const response = await api.post('/api/user/auth', payload)
 
         user.value = response.data.user
+        if (response.data.token) {
+          localStorage.setItem('auth_token', response.data.token)
+        }
         return user.value
       } catch (err) {
         error.value = err.response?.data?.message || err.message
@@ -30,14 +31,20 @@ export const useAuthStore = defineStore(
     }
 
     const fetchUser = async () => {
+      const token = localStorage.getItem('auth_token')
+      if (!token) {
+        user.value = null
+        return
+      }
+
       loading.value = true
       error.value = null
       try {
-        await api.get('/sanctum/csrf-cookie')
         const response = await api.get('/api/user/fetch')
         user.value = response.data.user || null
       } catch (err) {
         user.value = null
+        localStorage.removeItem('auth_token')
         error.value = err.response?.data?.message || err.message
       } finally {
         loading.value = false
@@ -49,7 +56,6 @@ export const useAuthStore = defineStore(
       users.value = []
 
       try {
-        await api.get('/sanctum/csrf-cookie')
         const response = await api.get('/api/user/fetch')
         const result = response.data.users
         users.value = Array.isArray(result) ? result : (result?.data ?? [])
@@ -63,12 +69,12 @@ export const useAuthStore = defineStore(
     const logout = async () => {
       loading.value = true
       try {
-        await api.get('/sanctum/csrf-cookie')
         await api.post('/api/user/logout')
-        user.value = null
       } catch (err) {
         error.value = err.response?.data?.message || err.message
       } finally {
+        user.value = null
+        localStorage.removeItem('auth_token')
         loading.value = false
       }
     }
@@ -78,13 +84,10 @@ export const useAuthStore = defineStore(
       error.value = null
 
       try {
-        await api.get('/sanctum/csrf-cookie')
-
         const response = await api.patch(`/api/user/update/phone/${id}`, {
           phone_number: phone,
         })
 
-        // update store user immediately (optional but recommended)
         if (response.data.user) {
           user.value = response.data.user
         }
@@ -103,7 +106,6 @@ export const useAuthStore = defineStore(
       error.value = null
 
       try {
-        await api.get('/sanctum/csrf-cookie')
         const response = await api.post('/api/user/forgot-password', { email })
         if (response.data && response.data.success === false) {
           error.value = response.data.message || 'Failed to send reset link.'
@@ -133,7 +135,7 @@ export const useAuthStore = defineStore(
   },
   {
     persist: {
-      paths: ['user'], // only save authenticated user
+      paths: ['user'],
     },
   },
 )

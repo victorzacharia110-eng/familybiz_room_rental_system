@@ -418,8 +418,8 @@ const filteredAnnouncements = computed(() => {
 const { paginatedData: paginatedAnnouncements, currentPage: ap, totalPages: atp, showingFrom: asf, showingTo: ast, totalItems: ati, goToPage: agp, resetPage: resetAnnouncementsPage } = usePagination(filteredAnnouncements)
 
 const galleryRooms = computed(() =>
-  roomStore.rooms.filter((r) => r.photo).map((r) => ({
-    src: `https://api.familybiz.online/storage/${r.photo}`,
+  roomStore.rooms.filter((r) => r.photo_url).map((r) => ({
+    src: r.photo_url,
     label: `${r.room_number} — ${r.type}`,
   })),
 )

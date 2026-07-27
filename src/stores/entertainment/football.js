@@ -24,7 +24,6 @@ export const useFootballStore = defineStore('football', () => {
     try {
       loading.value = true
       error.value = null
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.get('/api/football/live')
       liveMatches.value = response.data.data || []
       return liveMatches.value
@@ -42,7 +41,6 @@ export const useFootballStore = defineStore('football', () => {
     try {
       loading.value = true
       error.value = null
-      await api.get('/sanctum/csrf-cookie')
       const url = date ? `/api/football/fixtures?date=${date}` : '/api/football/fixtures'
       const response = await api.get(url)
       fixtures.value = response.data.data || []
@@ -61,7 +59,6 @@ export const useFootballStore = defineStore('football', () => {
     try {
       loading.value = true
       error.value = null
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.get('/api/football/standings')
       standings.value = response.data.data || []
       return standings.value
@@ -79,7 +76,6 @@ export const useFootballStore = defineStore('football', () => {
     try {
       loading.value = true
       error.value = null
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.get(`/api/football/match/${fixtureId}`)
       matchDetails.value = response.data.data || null
       return matchDetails.value
@@ -97,7 +93,6 @@ export const useFootballStore = defineStore('football', () => {
     try {
       loading.value = true
       error.value = null
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.get(`/api/football/team/${teamId}`)
       teamDetails.value = response.data.data || null
       return teamDetails.value
@@ -115,7 +110,6 @@ export const useFootballStore = defineStore('football', () => {
     try {
       loading.value = true
       error.value = null
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.get('/api/football/scorers')
       topScorers.value = response.data.data || []
       return topScorers.value
@@ -133,7 +127,6 @@ export const useFootballStore = defineStore('football', () => {
     try {
       loading.value = true
       error.value = null
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.get('/api/football/fetch')
       footballNews.value = response.data.footballNews || []
       return footballNews.value

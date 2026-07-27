@@ -1427,8 +1427,8 @@ function buildCubes() {
                 <tr v-for="room in paginatedRooms" :key="room?.id">
                   <td>
                     <img
-                      v-if="room?.photo"
-                      :src="`https://api.familybiz.online/storage/${room.photo}`"
+                      v-if="room?.photo_url"
+                      :src="room.photo_url"
                       alt="Room"
                       class="room-thumb"
                     />

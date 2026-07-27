@@ -10,7 +10,6 @@ export const useCommentStore = defineStore('comment', () => {
   const fetchComments = async () => {
     loading.value = true
     try {
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.get('/api/comments/fetch')
       const result = response.data.comments
       comments.value = Array.isArray(result) ? result : (result?.data ?? [])
@@ -26,7 +25,6 @@ export const useCommentStore = defineStore('comment', () => {
   const registerComments = async (payload) => {
     loading.value = true
     try {
-      await api.get('/sanctum/csrf-cookie')
       const response = await api.post('/api/comments/create', {
         comment: payload.comment,
         rating: payload.rating,
@@ -45,7 +43,6 @@ export const useCommentStore = defineStore('comment', () => {
 
   const deleteComment = async (id) => {
     try {
-      await api.get('/sanctum/csrf-cookie')
       await api.delete(`/api/comments/delete/${id}`)
       comments.value = comments.value.filter((c) => c.id !== id)
       return true
