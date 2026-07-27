@@ -52,6 +52,7 @@ import {
   faSearch,
   faSync,
   faFilm,
+  faPencil,
 } from '@fortawesome/free-solid-svg-icons'
 
 library.add(
@@ -87,6 +88,7 @@ library.add(
   faSearch,
   faSync,
   faFilm,
+  faPencil,
 )
 
 const router = useRouter()
@@ -105,6 +107,77 @@ const successLatePaymentReasonSubmissionMessage = ref('')
 const successCommentMessage = ref('')
 const successUpdateRoomStatus = ref('')
 const successPasswordResetMessage = ref('')
+
+// Profile edit
+const profileEditForm = ref({
+  last_name: '',
+  email: '',
+  phone_number: '',
+})
+const successProfileMessage = ref('')
+const editingProfile = ref(false)
+
+const startEditProfile = () => {
+  profileEditForm.value = {
+    last_name: auth.user?.last_name || '',
+    email: auth.user?.email || '',
+    phone_number: auth.user?.phone_number || '',
+  }
+  editingProfile.value = true
+}
+
+const cancelEditProfile = () => {
+  editingProfile.value = false
+}
+
+const saveProfile = async () => {
+  const response = await auth.updateProfile(auth.user.id, profileEditForm.value)
+  if (response && response.user) {
+    successProfileMessage.value = 'Profile updated successfully!'
+    editingProfile.value = false
+    setTimeout(() => { successProfileMessage.value = '' }, 3000)
+    await auth.fetchUser()
+  } else {
+    alert(auth.error || 'Failed to update profile')
+  }
+}
+
+// Room selection with payment modal
+const activeRoomSelectionModal = ref(false)
+const selectedRoom = ref(null)
+const roomSelectionPaymentMethod = ref('clickpesa')
+const roomSelectionLoading = ref(false)
+const roomSelectionMessage = ref('')
+
+const openRoomSelection = (room) => {
+  selectedRoom.value = room
+  roomSelectionPaymentMethod.value = 'clickpesa'
+  roomSelectionMessage.value = ''
+  activeRoomSelectionModal.value = true
+}
+
+const closeRoomSelection = () => {
+  activeRoomSelectionModal.value = false
+  selectedRoom.value = null
+}
+
+const submitRoomSelection = async () => {
+  if (!selectedRoom.value) return
+  roomSelectionLoading.value = true
+  const result = await paymentStore.selectRoom(selectedRoom.value.id, roomSelectionPaymentMethod.value)
+  if (result) {
+    roomSelectionMessage.value = result.message || 'Room selection pending. Please complete payment.'
+    if (roomSelectionPaymentMethod.value === 'clickpesa' && result.payment) {
+      // For ClickPesa, show payment initiated message
+      roomSelectionMessage.value = 'Payment initiated! Check your phone for the USSD prompt.'
+    }
+    await roomStore.fetchRooms()
+    await paymentStore.fetchPayment()
+  } else {
+    roomSelectionMessage.value = paymentStore.error || 'Failed to select room'
+  }
+  roomSelectionLoading.value = false
+}
 
 // Add to state for entertainment modal
 const footballStore = useFootballStore()
@@ -222,7 +295,6 @@ const closeRoomsModal = () => {
 }
 const roomFetching = async () => {
   await roomStore.fetchRooms()
-  await roomStore.updateRoomStatus()
 }
 const isDisabled = (room) => room.status === 'Occupied' && room.user_id !== auth.user?.id
 const confirmText = 'CONFIRMED'
@@ -231,17 +303,20 @@ const confirmToggle = async (room, checked) => {
     alert('This room is already occupied by another user')
     return
   }
-  const input = prompt(`Type "${confirmText}" to confirm`)
-  if (input?.trim() === confirmText) {
-    await updatingRoomStatus(room.id, checked)
-    successUpdateRoomStatus.value = 'Action completed successfully!'
-    setTimeout(() => {
-      successUpdateRoomStatus.value = ''
-    }, 3000)
-    await roomStore.fetchRooms()
-  } else {
-    alert('Incorrect text. Action Cancelled')
+  if (room.status === 'Occupied' && room.user_id === auth.user?.id) {
+    // Already occupying this room, allow release
+    const confirmText = 'CONFIRMED'
+    const input = prompt(`Type "${confirmText}" to release this room`)
+    if (input?.trim() === confirmText) {
+      await updatingRoomStatus(room.id, false)
+      successUpdateRoomStatus.value = 'Room released successfully!'
+      setTimeout(() => { successUpdateRoomStatus.value = '' }, 3000)
+      await roomStore.fetchRooms()
+    }
+    return
   }
+  // Open payment modal for room selection
+  openRoomSelection(room)
 }
 const updatingRoomStatus = async (id, checked) => await roomStore.updateRoomStatus(id, checked)
 
@@ -428,7 +503,6 @@ const paymentLoading = ref(true)
 onMounted(async () => {
   await auth.fetchUser()
   await roomStore.fetchRooms()
-  await roomStore.updateRoomStatus()
   await paymentStore.fetchPayment()
   paymentLoading.value = false
   await paymentMethodStore.fetchPaymentMethods()
@@ -984,28 +1058,55 @@ onMounted(async () => {
               <font-awesome-icon icon="xmark" />
             </button>
           </div>
+          <Transition name="alert-pop">
+            <div v-if="successProfileMessage" class="success-alert">
+              <font-awesome-icon icon="check-circle" /> {{ successProfileMessage }}
+            </div>
+          </Transition>
           <div class="profile-box">
             <div class="profile-avatar"><font-awesome-icon icon="user" /></div>
             <div class="profile-details">
-              <div class="mfield">
-                <label>{{ $t('Last Name') }}</label>
-                <p>{{ auth.user?.last_name || 'N/A' }}</p>
-              </div>
-              <div class="mfield">
-                <label>{{ $t('email') }}</label>
-                <p>{{ auth.user?.email || 'N/A' }}</p>
-              </div>
-              <div class="mfield">
-                <label>{{ $t('Phone Number') }}</label>
-                <p>{{ auth.user?.phone_number || 'N/A' }}</p>
-                <button
-                  class="btn-teal"
-                  style="margin-top: 8px"
-                  @click="updatingPhoneNumber(auth.user)"
-                >
-                  <font-awesome-icon icon="mobile-alt" /> {{ $t('updatePhone') }}
+              <template v-if="!editingProfile">
+                <div class="mfield">
+                  <label>{{ $t('Last Name') }}</label>
+                  <p>{{ auth.user?.last_name || 'N/A' }}</p>
+                </div>
+                <div class="mfield">
+                  <label>{{ $t('email') }}</label>
+                  <p>{{ auth.user?.email || 'N/A' }}</p>
+                </div>
+                <div class="mfield">
+                  <label>{{ $t('Phone Number') }}</label>
+                  <p>{{ auth.user?.phone_number || 'N/A' }}</p>
+                </div>
+                <button class="btn-teal" @click="startEditProfile">
+                  <font-awesome-icon icon="pencil" /> {{ $t('editProfile') || 'Edit Profile' }}
                 </button>
-              </div>
+              </template>
+              <template v-else>
+                <form @submit.prevent="saveProfile">
+                  <div class="mfield">
+                    <label>{{ $t('Last Name') }}</label>
+                    <input v-model="profileEditForm.last_name" type="text" required />
+                  </div>
+                  <div class="mfield">
+                    <label>{{ $t('email') }}</label>
+                    <input v-model="profileEditForm.email" type="email" required />
+                  </div>
+                  <div class="mfield">
+                    <label>{{ $t('Phone Number') }}</label>
+                    <input v-model="profileEditForm.phone_number" type="text" required />
+                  </div>
+                  <div class="modal-actions">
+                    <button type="submit" class="btn-teal" :disabled="auth.loading">
+                      <font-awesome-icon icon="floppy-disk" /> {{ $t('save') }}
+                    </button>
+                    <button type="button" class="btn-ghost" @click="cancelEditProfile">
+                      {{ $t('cancel') }}
+                    </button>
+                  </div>
+                </form>
+              </template>
             </div>
           </div>
         </div>
@@ -1219,6 +1320,66 @@ onMounted(async () => {
       :active="activeEntertainmentModal === 'entertainment'"
       @close="closeEntertainmentModal"
     />
+
+    <!-- ROOM SELECTION PAYMENT MODAL -->
+    <Transition name="modal-fade">
+      <div v-if="activeRoomSelectionModal" class="modal-overlay" @click.self="closeRoomSelection">
+        <div class="glass-modal">
+          <div class="modal-top">
+            <h3><font-awesome-icon icon="credit-card" /> {{ $t('selectRoom') || 'Select Room' }}</h3>
+            <button class="close-x" @click="closeRoomSelection">
+              <font-awesome-icon icon="xmark" />
+            </button>
+          </div>
+          <div v-if="selectedRoom" class="payment-modal-content">
+            <div class="room-selection-info">
+              <div class="room-detail">
+                <strong>{{ $t('room') || 'Room' }}:</strong> {{ selectedRoom.room_number }}
+              </div>
+              <div class="room-detail">
+                <strong>{{ $t('type') || 'Type' }}:</strong> {{ selectedRoom.type }}
+              </div>
+              <div class="room-detail">
+                <strong>{{ $t('roomPrice') || 'Price' }}:</strong> TZS {{ selectedRoom.room_price?.toLocaleString() }}
+              </div>
+            </div>
+            <div class="mfield">
+              <label>{{ $t('paymentMethod') || 'Payment Method' }}</label>
+              <select v-model="roomSelectionPaymentMethod">
+                <option value="clickpesa">ClickPesa (Auto-confirm)</option>
+                <option value="manual">Manual Transfer (Landlord confirms)</option>
+              </select>
+            </div>
+            <div v-if="roomSelectionPaymentMethod === 'manual'" class="payment-alert">
+              <font-awesome-icon icon="info-circle" />
+              {{ $t('manualPaymentNote') || 'With manual transfer, the landlord will verify your payment before the room is assigned. You will receive a notification once confirmed.' }}
+            </div>
+            <div v-if="roomSelectionPaymentMethod === 'clickpesa'" class="payment-alert">
+              <font-awesome-icon icon="info-circle" />
+              {{ $t('clickPesaNote') || 'You will receive a USSD prompt on your phone to complete the payment. The room will be automatically assigned after successful payment.' }}
+            </div>
+            <Transition name="alert-pop">
+              <div v-if="roomSelectionMessage" class="success-alert">
+                <font-awesome-icon icon="check-circle" /> {{ roomSelectionMessage }}
+              </div>
+            </Transition>
+            <div class="modal-actions">
+              <button
+                class="btn-teal"
+                @click="submitRoomSelection"
+                :disabled="roomSelectionLoading"
+              >
+                <font-awesome-icon :icon="roomSelectionLoading ? 'spinner' : 'credit-card'" :spin="roomSelectionLoading" />
+                {{ roomSelectionLoading ? 'Processing...' : ($t('confirmAndPay') || 'Confirm & Pay') }}
+              </button>
+              <button class="btn-ghost" @click="closeRoomSelection">
+                {{ $t('cancel') }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 

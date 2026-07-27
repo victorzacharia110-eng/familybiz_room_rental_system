@@ -122,6 +122,55 @@ export const usePaymentStore = defineStore('payment', () => {
     }
   }
 
+  const selectRoom = async (roomId, paymentMethod = 'clickpesa') => {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await api.post(`/api/room/select/${roomId}`, {
+        payment_method: paymentMethod,
+      })
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || err.message
+      return null
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const confirmPayment = async (paymentId, message = '') => {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await api.patch(`/api/payment/confirm/${paymentId}`, {
+        confirmation_message: message,
+      })
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || err.message
+      return null
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const unconfirmedPayments = ref([])
+
+  const fetchUnconfirmedPayments = async () => {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await api.get('/api/payment/unconfirmed')
+      unconfirmedPayments.value = response.data.unconfirmed_payments || []
+      return unconfirmedPayments.value
+    } catch (err) {
+      error.value = err.response?.data?.message || err.message
+      return []
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     payments,
     tenant_payment,
@@ -135,5 +184,9 @@ export const usePaymentStore = defineStore('payment', () => {
     fetchPayment,
     updatePayments,
     loadPaymentForEdit,
+    selectRoom,
+    confirmPayment,
+    unconfirmedPayments,
+    fetchUnconfirmedPayments,
   }
 })

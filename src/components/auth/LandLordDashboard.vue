@@ -18,6 +18,7 @@ import { storeToRefs } from 'pinia'
 import SkeletonLoader from './SkeletonLoader.vue'
 import PaginationControls from './PaginationControls.vue'
 import { usePagination } from '@/composables/usePagination'
+import api from '@/composables/api'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import {
@@ -149,6 +150,7 @@ onMounted(async () => {
   await paymentMethodStore.fetchPaymentMethods()
   await criticalRemarkStore.fetchCriticalRemarks()
   await latePaymentReasonStore.fetchLatePaymentReasons()
+  await fetchUnconfirmedPaymentsList()
   initCanvas()
   buildCubes()
   await criticalRemarkStore.fetchCriticalRemarks()
@@ -167,6 +169,9 @@ const successCreationRuleMessage = ref('')
 const successAnnouncementMessage = ref('')
 const successCommentMessage = ref('')
 const successPasswordResetMessage = ref('')
+const unconfirmedPayments = ref([])
+const unconfirmedPaymentLoading = ref(false)
+const activeUnconfirmedModal = ref(null)
 
 const logoutUser = async () => {
   await auth.logout()
@@ -652,6 +657,40 @@ const sendPasswordResetLink = async () => {
   }
 }
 
+const openUnconfirmedModal = async (n) => {
+  activeUnconfirmedModal.value = n
+  if (n === 'unconfirmed') {
+    unconfirmedPaymentLoading.value = true
+    await fetchUnconfirmedPaymentsList()
+    unconfirmedPaymentLoading.value = false
+  }
+}
+const closeUnconfirmedModal = () => { activeUnconfirmedModal.value = null }
+
+const fetchUnconfirmedPaymentsList = async () => {
+  try {
+    const response = await api.get('/api/payment/unconfirmed')
+    unconfirmedPayments.value = response.data.unconfirmed_payments || []
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+const confirmTenantPayment = async (paymentId) => {
+  const msg = prompt('Enter confirmation message (optional):')
+  if (msg === null) return
+  const result = await paymentStore.confirmPayment(paymentId, msg)
+  if (result && result.message) {
+    alert(result.message)
+    await fetchUnconfirmedPaymentsList()
+    await roomStore.fetchRooms()
+    await auth.fetchUsers()
+    await paymentStore.fetchPayments()
+  } else {
+    alert(paymentStore.error || 'Failed to confirm payment')
+  }
+}
+
 const handleImageUpload = (e) => {
   const file = e.target.files[0]
   if (!file) return
@@ -1011,6 +1050,17 @@ function buildCubes() {
           @click.prevent="openPaymentMethodModal('paymentMethod')"
         >
           <font-awesome-icon icon="credit-card" class="ni" /><span>{{ $t('paymentMethods') }}</span>
+        </a>
+
+        <a
+          href="#"
+          class="nav-item"
+          :class="{ on: activeUnconfirmedModal === 'unconfirmed' }"
+          @click.prevent="openUnconfirmedModal('unconfirmed')"
+        >
+          <font-awesome-icon icon="bell" class="ni" />
+          <span>{{ $t('unconfirmedPayments') || 'Unconfirmed Payments' }}</span>
+          <span v-if="unconfirmedPayments.length > 0" class="badge-new"></span>
         </a>
 
         <a
@@ -2170,6 +2220,52 @@ function buildCubes() {
       :active="activeEntertainmentModal === 'entertainment'"
       @close="closeEntertainmentModal"
     />
+
+    <!-- UNCONFIRMED PAYMENTS MODAL -->
+    <Transition name="modal-fade">
+      <div v-if="activeUnconfirmedModal === 'unconfirmed'" class="modal-overlay" @click.self="closeUnconfirmedModal">
+        <div class="glass-modal large">
+          <div class="modal-top">
+            <h3><font-awesome-icon icon="bell" /> {{ $t('unconfirmedPayments') || 'Unconfirmed Payments' }}</h3>
+            <button class="close-x" @click="closeUnconfirmedModal">
+              <font-awesome-icon icon="xmark" />
+            </button>
+          </div>
+          <div class="modal-table-wrap">
+            <SkeletonLoader v-if="unconfirmedPaymentLoading" :rows="4" :cols="5" />
+            <table v-else>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>{{ $t('Tenant') || 'Tenant' }}</th>
+                  <th>{{ $t('room') || 'Room' }}</th>
+                  <th>{{ $t('Amount') || 'Amount' }}</th>
+                  <th>{{ $t('Action') || 'Action' }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="!unconfirmedPayments.length">
+                  <td colspan="5" class="no-data">
+                    <font-awesome-icon icon="check-circle" /> {{ $t('noUnconfirmedPayments') || 'No unconfirmed payments' }}
+                  </td>
+                </tr>
+                <tr v-else v-for="(payment, i) in unconfirmedPayments" :key="payment.id">
+                  <td class="idx">{{ i + 1 }}</td>
+                  <td>{{ payment.user?.last_name || 'N/A' }}</td>
+                  <td>{{ payment.room?.room_number || 'N/A' }}</td>
+                  <td>TZS {{ payment.amount?.toLocaleString() }}</td>
+                  <td>
+                    <button class="btn-teal" @click="confirmTenantPayment(payment.id)">
+                      <font-awesome-icon icon="check-circle" /> {{ $t('confirmPayment') || 'Confirm Payment' }}
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 

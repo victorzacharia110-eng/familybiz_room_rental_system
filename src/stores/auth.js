@@ -101,6 +101,23 @@ export const useAuthStore = defineStore(
       }
     }
 
+    const updateProfile = async (id, payload) => {
+      loading.value = true
+      error.value = null
+      try {
+        const response = await api.patch(`/api/user/update/profile/${id}`, payload)
+        if (response.data.user) {
+          user.value = response.data.user
+        }
+        return response.data
+      } catch (err) {
+        error.value = err.response?.data?.message || err.message
+        return null
+      } finally {
+        loading.value = false
+      }
+    }
+
     const requestPasswordReset = async (email) => {
       loading.value = true
       error.value = null
@@ -129,6 +146,7 @@ export const useAuthStore = defineStore(
       fetchUser,
       fetchUsers,
       updatePhoneNumber,
+      updateProfile,
       requestPasswordReset,
       logout,
     }
