@@ -438,7 +438,7 @@ onMounted(async () => {
           <div class="reset-modal-icon">
             <font-awesome-icon icon="key" />
           </div>
-          <h3>{{ t('resetPassword') }}</h3>
+          <h3>{{ 'RESET PASSWORD' }}</h3>
           <button class="modal-close-btn" @click="closeResetModal">
             <font-awesome-icon icon="xmark" />
           </button>
