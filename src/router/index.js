@@ -88,7 +88,7 @@ router.beforeEach(async (to) => {
   }
 
   // define normalized role ONCE
-  const role = auth.user?.is_landlord == 1 ? 'landlord' : 'tenant'
+  const role = (auth.user?.is_landlord == 1 || auth.user?.is_super_admin) ? 'landlord' : 'tenant'
 
   // not logged in
   if (to.meta.requiresAuth && !auth.user) {
