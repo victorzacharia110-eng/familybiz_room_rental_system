@@ -431,7 +431,7 @@ onMounted(async () => {
       </div>
     </main>
 
-    <!-- RESET PASSWORD MODAL - TEST 2: FA icons only, no t(), no optional chaining -->
+    <!-- RESET PASSWORD MODAL - TEST 3: ONE t() call only -->
     <div v-if="resetModalOpen" class="modal-overlay" @click.self="closeResetModal">
       <div class="reset-modal">
         <div class="reset-modal-header">
@@ -450,17 +450,17 @@ onMounted(async () => {
         </div>
 
         <div class="reset-form-group">
-          <label>{{ t('newPassword') }}</label>
+          <label>New Password</label>
           <input type="text" class="reset-input" />
           <p class="reset-hint">Password must be at least 8 characters.</p>
         </div>
 
         <div class="reset-modal-actions">
           <button class="reset-btn cancel" @click="closeResetModal">
-            {{ t('cancel') }}
+            Cancel
           </button>
           <button class="reset-btn confirm">
-            {{ t('resetPassword') }}
+            Reset
           </button>
         </div>
       </div>
