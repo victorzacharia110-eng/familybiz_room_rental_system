@@ -102,4 +102,15 @@ app.use(pinia)
 app.use(router)
 app.use(i18n)
 
+app.config.errorHandler = (err, instance, info) => {
+  console.error(
+    '[Vue Error]',
+    '\nMessage:', err.message,
+    '\nType:', err.constructor.name,
+    '\nStack:', err.stack,
+    '\nInfo:', info,
+    '\nComponent:', instance?.type?.name || instance?.type?.__name || 'unknown'
+  )
+}
+
 app.mount('#app')
