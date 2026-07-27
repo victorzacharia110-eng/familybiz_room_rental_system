@@ -275,5 +275,6 @@
   "deletePhoto": "Remove Photo",
   "deletePhotoConfirm": "Remove this photo?",
   "viewAll": "View All",
-  "showLess": "Show Less"
+  "showLess": "Show Less",
+  "clickToExpand": "Click on any image to view full size"
 }

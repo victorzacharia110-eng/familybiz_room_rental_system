@@ -789,8 +789,11 @@ onMounted(async () => {
             </div>
           </div>
           <div v-if="galleryRooms.length" class="gallery-grid">
-            <div v-for="(img, idx) in visibleGalleryRooms" :key="idx" class="gallery-card" @click="openLightbox(img)" style="cursor:pointer">
+            <div v-for="(img, idx) in visibleGalleryRooms" :key="idx" class="gallery-card" @click="openLightbox(img)">
               <img :src="img.src" :alt="img.label" class="gallery-img" />
+              <div class="gallery-hint-overlay">
+                <font-awesome-icon icon="hand-pointer" /> {{ $t('clickToExpand') }}
+              </div>
               <div class="gallery-label">{{ img.label }}</div>
             </div>
           </div>
@@ -2000,11 +2003,30 @@ tbody tr:last-child td {
   gap: 16px;
 }
 .gallery-card {
+  position: relative;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   overflow: hidden;
   transition: 0.3s;
+  cursor: pointer;
+}
+.gallery-card:hover .gallery-hint-overlay {
+  opacity: 1;
+}
+.gallery-hint-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 10px;
+  background: rgba(0,0,0,0.7);
+  color: rgba(255,255,255,0.8);
+  font-size: 11px;
+  text-align: center;
+  opacity: 0;
+  transition: 0.2s;
+  pointer-events: none;
 }
 .gallery-card:hover {
   transform: translateY(-5px);
