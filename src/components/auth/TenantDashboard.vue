@@ -791,8 +791,9 @@ onMounted(async () => {
           <div v-if="galleryRooms.length" class="gallery-grid">
             <div v-for="(img, idx) in visibleGalleryRooms" :key="idx" class="gallery-card" @click="openLightbox(img)">
               <img :src="img.src" :alt="img.label" class="gallery-img" />
-              <div class="gallery-hint-overlay">
-                <font-awesome-icon icon="hand-pointer" /> {{ $t('clickToExpand') }}
+              <div class="gallery-overlay">
+                <font-awesome-icon icon="hand-pointer" style="color:#fff;font-size:20px" />
+                <span>{{ $t('clickToExpand') }}</span>
               </div>
               <div class="gallery-label">{{ img.label }}</div>
             </div>
@@ -2011,22 +2012,32 @@ tbody tr:last-child td {
   transition: 0.3s;
   cursor: pointer;
 }
-.gallery-card:hover .gallery-hint-overlay {
+.gallery-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(20, 184, 166, 0.3);
+  box-shadow: 0 8px 24px rgba(20, 184, 166, 0.15);
+}
+.gallery-card:hover .gallery-overlay {
   opacity: 1;
 }
-.gallery-hint-overlay {
+.gallery-overlay {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 10px;
-  background: rgba(0,0,0,0.7);
-  color: rgba(255,255,255,0.8);
-  font-size: 11px;
-  text-align: center;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   opacity: 0;
   transition: 0.2s;
   pointer-events: none;
+  border-radius: 12px;
+}
+.gallery-overlay span {
+  color: rgba(255,255,255,0.85);
+  font-size: 12px;
+  font-weight: 600;
 }
 .gallery-card:hover {
   transform: translateY(-5px);
