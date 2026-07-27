@@ -512,6 +512,7 @@ const filteredAnnouncements = computed(() => {
 const { paginatedData: paginatedAnnouncements, currentPage: ap, totalPages: atp, showingFrom: asf, showingTo: ast, totalItems: ati, goToPage: agp, resetPage: resetAnnouncementsPage } = usePagination(filteredAnnouncements)
 
 const showAllGallery = ref(false)
+const lightboxImage = ref(null)
 const galleryRooms = computed(() =>
   roomStore.rooms.filter((r) => r.photo_url).map((r) => ({
     src: r.photo_url,
@@ -521,6 +522,8 @@ const galleryRooms = computed(() =>
 const visibleGalleryRooms = computed(() =>
   showAllGallery.value ? galleryRooms.value : galleryRooms.value.slice(0, 6),
 )
+const openLightbox = (img) => { lightboxImage.value = img }
+const closeLightbox = () => { lightboxImage.value = null }
 
 const paymentLoading = ref(true)
 onMounted(async () => {
@@ -786,7 +789,7 @@ onMounted(async () => {
             </div>
           </div>
           <div v-if="galleryRooms.length" class="gallery-grid">
-            <div v-for="(img, idx) in visibleGalleryRooms" :key="idx" class="gallery-card">
+            <div v-for="(img, idx) in visibleGalleryRooms" :key="idx" class="gallery-card" @click="openLightbox(img)" style="cursor:pointer">
               <img :src="img.src" :alt="img.label" class="gallery-img" />
               <div class="gallery-label">{{ img.label }}</div>
             </div>
@@ -1423,6 +1426,19 @@ onMounted(async () => {
         </div>
       </div>
     </Transition>
+
+    <!-- LIGHTBOX -->
+    <Transition name="modal-fade">
+      <div v-if="lightboxImage" class="lightbox-overlay" @click.self="closeLightbox">
+        <button class="lightbox-close" @click="closeLightbox">
+          <font-awesome-icon icon="xmark" />
+        </button>
+        <div class="lightbox-content">
+          <img :src="lightboxImage.src" :alt="lightboxImage.label" class="lightbox-img" />
+          <p class="lightbox-label">{{ lightboxImage.label }}</p>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -2025,6 +2041,49 @@ tbody tr:last-child td {
 }
 .gallery-toggle:hover {
   background: rgba(20,184,166,0.2);
+}
+
+/* Lightbox */
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 28px;
+  cursor: pointer;
+  z-index: 10;
+  opacity: 0.7;
+  transition: 0.2s;
+}
+.lightbox-close:hover { opacity: 1; }
+.lightbox-content {
+  max-width: 90vw;
+  max-height: 85vh;
+  text-align: center;
+}
+.lightbox-img {
+  max-width: 100%;
+  max-height: 80vh;
+  border-radius: 12px;
+  object-fit: contain;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+}
+.lightbox-label {
+  color: rgba(255,255,255,0.7);
+  font-size: 14px;
+  margin-top: 12px;
 }
 .no-gallery {
   text-align: center;
